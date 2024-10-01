@@ -6,6 +6,8 @@ import MainImg from "./assets/R.jpg";
 import LoginPopup from "./components/LoginPopup/LoginPopup";
 import KoiForSale from "./components/Hero/KoiForSale";
 import Footer from "./components/Footer/Footer";
+
+import Farm from "./components/Hero/Farm";
 const bgImage = {
   backgroundImage: `url(${MainImg})`,
   height: "100vh",
@@ -27,6 +29,7 @@ const App = () => {
         <Routes>
           <Route path="/" element={<Hero />} />
           <Route path="/KoiForSale" element={<KoiForSale />} />
+          <Route path="/farm" element={<Farm />} />
         </Routes>
         <Footer />
       </main>

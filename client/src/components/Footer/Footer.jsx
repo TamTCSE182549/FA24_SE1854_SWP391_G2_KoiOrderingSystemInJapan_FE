@@ -20,7 +20,7 @@ const Footer = () => {
               <h2 className="mb-5 text-2xl">Use Link</h2>
               <ul>
                 <li className="pb-4">
-                  <a href="#" className="hover:text-red-800">
+                  <a href="/" className="hover:text-red-800">
                     Home
                   </a>
                 </li>

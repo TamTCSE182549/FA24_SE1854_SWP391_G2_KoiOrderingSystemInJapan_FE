@@ -20,8 +20,8 @@ const Menu = [
   },
   {
     id: 4,
-    name: "Variety",
-    link: "/variety",
+    name: "Farm",
+    link: "/farm",
   },
   {
     id: 5,

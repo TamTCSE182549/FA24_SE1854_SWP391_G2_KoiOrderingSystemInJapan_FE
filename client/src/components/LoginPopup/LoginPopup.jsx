@@ -22,7 +22,7 @@ const LoginPopup = ({ loginPopup, toggleLoginPopup }) => {
         <div
           ref={loginPopupRef}
           className="h-screen w-screen fixed top-0 left-0 z-[20]
-          backdrop-blur-lg bg-black/50 flex items-center justify-center"
+          backdrop-blur-sm bg-black/50 flex items-center justify-center"
         >
           <div
             className=" absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 
