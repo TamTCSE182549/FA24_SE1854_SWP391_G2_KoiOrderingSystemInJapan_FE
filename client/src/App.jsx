@@ -6,8 +6,10 @@ import MainImg from "./assets/R.jpg";
 import LoginPopup from "./components/LoginPopup/LoginPopup";
 import KoiForSale from "./components/Hero/KoiForSale";
 import Footer from "./components/Footer/Footer";
-
 import Farm from "./components/Hero/Farm";
+import TimeLine from "./components/Delivery/TimeLine";
+import AdminDashboard from "./components/Admin/AdminDashboard";
+
 const bgImage = {
   backgroundImage: `url(${MainImg})`,
   height: "100vh",
@@ -26,12 +28,19 @@ const App = () => {
     <>
       <main className="">
         <Navbar toggleLoginPopup={toggleLoginPopup} />
-        <Routes>
-          <Route path="/" element={<Hero />} />
-          <Route path="/KoiForSale" element={<KoiForSale />} />
-          <Route path="/farm" element={<Farm />} />
-        </Routes>
-        <Footer />
+        <div className="min-h-screen flex flex-col flex-grow">
+          <Routes>
+            <Route path="/" element={<Hero />} />
+            <Route path="/KoiForSale" element={<KoiForSale />} />
+            <Route path="/farm" element={<Farm />} />
+            <Route path="/about" element={<TimeLine />} />
+
+            <Route path="/admin/*" element={<AdminDashboard />} />
+          </Routes>
+        </div>
+        <div>
+          <Footer />
+        </div>
       </main>
       <LoginPopup loginPopup={loginPopup} toggleLoginPopup={toggleLoginPopup} />
     </>
