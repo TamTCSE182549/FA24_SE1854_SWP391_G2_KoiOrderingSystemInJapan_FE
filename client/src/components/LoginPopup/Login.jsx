@@ -2,9 +2,6 @@ import React from "react";
 import { FcGoogle } from "react-icons/fc";
 import { FaSquareFacebook } from "react-icons/fa6";
 const Login = ({ handleSignIn }) => {
-  const google = () => {
-    window.open("http://localhost:5000/auth/google", "_self");
-  };
   return (
     <>
       <div className="p-6">
@@ -34,7 +31,6 @@ const Login = ({ handleSignIn }) => {
           <div
             className="bg-white w-9 h-9 rounded-full flex items-center
           justify-center shadow-custom-inset hover:scale-110 transition-all duration-300"
-            onClick={google}
           >
             <FcGoogle className="text-3xl" />
           </div>

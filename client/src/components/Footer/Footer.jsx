@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
@@ -20,34 +21,34 @@ const Footer = () => {
               <h2 className="mb-5 text-2xl">Use Link</h2>
               <ul>
                 <li className="pb-4">
-                  <a href="/" className="hover:text-red-800">
+                  <Link to="/" className="hover:text-red-800">
                     Home
-                  </a>
+                  </Link>
                 </li>
                 <li className="pb-4">
-                  <a href="#" className="hover:text-red-800">
+                  <Link to="#" className="hover:text-red-800">
                     Product
-                  </a>
+                  </Link>
                 </li>
                 <li className="pb-4">
-                  <a href="#" className="hover:text-red-800">
+                  <Link to="#" className="hover:text-red-800">
                     Blog
-                  </a>
+                  </Link>
                 </li>
                 <li className="pb-4">
-                  <a href="#" className="hover:text-red-800">
+                  <Link to="#" className="hover:text-red-800">
                     FAQ
-                  </a>
+                  </Link>
                 </li>
                 <li className="pb-4">
-                  <a href="#" className="hover:text-red-800">
+                  <Link to="#" className="hover:text-red-800">
                     FAQ
-                  </a>
+                  </Link>
                 </li>
                 <li className="pb-4">
-                  <a href="#" className="hover:text-red-800">
+                  <Link to="#" className="hover:text-red-800">
                     Contact
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>
@@ -55,34 +56,34 @@ const Footer = () => {
               <h2 className="mb-5 text-2xl">Useful Link</h2>
               <ul>
                 <li className="pb-4">
-                  <a href="#" className="hover:text-red-800">
+                  <Link to="#" className="hover:text-red-800">
                     Home
-                  </a>
+                  </Link>
                 </li>
                 <li className="pb-4">
-                  <a href="#" className="hover:text-red-800">
+                  <Link to="#" className="hover:text-red-800">
                     Product
-                  </a>
+                  </Link>
                 </li>
                 <li className="pb-4">
-                  <a href="#" className="hover:text-red-800">
+                  <Link to="#" className="hover:text-red-800">
                     Blog
-                  </a>
+                  </Link>
                 </li>
                 <li className="pb-4">
-                  <a href="#" className="hover:text-red-800">
+                  <Link to="#" className="hover:text-red-800">
                     FAQ
-                  </a>
+                  </Link>
                 </li>
                 <li className="pb-4">
-                  <a href="#" className="hover:text-red-800">
+                  <Link to="#" className="hover:text-red-800">
                     Support
-                  </a>
+                  </Link>
                 </li>
                 <li className="pb-4">
-                  <a href="#" className="hover:text-red-800">
+                  <Link to="#" className="hover:text-red-800">
                     Contact
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>
@@ -90,19 +91,19 @@ const Footer = () => {
               <h2 className="mb-5 text-2xl">Support</h2>
               <ul>
                 <li className="pb-4">
-                  <a href="#" className="hover:text-red-800">
+                  <Link to="#" className="hover:text-red-800">
                     FAQ
-                  </a>
+                  </Link>
                 </li>
                 <li className="pb-4">
-                  <a href="#" className="hover:text-red-800">
+                  <Link to="#" className="hover:text-red-800">
                     Support
-                  </a>
+                  </Link>
                 </li>
                 <li className="pb-4">
-                  <a href="#" className="hover:text-red-800">
+                  <Link to="#" className="hover:text-red-800">
                     Contact
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>
