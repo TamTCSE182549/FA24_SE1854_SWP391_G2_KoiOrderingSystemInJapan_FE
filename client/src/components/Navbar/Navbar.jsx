@@ -2,6 +2,7 @@ import React from "react";
 import Logo from "../../assets/bg_f8f8f8-flat_750x_075_f-pad_750x1000_f8f8f8-removebg-preview.png";
 import { IoMdSearch } from "react-icons/io";
 import { Outlet, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 const Menu = [
   {
     id: 1,
@@ -44,7 +45,11 @@ const Menu = [
     link: "/contact",
   },
 ];
-const Navbar = ({ toggleLoginPopup }) => {
+const Navbar = () => {
+  const navigate = useNavigate();
+  const handleNavigate = () => {
+    navigate("/Login");
+  };
   return (
     <div className="shadow md bg-gradient-to-r from-blue-600 to-cyan-500 dark:bg-black dark:text-white duration-200 relative z-40">
       {/* upper Navbar */}
@@ -96,7 +101,7 @@ const Navbar = ({ toggleLoginPopup }) => {
           {/* Login button */}
           <div className="p-auto shadow-md mx-auto rounded-xl">
             <button
-              onClick={toggleLoginPopup}
+              onClick={handleNavigate}
               className="inline-block py-2 px-3
                             hover:text-cyan-600 duration-200 text-white
                               hover:shadow-lg hover:translate-y-[-2px] 
