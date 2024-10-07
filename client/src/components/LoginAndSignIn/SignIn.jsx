@@ -22,8 +22,8 @@ const SignIn = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-      <div className="bg-gray-800 p-8 rounded-lg shadow-lg w-full max-w-md">
+    <div className="min-h-screen  flex items-center justify-center">
+      <div className="bg-gradient-to-r from-blue-600 to-cyan-500 p-8 rounded-lg shadow-lg w-full max-w-md">
         <h2 className="text-white text-3xl font-bold text-center mb-6">
           Sign up
         </h2>
@@ -40,7 +40,7 @@ const SignIn = () => {
             rules={[{ required: true, message: "Please input your username!" }]}
           >
             <Input
-              className="bg-gray-700 text-white"
+              className="bg-white text-black"
               placeholder="Enter your username"
               size="large"
             />
@@ -52,7 +52,7 @@ const SignIn = () => {
             rules={[{ required: true, message: "Please input your email!" }]}
           >
             <Input
-              className="bg-gray-700 text-white"
+              className="bg-white text-black"
               placeholder="your@email.com"
               size="large"
             />
@@ -64,7 +64,7 @@ const SignIn = () => {
             rules={[{ required: true, message: "Please input your password!" }]}
           >
             <Input.Password
-              className="bg-gray-700 text-white"
+              className="bg-white text-black"
               placeholder="Enter your password"
               size="large"
             />
@@ -89,7 +89,7 @@ const SignIn = () => {
             ]}
           >
             <Input.Password
-              className="bg-gray-700 text-white"
+              className="bg-white text-black"
               placeholder="Confirm your password"
               size="large"
             />
@@ -102,7 +102,7 @@ const SignIn = () => {
               className="w-full bg-cyan-500 text-white"
               onClick={handleSignInSuccess}
             >
-              Sign up
+              Sign In
             </Button>
           </Form.Item>
         </Form>
@@ -110,10 +110,10 @@ const SignIn = () => {
         <div className="text-center text-white my-4">
           <span>Already have an account?</span>
           <span
-            className="text-cyan-500 hover:underline ml-2 cursor-pointer"
+            className="text-white hover:underline ml-2 cursor-pointer"
             onClick={handleNavigateToLogin}
           >
-            Sign in
+            Log in
           </span>
         </div>
       </div>

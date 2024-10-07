@@ -1,122 +1,175 @@
-import React from "react";
+import React, { useState } from "react";
+import { Input, Dropdown, Menu, Avatar, message } from "antd"; // Ant Design components
 import Logo from "../../assets/bg_f8f8f8-flat_750x_075_f-pad_750x1000_f8f8f8-removebg-preview.png";
 import { IoMdSearch } from "react-icons/io";
-import { Outlet, Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
-const Menu = [
-  {
-    id: 1,
-    name: "Home",
-    link: "/",
-  },
-  {
-    id: 2,
-    name: "Koi for sale",
-    link: "/KoiforSale",
-  },
-  {
-    id: 3,
-    name: "Buying Trips",
-    link: "/buyingtrips",
-  },
-  {
-    id: 4,
-    name: "Farm",
-    link: "/farm",
-  },
-  {
-    id: 5,
-    name: "Guideline",
-    link: "/guideline",
-  },
-  {
-    id: 6,
-    name: "Disease",
-    link: "/disease",
-  },
-  {
-    id: 7,
-    name: "About",
-    link: "/about",
-  },
-  {
-    id: 8,
-    name: "Contact",
-    link: "/contact",
-  },
+import { Link, useNavigate } from "react-router-dom";
+import {
+  UserOutlined,
+  ShoppingCartOutlined,
+  DownOutlined,
+} from "@ant-design/icons";
+
+const { Search } = Input;
+
+const MenuItems = [
+  { id: 1, name: "Home", link: "/" },
+  { id: 2, name: "Bookings", link: "/bookings" },
+  { id: 3, name: "Koi Products", link: "/koiforsale" },
+  { id: 4, name: "Farm", link: "/farm" },
+  { id: 5, name: "All About Koi", link: "/allaboutkoi" },
+  { id: 6, name: "About us", link: "/aboutus" },
 ];
+
+const userMenu = (
+  <Menu>
+    <Menu.Item key="1">
+      <Link to="/profile">Manage account</Link>
+    </Menu.Item>
+    <Menu.Item key="2">
+      <Link to="/bookings">Bookings & Trips</Link>
+    </Menu.Item>
+    <Menu.Item key="3">
+      <Link to="/loyalty">Genius loyalty programme</Link>
+    </Menu.Item>
+    <Menu.Item key="4">
+      <Link to="/rewards">Rewards & Wallet</Link>
+    </Menu.Item>
+    <Menu.Item key="5">
+      <Link to="/reviews">Reviews</Link>
+    </Menu.Item>
+    <Menu.Item key="6">
+      <Link to="/saved">Saved</Link>
+    </Menu.Item>
+    <Menu.Item key="7">
+      <Link to="/logout">Sign out</Link>
+    </Menu.Item>
+  </Menu>
+);
+
 const Navbar = () => {
   const navigate = useNavigate();
-  const handleNavigate = () => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false); // State quản lý mở/đóng menu cho mobile
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // State theo dõi tình trạng đăng nhập
+
+  const onSearch = (value) => {
+    console.log(value); // Thêm logic tìm kiếm của bạn ở đây
+  };
+
+  const onMenuClick = () => {
     navigate("/Login");
   };
+
+  const onHomeClick = () => {
+    navigate("/");
+  };
+
+  // Giả lập hàm đăng nhập thành công hoặc thất bại
+  const handleLogin = (status) => {
+    if (status === "success") {
+      setIsLoggedIn(true); // Khi đăng nhập thành công, thay đổi state
+      message.success("Login successful!");
+    } else {
+      setIsLoggedIn(false); // Khi đăng nhập thất bại
+      message.error("Login failed.");
+    }
+  };
+
   return (
-    <div className="shadow md bg-gradient-to-r from-blue-600 to-cyan-500 dark:bg-black dark:text-white duration-200 relative z-40">
+    <div className="bg-gradient-to-r from-blue-600 to-cyan-500 w-full">
       {/* upper Navbar */}
-      <div className="bg-white/10 py-1 flex justify-between mx-auto items-center">
-        {/* <div className="container mx-auto flex justify-between items-center "> */}
-        <div className="flex">
-          <a
-            href="/"
-            className="font-serif text-2xl sm:text-3xl flex gap-2 items-center text-white "
-          >
-            <img src={Logo} alt="Logo" className="w-20 px-2 pl-4"></img>
-            KOISERVICE
-          </a>
+      <div className="flex justify-between items-center w-full px-6 lg:px-12 py-3">
+        {/* Logo và tên trang */}
+        <div className="flex items-center">
+          <img
+            src={Logo}
+            alt="Logo"
+            className="w-14 h-auto cursor-pointer"
+            onClick={onHomeClick}
+          />
+          <div className="text-white font-bold text-2xl ml-2">KOIBOOKING</div>
         </div>
-        <div className="flex justify-center mx-auto items-center">
-          <div className=" rounded-xl p-auto mx-auto">
-            <ul className="sm:flex hidden items-center">
-              {Menu.map((data) => (
-                <li key={data.id}>
-                  <Link
-                    to={data.link}
-                    className="inline-block py-2 px-10
-                            hover:text-cyan-600 duration-200 text-white
-                              hover:shadow-lg hover:translate-y-[-2px] 
-                            hover:text-cyan-600 transition-all duration-300
-                              hover:rounded-full hover:bg-white hover:text-gray-500 items-center
-                              text-lg font-serif"
-                  >
-                    {data.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-            <Outlet />
-          </div>
+
+        {/* Thanh điều hướng */}
+        <div className="hidden md:flex flex-grow justify-center rounded-3xl">
+          <ul className="flex justify-between w-full max-w-4xl rounded-3xl">
+            {MenuItems.map((data) => (
+              <li
+                key={data.id}
+                className="flex-1 flex justify-center items-center h-12 text-center"
+              >
+                <Link
+                  to={data.link}
+                  className="text-white font-bold transition duration-500 ease-in-out text-base
+                            hover:bg-white hover:text-black hover:shadow-2xl hover:rounded-3xl px-4 py-2"
+                >
+                  {data.name}
+                </Link>
+              </li>
+            ))}
+          </ul>
         </div>
-        {/* Search bar and login button */}
-        <div className="flex justify-between items-center gap-4">
-          <div className="relative group hidden sm:block">
-            <input
-              type="text"
-              placeholder="Search"
-              className="w-[200px] sm:w-[300px] hover:border-red-600
-                transition-all duration-300 rounded-full border border-gray-950 
-                px-2 py-1 focus:outline-none focus:border-1 focus:border-gray-950 text-black dark:text-black"
+
+        {/* Search bar và Icons */}
+        <div className="flex items-center space-x-6">
+          {/* Ant Design Search Input */}
+          <Search
+            placeholder="Search Koi"
+            onSearch={onSearch}
+            className="hidden md:block w-40 xl:w-60"
+            enterButton={<IoMdSearch className="text-white" />}
+          />
+
+          {/* Hiển thị icon hoặc dropdown menu dựa trên trạng thái đăng nhập */}
+          {isLoggedIn ? (
+            <Dropdown overlay={userMenu} trigger={["click"]}>
+              <div className="flex items-center cursor-pointer text-white">
+                <Avatar icon={<UserOutlined />} />
+                <span className="ml-2">Quang Trần</span>
+                <DownOutlined className="ml-2" />
+              </div>
+            </Dropdown>
+          ) : (
+            <UserOutlined
+              className="text-white text-2xl cursor-pointer"
+              onClick={onMenuClick}
             />
-            <IoMdSearch className="text-gray-950 group-hover:text-cyan-600 absolute top-1/2 -translate-y-1/2 right-3" />
-          </div>
-          {/* Login button */}
-          <div className="p-auto shadow-md mx-auto rounded-xl">
-            <button
-              onClick={handleNavigate}
-              className="inline-block py-2 px-3
-                            hover:text-cyan-600 duration-200 text-white
-                              hover:shadow-lg hover:translate-y-[-2px] 
-                            hover:text-cyan-600 transition-all duration-300
-                              hover:rounded-full hover:bg-white hover:text-gray-500 items-center
-                              text-lg font-serif"
-            >
-              Login
-            </button>
-          </div>
-          {/* Darkmode switch */}
+          )}
+
+          {/* Cart Icon */}
+          <ShoppingCartOutlined className="text-white text-2xl cursor-pointer" />
         </div>
-        {/* </div> */}
       </div>
-      {/* lower Navbar */}
+
+      {/* Mobile Menu */}
+      {isMenuOpen && (
+        <div className="flex flex-col md:hidden space-y-2 absolute top-16 left-0 w-full bg-blue-600 text-white p-4 z-50">
+          {MenuItems.map((data) => (
+            <Link
+              key={data.id}
+              to={data.link}
+              className="py-2 px-4 text-lg font-medium"
+            >
+              {data.name}
+            </Link>
+          ))}
+        </div>
+      )}
+
+      {/* Đăng nhập thử nghiệm */}
+      <div className="flex justify-center mt-4 space-x-4">
+        <button
+          className="bg-green-500 text-white px-4 py-2 rounded"
+          onClick={() => handleLogin("success")}
+        >
+          Login Success
+        </button>
+        <button
+          className="bg-red-500 text-white px-4 py-2 rounded"
+          onClick={() => handleLogin("fail")}
+        >
+          Login Failed
+        </button>
+      </div>
     </div>
   );
 };

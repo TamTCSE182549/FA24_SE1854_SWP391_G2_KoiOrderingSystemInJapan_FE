@@ -3,8 +3,10 @@ import { Form, Input, Button, Checkbox } from "antd";
 import { FcGoogle } from "react-icons/fc";
 import { FaFacebook } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+
 const LoginForm = () => {
   const navigate = useNavigate();
+
   const onFinish = (values) => {
     console.log("Success:", values);
   };
@@ -14,13 +16,14 @@ const LoginForm = () => {
   };
 
   const handleNavigateToSignIn = () => {
-    navigate("/SignIn"); // Điều hướng về trang đăng nhập
+    navigate("/SignIn"); // Điều hướng về trang đăng ký
   };
+
   return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-      <div className="bg-gray-800 p-8 rounded-lg shadow-lg w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="bg-gradient-to-r from-blue-600 to-cyan-500 p-8 rounded-lg shadow-lg w-full max-w-md">
         <h2 className="text-white text-3xl font-bold text-center mb-6">
-          Sign in
+          Log In
         </h2>
         <Form
           name="login"
@@ -35,7 +38,7 @@ const LoginForm = () => {
             rules={[{ required: true, message: "Please input your email!" }]}
           >
             <Input
-              className="bg-gray-700 text-black"
+              className="bg-white text-black"
               placeholder="your@email.com"
               size="large"
             />
@@ -47,15 +50,15 @@ const LoginForm = () => {
             rules={[{ required: true, message: "Please input your password!" }]}
           >
             <Input.Password
-              className="bg-gray-700 text-black"
+              className="bg-white text-black"
               placeholder="Enter your password"
               size="large"
             />
           </Form.Item>
 
           <div className="flex justify-between items-center text-white">
-            <Checkbox>Remember me</Checkbox>
-            <a href="#" className="text-cyan-500 hover:underline">
+            <Checkbox className="text-white">Remember me</Checkbox>
+            <a href="#" className="text-white hover:underline">
               Forgot your password?
             </a>
           </div>
@@ -64,7 +67,7 @@ const LoginForm = () => {
             <Button
               type="primary"
               htmlType="submit"
-              className="w-full bg-cyan-500 text-white"
+              className="w-full bg-cyan-500 text-white hover:bg-cyan-600 transition-all duration-300"
             >
               Sign in
             </Button>
@@ -85,10 +88,10 @@ const LoginForm = () => {
         <div className="text-center">
           <span className="text-white">Don't have an account?</span>
           <span
-            className="text-cyan-500 hover:underline ml-2 cursor-pointer"
+            className="text-white hover:underline ml-2 cursor-pointer"
             onClick={handleNavigateToSignIn}
           >
-            Sign up
+            Sign In
           </span>
         </div>
       </div>

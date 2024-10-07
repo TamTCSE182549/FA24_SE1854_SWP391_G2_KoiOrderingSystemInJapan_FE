@@ -1,114 +1,123 @@
-import React, { useState, useEffect } from "react";
-import { Input, Card, Row, Col, Checkbox, Button, Spin } from "antd";
+import React from "react";
+import { Input, Slider, Checkbox, Pagination, Button, Tag } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
-import axios from "axios"; // Sử dụng axios cho việc gọi API
 
-const Sidebar = ({ filters, onFilterChange }) => {
+const { CheckableTag } = Tag;
+
+const mockData = [
+  { name: "Tour name", location: "Location", price: "5.99$", rating: "Rating" },
+  { name: "Tour name", location: "Location", price: "5.99$", rating: "Rating" },
+  { name: "Tour name", location: "Location", price: "5.99$", rating: "Rating" },
+  { name: "Tour name", location: "Location", price: "5.99$", rating: "Rating" },
+  { name: "Tour name", location: "Location", price: "5.99$", rating: "Rating" },
+  { name: "Tour name", location: "Location", price: "5.99$", rating: "Rating" },
+];
+
+const Filters = () => {
   return (
-    <div className="bg-gray-100 p-4 w-full">
-      <h3 className="text-xl font-semibold mb-4">Filter by Category</h3>
-      <Checkbox.Group
-        options={["Category 1", "Category 2", "Category 3"]}
-        onChange={onFilterChange}
-        value={filters}
-        className="flex flex-col" // Sử dụng Tailwind CSS để hiển thị theo cột
-      />
+    <div className="w-1/4 p-4 bg-white shadow-md">
+      <div className="mb-4">
+        <h3 className="font-semibold mb-2">Keywords</h3>
+        <div className="flex flex-wrap gap-2">
+          <Tag closable>Spring</Tag>
+          <Tag closable>Smart</Tag>
+          <Tag closable>Modern</Tag>
+        </div>
+      </div>
 
-      <Button className="mt-4 w-full" type="primary" danger>
-        Reset Filters
-      </Button>
+      <div className="mb-4">
+        <h3 className="font-semibold mb-2">Label</h3>
+        <Checkbox className="mb-2">
+          Label <span className="text-gray-400">Description</span>
+        </Checkbox>{" "}
+        <br />
+        <Checkbox className="mb-2">
+          Label <span className="text-gray-400">Description</span>
+        </Checkbox>{" "}
+        <br />
+        <Checkbox>
+          Label <span className="text-gray-400">Description</span>
+        </Checkbox>{" "}
+        <br />
+      </div>
+
+      <div className="mb-4">
+        <h3 className="font-semibold mb-2">Price Range</h3>
+        <Slider range defaultValue={[50, 100]} min={0} max={200} />
+      </div>
+
+      <div className="mb-4">
+        <h3 className="font-semibold mb-2">Color</h3>
+        <Checkbox className="mb-2">Label</Checkbox> <br />
+        <Checkbox className="mb-2">Label</Checkbox> <br />
+        <Checkbox>Label</Checkbox>
+      </div>
+
+      <div className="mb-4">
+        <h3 className="font-semibold mb-2">Size</h3>
+        <Checkbox className="mb-2">Label</Checkbox> <br />
+        <Checkbox className="mb-2">Label</Checkbox> <br />
+        <Checkbox>Label</Checkbox>
+      </div>
     </div>
   );
 };
 
-const ProductCard = ({ product }) => {
+const ProductCard = ({ name, location, price, rating }) => {
   return (
-    <Card title={product.name} bordered={false} className="mb-4">
-      <p>{product.category}</p>
-      <p>{product.price}</p>
-    </Card>
+    <div className="p-4 bg-white shadow-md rounded-md">
+      <div className="h-48 bg-gray-200 mb-4" /> {/* Placeholder cho hình ảnh */}
+      <h3 className="font-semibold">{name}</h3>
+      <p>{location}</p>
+      <div className="font-bold">{price}</div>
+      <p className="text-gray-500">{rating}</p>
+    </div>
   );
 };
 
-const ProductDisplay = () => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filters, setFilters] = useState([]);
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  // Mảng sản phẩm tĩnh (5 sản phẩm) để sử dụng với map
-  const staticProducts = [
-    { id: 1, name: "Product A", category: "Category 1", price: "$100" },
-    { id: 2, name: "Product B", category: "Category 2", price: "$150" },
-    { id: 3, name: "Product C", category: "Category 1", price: "$200" },
-    { id: 4, name: "Product D", category: "Category 3", price: "$250" },
-    { id: 5, name: "Product E", category: "Category 2", price: "$300" },
-  ];
-
-  // Gọi API để lấy dữ liệu sản phẩm
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        // Thay thế URL API thật vào đây, ví dụ: 'https://api.example.com/products'
-        const response = await axios.get("https://api.example.com/products");
-        setProducts(response.data); // Giả sử API trả về mảng sản phẩm
-      } catch (error) {
-        console.error("Error fetching products:", error);
-        // Nếu gọi API thất bại, hiển thị danh sách sản phẩm tĩnh
-        setProducts(staticProducts);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProducts();
-  }, []);
-
-  // Lọc các sản phẩm dựa trên tìm kiếm và bộ lọc
-  const filteredProducts = products.filter((product) => {
-    return (
-      product.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-      (filters.length === 0 || filters.includes(product.category))
-    );
-  });
-
+const ProductGrid = () => {
   return (
-    <div className="flex">
-      {/* Sidebar */}
-      <div className="w-1/4 p-4">
-        <Sidebar filters={filters} onFilterChange={setFilters} />
-      </div>
-
-      {/* Main Content */}
-      <div className="w-3/4 p-4">
-        {/* Search Bar */}
+    <div className="w-3/4 p-4">
+      <div className="flex justify-between mb-4">
         <Input
-          placeholder="Search for products"
+          placeholder="Search"
           prefix={<SearchOutlined />}
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="mb-4"
+          className="w-1/2"
         />
+        <div className="flex gap-2">
+          <Button type="primary">New</Button>
+          <Button>Price ascending</Button>
+          <Button>Price descending</Button>
+          <Button>Rating</Button>
+        </div>
+      </div>
 
-        {/* Hiển thị loading khi đang fetch API */}
-        {loading ? (
-          <Spin size="large" />
-        ) : (
-          <Row gutter={[16, 16]}>
-            {filteredProducts.length > 0 ? (
-              filteredProducts.map((product) => (
-                <Col span={8} key={product.id}>
-                  <ProductCard product={product} />
-                </Col>
-              ))
-            ) : (
-              <p>No products found</p>
-            )}
-          </Row>
-        )}
+      <div className="grid grid-cols-3 gap-6">
+        {mockData.map((item, index) => (
+          <ProductCard
+            key={index}
+            name={item.name}
+            location={item.location}
+            price={item.price}
+            rating={item.rating}
+          />
+        ))}
+      </div>
+
+      <div className="flex justify-center mt-6">
+        <Pagination defaultCurrent={1} total={500} />
       </div>
     </div>
   );
 };
 
-export default ProductDisplay;
+const KoiForSale = () => {
+  return (
+    <div className="flex min-h-screen bg-gray-100">
+      <Filters />
+      <ProductGrid />
+    </div>
+  );
+};
+
+export default KoiForSale;
