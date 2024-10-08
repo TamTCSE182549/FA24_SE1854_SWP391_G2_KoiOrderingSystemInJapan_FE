@@ -3,12 +3,40 @@ import { Form, Input, Button, Checkbox } from "antd";
 import { FcGoogle } from "react-icons/fc";
 import { FaFacebook } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-
+import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
+import axios from "axios";
+import { toast } from "react-toastify";
 const LoginForm = () => {
   const navigate = useNavigate();
 
-  const onFinish = (values) => {
-    console.log("Success:", values);
+  const clientId =
+    "738391852199-e9cllf84bulqf7hsbgl5i7gofq1vrb8o.apps.googleusercontent.com";
+
+  const onFinish = async (values) => {
+    try {
+      const response = await axios.post("http://localhost:8080/api/login", {
+        email: values.email,
+        password: values.password,
+      });
+
+      if (response.status === 200) {
+        localStorage.setItem("token", response.data.token); // Store the token (if you implement JWT)
+        toast.success("Login successful!"); // Notify user of success
+        navigate("/"); // Redirect to homepage or another protected route
+      } else {
+        toast.error(
+          response.data?.message || "Login failed. Please try again."
+        );
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        toast.error(
+          error.response?.data?.message || "An error occurred during login."
+        );
+      } else {
+        toast.error("An unknown error occurred during login.");
+      }
+    }
   };
 
   const onFinishFailed = (errorInfo) => {
@@ -17,6 +45,46 @@ const LoginForm = () => {
 
   const handleNavigateToSignIn = () => {
     navigate("/SignIn"); // Điều hướng về trang đăng ký
+  };
+
+  const handleGoogleLoginSuccess = async (credentialResponse) => {
+    console.log(credentialResponse); // The credential token from Google
+
+    try {
+      // Send the token to the backend
+      const response = await axios.post("http://localhost:8080/api/google", {
+        token: credentialResponse.credential,
+      });
+
+      //     console.log("Backend Response:", response.data);
+      //     // After successful login, you can store the token or navigate to a protected route
+      //     navigate("/");
+
+      //   } catch (error) {
+      //     console.error("Error sending credential to backend:", error);
+      //   }
+      // };
+      if (response.status === 200) {
+        localStorage.setItem("token", response.data.token); // Store token in localStorage
+        toast.success("Google login successful!"); // Notify user of success
+        navigate("/"); // Redirect to homepage or another protected route
+      } else {
+        // If the response status is not 200, handle it as an error
+        toast.error(
+          response.data?.message || "Google login failed. Please try again."
+        );
+      }
+    } catch (error) {
+      // Handle Axios-specific errors and general errors
+      if (axios.isAxiosError(error)) {
+        toast.error(
+          error.response?.data?.message ||
+            "An error occurred during Google login."
+        );
+      } else {
+        toast.error("An unknown error occurred during Google login.");
+      }
+    }
   };
 
   return (
@@ -77,12 +145,22 @@ const LoginForm = () => {
         <div className="text-center text-white my-4">Or Login with</div>
 
         <div className="flex justify-center gap-4 mb-6">
-          <button className="bg-white p-3 rounded-full flex items-center justify-center shadow hover:scale-105 transition-transform">
-            <FcGoogle className="text-2xl" />
-          </button>
+          {/* <button className="bg-white p-3 rounded-full flex items-center justify-center shadow hover:scale-105 transition-transform">
+            <FcGoogle className="text-2xl" /> */}
+          <GoogleOAuthProvider clientId={clientId}>
+            <GoogleLogin
+              onSuccess={handleGoogleLoginSuccess}
+              onError={() => toast.error("Google login failed")}
+              useOneTap
+              shape={"square"}
+              size={"large"}
+              width={390}
+            />
+          </GoogleOAuthProvider>
+          {/* </button>
           <button className="bg-blue-600 p-3 rounded-full flex items-center justify-center shadow hover:scale-105 transition-transform">
             <FaFacebook className="text-white text-2xl" />
-          </button>
+          </button> */}
         </div>
 
         <div className="text-center">
