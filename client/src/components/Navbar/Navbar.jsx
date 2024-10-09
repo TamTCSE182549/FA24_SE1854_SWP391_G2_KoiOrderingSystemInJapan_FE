@@ -130,7 +130,7 @@ const Navbar = () => {
             className="hidden md:block w-auto xl:w-60 bg-[#c5bd92]"
           />
           {login ? (
-            <Dropdown overlay={userMenu} trigger={["click"]}>
+            <Dropdown menu={userMenu} trigger={["click"]}>
               <div className="flex items-center cursor-pointer text-white">
                 <Avatar icon={<UserOutlined />} />
                 <span className="ml-2">{email}</span>

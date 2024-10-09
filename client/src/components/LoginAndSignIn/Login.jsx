@@ -23,6 +23,9 @@ const Login = () => {
         const { token } = response.data;
         localStorage.setItem("token", token); // Store the token (if you implement JWT)
         localStorage.setItem("email", values.email);
+
+        const decodedToken = jwtDecode(token);
+        console.log(decodedToken);
         console.log(values.email);
         console.log(token);
         toast.success("Login successful!"); // Notify user of success
