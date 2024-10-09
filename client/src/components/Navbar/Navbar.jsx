@@ -1,6 +1,6 @@
-import React, { useState } from "react";
-import { Input, Dropdown, Menu, Avatar, message } from "antd"; // Ant Design components
-import Logo from "../../assets/bg_f8f8f8-flat_750x_075_f-pad_750x1000_f8f8f8-removebg-preview.png";
+// Navbar.js
+import React, { useContext } from "react";
+import { Input, Dropdown, Menu, Avatar } from "antd";
 import { IoMdSearch } from "react-icons/io";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -8,6 +8,8 @@ import {
   ShoppingCartOutlined,
   DownOutlined,
 } from "@ant-design/icons";
+import { AuthContext } from "../../components/LoginAndSignIn/AuthContext";
+import Logo from "../../assets/bg_f8f8f8-flat_750x_075_f-pad_750x1000_f8f8f8-removebg-preview.png";
 
 const { Search } = Input;
 
@@ -20,39 +22,12 @@ const MenuItems = [
   { id: 6, name: "About us", link: "/aboutus" },
 ];
 
-const userMenu = (
-  <Menu>
-    <Menu.Item key="1">
-      <Link to="/profile">Manage account</Link>
-    </Menu.Item>
-    <Menu.Item key="2">
-      <Link to="/bookings">Bookings & Trips</Link>
-    </Menu.Item>
-    <Menu.Item key="3">
-      <Link to="/loyalty">Genius loyalty programme</Link>
-    </Menu.Item>
-    <Menu.Item key="4">
-      <Link to="/rewards">Rewards & Wallet</Link>
-    </Menu.Item>
-    <Menu.Item key="5">
-      <Link to="/reviews">Reviews</Link>
-    </Menu.Item>
-    <Menu.Item key="6">
-      <Link to="/saved">Saved</Link>
-    </Menu.Item>
-    <Menu.Item key="7">
-      <Link to="/logout">Sign out</Link>
-    </Menu.Item>
-  </Menu>
-);
-
 const Navbar = () => {
   const navigate = useNavigate();
-  const [isMenuOpen, setIsMenuOpen] = useState(false); // State quản lý mở/đóng menu cho mobile
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // State theo dõi tình trạng đăng nhập
+  const { isLoggedIn, userProfile, logout } = useContext(AuthContext); // Get login state and user profile from context
 
   const onSearch = (value) => {
-    console.log(value); // Thêm logic tìm kiếm của bạn ở đây
+    console.log(value);
   };
 
   const onMenuClick = () => {
@@ -63,19 +38,38 @@ const Navbar = () => {
     navigate("/");
   };
 
-  // Giả lập hàm đăng nhập thành công hoặc thất bại
-  const handleLogin = (status) => {
-    if (status === "success") {
-      setIsLoggedIn(true); // Khi đăng nhập thành công, thay đổi state
-      message.success("Login successful!");
-    } else {
-      setIsLoggedIn(false); // Khi đăng nhập thất bại
-      message.error("Login failed.");
-    }
+  const handleSignOut = () => {
+    logout(); // Call the logout function
+    navigate("/Login"); // Optionally, navigate to the login page after logging out
   };
 
+  const userMenu = (
+    <Menu>
+      <Menu.Item key="1">
+        <Link to="/profile">Manage account</Link>
+      </Menu.Item>
+      <Menu.Item key="2">
+        <Link to="/bookings">Bookings & Trips</Link>
+      </Menu.Item>
+      <Menu.Item key="3">
+        <Link to="/loyalty">Genius loyalty programme</Link>
+      </Menu.Item>
+      <Menu.Item key="4">
+        <Link to="/rewards">Rewards & Wallet</Link>
+      </Menu.Item>
+      <Menu.Item key="5">
+        <Link to="/reviews">Reviews</Link>
+      </Menu.Item>
+      <Menu.Item key="6">
+        <Link to="/saved">Saved</Link>
+      </Menu.Item>
+      <Menu.Item key="7" onClick={handleSignOut}>
+        Sign out
+      </Menu.Item>
+    </Menu>
+  );
   return (
-    <div className="bg-gradient-to-r from-blue-600 to-cyan-500 w-full">
+    <div className="bg-[#c5bd92] w-full">
       {/* upper Navbar */}
       <div className="flex justify-between items-center w-full px-6 lg:px-12 py-3">
         {/* Logo và tên trang */}
@@ -111,20 +105,19 @@ const Navbar = () => {
 
         {/* Search bar và Icons */}
         <div className="flex items-center space-x-6">
-          {/* Ant Design Search Input */}
           <Search
             placeholder="Search Koi"
             onSearch={onSearch}
-            className="hidden md:block w-40 xl:w-60"
-            enterButton={<IoMdSearch className="text-white" />}
+            className="hidden md:block w-40 xl:w-60 bg-[#c5bd92]"
           />
-
-          {/* Hiển thị icon hoặc dropdown menu dựa trên trạng thái đăng nhập */}
           {isLoggedIn ? (
             <Dropdown overlay={userMenu} trigger={["click"]}>
               <div className="flex items-center cursor-pointer text-white">
-                <Avatar icon={<UserOutlined />} />
-                <span className="ml-2">Quang Trần</span>
+                <Avatar
+                  src={userProfile?.picture?.data?.url}
+                  icon={<UserOutlined />}
+                />
+                <span className="ml-2">{userProfile?.name}</span>
                 <DownOutlined className="ml-2" />
               </div>
             </Dropdown>
@@ -134,41 +127,8 @@ const Navbar = () => {
               onClick={onMenuClick}
             />
           )}
-
-          {/* Cart Icon */}
           <ShoppingCartOutlined className="text-white text-2xl cursor-pointer" />
         </div>
-      </div>
-
-      {/* Mobile Menu */}
-      {isMenuOpen && (
-        <div className="flex flex-col md:hidden space-y-2 absolute top-16 left-0 w-full bg-blue-600 text-white p-4 z-50">
-          {MenuItems.map((data) => (
-            <Link
-              key={data.id}
-              to={data.link}
-              className="py-2 px-4 text-lg font-medium"
-            >
-              {data.name}
-            </Link>
-          ))}
-        </div>
-      )}
-
-      {/* Đăng nhập thử nghiệm */}
-      <div className="flex justify-center mt-4 space-x-4">
-        <button
-          className="bg-green-500 text-white px-4 py-2 rounded"
-          onClick={() => handleLogin("success")}
-        >
-          Login Success
-        </button>
-        <button
-          className="bg-red-500 text-white px-4 py-2 rounded"
-          onClick={() => handleLogin("fail")}
-        >
-          Login Failed
-        </button>
       </div>
     </div>
   );

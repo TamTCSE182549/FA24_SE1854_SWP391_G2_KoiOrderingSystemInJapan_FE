@@ -1,53 +1,67 @@
-import React, { useState } from "react";
-import { Input, Button, Typography, Select } from "antd";
-import { EditOutlined, CheckOutlined } from "@ant-design/icons";
-import "antd/dist/reset.css"; // Reset CSS của Ant Design để dùng với Tailwind CSS
+import React, { useContext, useState } from "react";
+import { Input, Button, Avatar, Typography, Select } from "antd";
+import { AuthContext } from "../../components/LoginAndSignIn/AuthContext"; // Import AuthContext to access the logged-in user
+import { UserOutlined, EditOutlined, CheckOutlined } from "@ant-design/icons";
+import { useNavigate } from "react-router-dom";
 
 const { Text } = Typography;
 const { Option } = Select;
 
-const Profile = () => {
-  // State để lưu thông tin người dùng
+const ProfileView = () => {
+  const { userProfile, isLoggedIn } = useContext(AuthContext); // Get user profile and login state from context
+  const navigate = useNavigate();
+
+  // State for managing profile information editing
   const [userInfo, setUserInfo] = useState({
-    name: "Quang Trần",
-    displayName: "",
-    email: "zxc072004@gmail.com",
+    name: userProfile?.name,
+    surname: userProfile?.surname,
+    email: userProfile?.email,
     phone: "",
-    dob: "",
-    nationality: "Vietnam",
-    gender: "",
-    address: "",
-    passportDetails: "",
+    addressLine1: "",
+    addressLine2: "",
+    postcode: "",
+    state: "",
+    area: "",
+    education: "",
+    country: "Vietnam",
+    region: "",
+    avatar: userProfile?.picture?.data?.url || userProfile?.picture || null, // Use Facebook avatar or default
   });
 
-  // State để theo dõi trường nào đang được chỉnh sửa
   const [editingField, setEditingField] = useState(null);
 
-  // Hàm xử lý khi người dùng muốn chỉnh sửa một trường
-  const handleEdit = (field) => {
-    setEditingField(field);
-  };
-
-  // Hàm xử lý lưu thông tin sau khi chỉnh sửa
+  // Handle saving edited fields
   const handleSave = (field, value) => {
     setUserInfo({ ...userInfo, [field]: value });
     setEditingField(null);
   };
 
-  // Hàm xử lý khi giá trị trong input thay đổi
+  // Handle input change
   const handleChange = (e) => {
     const { name, value } = e.target;
     setUserInfo({ ...userInfo, [name]: value });
   };
 
-  // Hàm xử lý thay đổi trong dropdown quốc gia
-  const handleNationalityChange = (value) => {
-    setUserInfo({ ...userInfo, nationality: value });
+  // Handle dropdown country change
+  const handleCountryChange = (value) => {
+    setUserInfo({ ...userInfo, country: value });
   };
 
-  // Tạo các thành phần hiển thị
+  // Handle avatar upload
+  const handleAvatarUpload = (e) => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setUserInfo({ ...userInfo, avatar: reader.result }); // Update avatar in base64 format
+    };
+    if (file) {
+      reader.readAsDataURL(file); // Convert the uploaded file to base64
+    }
+  };
+
+  // Render form field
   const renderField = (label, field, placeholder, type = "text") => (
-    <div className="flex items-center justify-between mb-4 border-b pb-3">
+    <div className="flex items-center justify-between mb-4">
       <span className="w-1/4 font-semibold">{label}</span>
       <div className="w-2/4">
         {editingField === field ? (
@@ -70,22 +84,22 @@ const Profile = () => {
         onClick={() =>
           editingField === field
             ? handleSave(field, userInfo[field])
-            : handleEdit(field)
+            : setEditingField(field)
         }
         className="ml-4"
       />
     </div>
   );
 
-  // Tạo dropdown cho Nationality
-  const renderNationalityField = () => (
-    <div className="flex items-center justify-between mb-4 border-b pb-3">
-      <span className="w-1/4 font-semibold">Nationality</span>
+  // Render dropdown for country selection
+  const renderCountryField = () => (
+    <div className="flex items-center justify-between mb-4">
+      <span className="w-1/4 font-semibold">Country</span>
       <div className="w-2/4">
-        {editingField === "nationality" ? (
+        {editingField === "country" ? (
           <Select
-            value={userInfo.nationality}
-            onChange={handleNationalityChange}
+            value={userInfo.country}
+            onChange={handleCountryChange}
             className="w-full"
           >
             <Option value="Vietnam">Vietnam</Option>
@@ -94,46 +108,95 @@ const Profile = () => {
             <Option value="France">France</Option>
             <Option value="Germany">Germany</Option>
             <Option value="Canada">Canada</Option>
-            {/* Bạn có thể thêm nhiều quốc gia hơn ở đây */}
           </Select>
         ) : (
-          <Text>{userInfo.nationality || "Select your nationality"}</Text>
+          <Text>{userInfo.country || "Select your country"}</Text>
         )}
       </div>
       <Button
         type="primary"
         shape="circle"
-        icon={
-          editingField === "nationality" ? <CheckOutlined /> : <EditOutlined />
-        }
+        icon={editingField === "country" ? <CheckOutlined /> : <EditOutlined />}
         onClick={() =>
-          editingField === "nationality"
-            ? handleSave("nationality", userInfo.nationality)
-            : handleEdit("nationality")
+          editingField === "country"
+            ? handleSave("country", userInfo.country)
+            : setEditingField("country")
         }
         className="ml-4"
       />
     </div>
   );
 
+  // If the user is not logged in, redirect to login
+  if (!isLoggedIn) {
+    navigate("/Login");
+    return null;
+  }
+
   return (
-    <div className="container mx-auto p-6 max-w-2xl bg-white shadow-md rounded-md">
-      <h2 className="text-3xl font-bold mb-6">Personal details</h2>
-      <p className="text-gray-500 mb-6">
-        Update your information and find out how it's used.
-      </p>
-      {/* Render các trường thông tin */}
-      {renderField("Name", "name", "Enter your name")}
-      {renderField("Display name", "displayName", "Choose a display name")}
-      {renderField("Email address", "email", "Enter your email", "email")}
-      {renderField("Phone number", "phone", "Add your phone number")}
-      {renderField("Date of birth", "dob", "Enter your date of birth", "date")}
-      {renderNationalityField()} {/* Dùng dropdown cho Nationality */}
-      {renderField("Gender", "gender", "Select your gender")}
-      {renderField("Address", "address", "Add your address")}
-      {renderField("Passport details", "passportDetails", "Not provided")}
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-6">
+      <div className="w-full max-w-4xl bg-white shadow-lg rounded-lg p-6">
+        <div className="flex items-center mb-4 relative">
+          {/* Avatar Section */}
+          <Avatar
+            size={100}
+            src={userInfo.avatar} // Use avatar from userInfo
+            icon={<UserOutlined />}
+          />
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleAvatarUpload}
+            className="hidden"
+            id="avatar-upload"
+          />
+          <label
+            htmlFor="avatar-upload"
+            className="absolute top-8 left-24 bg-gray-100 p-1 rounded-full cursor-pointer"
+            title="Change Avatar"
+          >
+            <EditOutlined className="text-gray-700" /> {/* Pencil Icon */}
+          </label>
+          <div className="ml-6">
+            <h2 className="text-3xl font-bold">{userInfo.name}</h2>
+            <Text className="text-gray-500">{userInfo.email}</Text>
+          </div>
+        </div>
+
+        {/* Profile Settings Form */}
+        <h2 className="text-3xl font-bold mb-6">Profile Settings</h2>
+        <div className="grid grid-cols-2 gap-6">
+          {renderField("Name", "name", "Enter your name")}
+          {renderField("Surname", "surname", "Enter your surname")}
+          {renderField("Mobile Number", "phone", "Enter phone number")}
+          {renderField(
+            "Address Line 1",
+            "addressLine1",
+            "Enter address line 1"
+          )}
+          {renderField(
+            "Address Line 2",
+            "addressLine2",
+            "Enter address line 2"
+          )}
+          {renderField("Postcode", "postcode", "Enter postcode")}
+          {renderField("State", "state", "Enter state")}
+          {renderField("Area", "area", "Enter area")}
+          {renderField("Email ID", "email", "Enter email", "email")}
+          {renderField("Education", "education", "Enter education")}
+          {renderCountryField()} {/* Render dropdown for Country */}
+          {renderField("State/Region", "region", "Enter region")}
+        </div>
+
+        {/* Save Profile Button */}
+        <div className="mt-6 text-center">
+          <Button type="primary" size="large">
+            Save Profile
+          </Button>
+        </div>
+      </div>
     </div>
   );
 };
 
-export default Profile;
+export default ProfileView;

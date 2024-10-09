@@ -15,7 +15,7 @@ import moment from "moment";
 const { Option } = Select;
 const { TabPane } = Tabs;
 
-const BookingTour = () => {
+const Booking = () => {
   const navigate = useNavigate();
   const [form] = Form.useForm();
 
@@ -38,8 +38,8 @@ const BookingTour = () => {
   };
 
   return (
-    <div className="min-h-screen flex justify-center items-center bg-gray-100">
-      <div className="bg-white shadow-lg rounded-lg max-w-lg w-full">
+    <div className=" flex justify-center items-center pt-10">
+      <div className="bg-white shadow-lg rounded-lg max-w-lg w-full ">
         <h2 className="text-2xl font-bold text-center mb-6">
           Japan Trip Booking
         </h2>
@@ -209,4 +209,4 @@ const BookingTour = () => {
   );
 };
 
-export default BookingTour;
+export default Booking;

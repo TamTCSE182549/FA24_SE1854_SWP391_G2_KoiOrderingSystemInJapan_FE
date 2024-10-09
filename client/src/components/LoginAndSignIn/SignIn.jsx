@@ -23,7 +23,7 @@ const SignIn = () => {
 
   return (
     <div className="min-h-screen  flex items-center justify-center">
-      <div className="bg-gradient-to-r from-blue-600 to-cyan-500 p-8 rounded-lg shadow-lg w-full max-w-md">
+      <div className="bg-[#c5bd92] p-8 rounded-lg shadow-lg w-full max-w-md">
         <h2 className="text-white text-3xl font-bold text-center mb-6">
           Sign up
         </h2>
@@ -97,9 +97,9 @@ const SignIn = () => {
 
           <Form.Item className="mt-6">
             <Button
-              type="primary"
+              type="custom"
               htmlType="submit"
-              className="w-full bg-cyan-500 text-white"
+              className="w-full bg-[#b7aa61] text-white hover:bg-[#b7aa59] hover:scale-105 transition-all duration-300"
               onClick={handleSignInSuccess}
             >
               Sign In
