@@ -8,9 +8,6 @@ import { jwtDecode } from "jwt-decode";
 const { RangePicker } = DatePicker;
 
 const App = () => {
-  const [hotels, setHotels] = useState([]); // To hold hotel data
-  const [loading, setLoading] = useState(true); // Loading state
-
   const tourList = async (values) => {
     try {
       // Replace this with your actual API or fetch function

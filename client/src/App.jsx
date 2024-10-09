@@ -14,6 +14,7 @@ import Payment from "./components/Customer/Payment";
 import PaymentSuccess from "./components/Customer/PaymentSuccess";
 // import { AuthProvider } from "./components/LoginAndSignIn/AuthContext";
 import MainImg from "./assets/koi2.jpg"; // Import hình ảnh của bạn
+import Delivery from "./components/Customer/Delivery";
 
 const App = () => {
   return (
@@ -41,6 +42,7 @@ const App = () => {
             <Route path="/payment" element={<Payment />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/paymentsuccess" element={<PaymentSuccess />} />
+            <Route path="*" element={<Delivery />} />
           </Routes>
         </div>
       </div>
