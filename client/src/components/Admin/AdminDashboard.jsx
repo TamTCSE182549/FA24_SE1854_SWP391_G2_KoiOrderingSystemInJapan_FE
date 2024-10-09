@@ -16,16 +16,15 @@ import {
   DollarOutlined,
   SearchOutlined,
 } from "@ant-design/icons";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-} from "recharts"; // Import từ recharts
-
+// import {
+//   LineChart,
+//   Line,
+//   XAxis,
+//   YAxis,
+//   CartesianGrid,
+//   Tooltip,
+//   Legend,
+// } from "recharts"; // Import từ recharts
 const { Header, Content, Footer, Sider } = Layout;
 const { Title } = Typography;
 
@@ -168,7 +167,7 @@ const Dashboard = () => {
             <Row gutter={[16, 16]} className="mt-6">
               <Col span={12}>
                 <Card title="Sales Report" className="shadow-lg">
-                  <LineChart width={400} height={200} data={data}>
+                  {/* <LineChart width={400} height={200} data={data}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="name" />
                     <YAxis />
@@ -176,12 +175,12 @@ const Dashboard = () => {
                     <Legend />
                     <Line type="monotone" dataKey="orders" stroke="#8884d8" />
                     <Line type="monotone" dataKey="sales" stroke="#82ca9d" />
-                  </LineChart>
+                  </LineChart> */}
                 </Card>
               </Col>
               <Col span={12}>
                 <Card title="User Stats" className="shadow-lg">
-                  <LineChart width={400} height={200} data={data}>
+                  {/* <LineChart width={400} height={200} data={data}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="name" />
                     <YAxis />
@@ -189,7 +188,7 @@ const Dashboard = () => {
                     <Legend />
                     <Line type="monotone" dataKey="orders" stroke="#ff7300" />
                     <Line type="monotone" dataKey="sales" stroke="#387908" />
-                  </LineChart>
+                  </LineChart> */}
                 </Card>
               </Col>
             </Row>

@@ -1,6 +1,6 @@
 import React, { useContext, useState } from "react";
 import { Input, Button, Avatar, Typography, Select } from "antd";
-import { AuthContext } from "../../components/LoginAndSignIn/AuthContext"; // Import AuthContext to access the logged-in user
+// import { AuthContext } from "../../components/LoginAndSignIn/AuthContext"; // Import AuthContext to access the logged-in user
 import { UserOutlined, EditOutlined, CheckOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 
@@ -8,7 +8,7 @@ const { Text } = Typography;
 const { Option } = Select;
 
 const ProfileView = () => {
-  const { userProfile, isLoggedIn } = useContext(AuthContext); // Get user profile and login state from context
+  // const { userProfile, isLoggedIn } = useContext(AuthContext); // Get user profile and login state from context
   const navigate = useNavigate();
 
   // State for managing profile information editing

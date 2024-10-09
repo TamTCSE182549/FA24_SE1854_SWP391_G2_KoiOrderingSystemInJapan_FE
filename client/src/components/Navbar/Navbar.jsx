@@ -8,7 +8,7 @@ import {
   ShoppingCartOutlined,
   DownOutlined,
 } from "@ant-design/icons";
-import { AuthContext } from "../../components/LoginAndSignIn/AuthContext";
+// import { AuthContext } from "../../components/LoginAndSignIn/AuthContext";
 import Logo from "../../assets/bg_f8f8f8-flat_750x_075_f-pad_750x1000_f8f8f8-removebg-preview.png";
 
 const { Search } = Input;
@@ -24,7 +24,7 @@ const MenuItems = [
 
 const Navbar = () => {
   const navigate = useNavigate();
-  const { isLoggedIn, userProfile, logout } = useContext(AuthContext); // Get login state and user profile from context
+  // const { isLoggedIn, userProfile, logout } = useContext(AuthContext); // Get login state and user profile from context
 
   const onSearch = (value) => {
     console.log(value);
@@ -110,7 +110,7 @@ const Navbar = () => {
             onSearch={onSearch}
             className="hidden md:block w-40 xl:w-60 bg-[#c5bd92]"
           />
-          {isLoggedIn ? (
+          {/* {isLoggedIn ? (
             <Dropdown overlay={userMenu} trigger={["click"]}>
               <div className="flex items-center cursor-pointer text-white">
                 <Avatar
@@ -126,7 +126,7 @@ const Navbar = () => {
               className="text-white text-2xl cursor-pointer"
               onClick={onMenuClick}
             />
-          )}
+          )} */}
           <ShoppingCartOutlined className="text-white text-2xl cursor-pointer" />
         </div>
       </div>

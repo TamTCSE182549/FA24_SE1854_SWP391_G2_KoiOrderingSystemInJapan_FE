@@ -1,12 +1,10 @@
 import React, { useState, useContext } from "react";
 import { Form, Input, Button, Checkbox } from "antd";
-import { FcGoogle } from "react-icons/fc";
-import { FaFacebook } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import axios from "axios";
 import { toast } from "react-toastify";
-const LoginForm = () => {
+const Login = () => {
   const navigate = useNavigate();
 
   const clientId =
@@ -164,7 +162,7 @@ const LoginForm = () => {
         </div>
 
         {/* Profile Display */}
-        {profile ? (
+        {/* {profile ? (
           <div className="mt-4 text-white text-center">
             <h3 className="text-xl font-bold">Welcome, {profile.name}!</h3>
             {profile.picture && (
@@ -180,7 +178,7 @@ const LoginForm = () => {
           </div>
         ) : (
           ""
-        )}
+        )} */}
 
         <div className="text-center">
           <span className="text-white">Don't have an account?</span>
