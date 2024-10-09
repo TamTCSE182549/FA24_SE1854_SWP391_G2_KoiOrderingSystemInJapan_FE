@@ -1,212 +1,145 @@
-import React, { useState } from "react";
-import {
-  DatePicker,
-  InputNumber,
-  Form,
-  Input,
-  Button,
-  Checkbox,
-  Select,
-  Tabs,
-} from "antd";
-import { useNavigate } from "react-router-dom";
-import moment from "moment";
+import React, { useState, useEffect } from "react";
+import { DatePicker, Input, Button, Rate, Pagination } from "antd";
+import { SearchOutlined, EnvironmentOutlined } from "@ant-design/icons";
 
-const { Option } = Select;
-const { TabPane } = Tabs;
+const { RangePicker } = DatePicker;
 
-const Booking = () => {
-  const navigate = useNavigate();
-  const [form] = Form.useForm();
+const App = () => {
+  const [hotels, setHotels] = useState([]); // To hold hotel data
+  const [loading, setLoading] = useState(true); // Loading state
 
-  // State lưu tour có sẵn hoặc tùy chọn
-  const [tourType, setTourType] = useState("available");
-
-  // Hàm xử lý khi đặt chỗ thành công
-  const onFinish = (values) => {
-    console.log("Success:", values);
-    navigate("/booking-confirmation"); // Điều hướng đến trang xác nhận sau khi đặt thành công
+  // Function to fetch hotel data dynamically
+  const fetchHotels = async () => {
+    setLoading(true);
+    try {
+      // Replace this with your actual API or fetch function
+      const response = await fetch("https://localhost:8080/tour/list");
+      const data = await response.json();
+      setHotels(data.hotels);
+      setLoading(false);
+    } catch (error) {
+      console.error("Failed to fetch hotels", error);
+      setLoading(false);
+    }
   };
 
-  const onFinishFailed = (errorInfo) => {
-    console.log("Failed:", errorInfo);
-  };
-
-  // Thay đổi loại tour
-  const handleTourTypeChange = (key) => {
-    setTourType(key);
-  };
+  useEffect(() => {
+    // Fetch the hotels when the component is mounted
+    fetchHotels();
+  }, []);
 
   return (
-    <div className=" flex justify-center items-center pt-10">
-      <div className="bg-white shadow-lg rounded-lg max-w-lg w-full ">
-        <h2 className="text-2xl font-bold text-center mb-6">
-          Japan Trip Booking
-        </h2>
+    <div className="min-h-screen bg-gray-100">
+      {/* Top Search Bar */}
+      <div className="bg-white shadow p-4 flex items-center justify-between">
+        <div className="flex items-center space-x-4">
+          <Input
+            className="w-64"
+            size="large"
+            placeholder="Ho Chi Minh City"
+            prefix={<EnvironmentOutlined />}
+          />
+          <RangePicker size="large" />
+          <Input size="large" defaultValue="2 adults · 0 children · 1 room" />
+        </div>
+        <Button type="primary" size="large" icon={<SearchOutlined />}>
+          Search
+        </Button>
+      </div>
 
-        <Tabs defaultActiveKey="available" onChange={handleTourTypeChange}>
-          {/* Tab "Tour có sẵn" */}
-          <TabPane tab="Available Tours" key="available">
-            <Form
-              form={form}
-              layout="vertical"
-              onFinish={onFinish}
-              onFinishFailed={onFinishFailed}
-            >
-              {/* Chọn tour có sẵn */}
-              <Form.Item
-                label="Choose Tour"
-                name="availableTour"
-                rules={[
-                  {
-                    required: tourType === "available",
-                    message: "Please select a tour!",
-                  },
-                ]}
-              >
-                <Select placeholder="Select a tour" className="w-full">
-                  <Option value="Tokyo Tour">Tokyo Tour</Option>
-                  <Option value="Kyoto Cultural Tour">
-                    Kyoto Cultural Tour
-                  </Option>
-                  <Option value="Mount Fuji Tour">Mount Fuji Tour</Option>
-                </Select>
-              </Form.Item>
+      <div className="container mx-auto py-6">
+        {/* Filters Sidebar */}
+        <div className="grid grid-cols-12 gap-6">
+          <div className="col-span-3 bg-white p-4 rounded-lg shadow">
+            <h3 className="font-bold text-lg mb-4">Filter by:</h3>
+            <div className="mb-6">
+              <h4 className="font-semibold mb-2">Popular filters</h4>
+              <ul>
+                <li>
+                  <input type="checkbox" className="mr-2" /> District 1
+                </li>
+                <li>
+                  <input type="checkbox" className="mr-2" /> 5 Stars
+                </li>
+                <li>
+                  <input type="checkbox" className="mr-2" /> Swimming Pool
+                </li>
+              </ul>
+            </div>
+            <div className="mb-6">
+              <h4 className="font-semibold mb-2">Property Type</h4>
+              <ul>
+                <li>
+                  <input type="checkbox" className="mr-2" /> Hotels
+                </li>
+                <li>
+                  <input type="checkbox" className="mr-2" /> Apartments
+                </li>
+              </ul>
+            </div>
+            {/* Add more filters as needed */}
+          </div>
 
-              {/* Ngày đi */}
-              <Form.Item
-                label="Select Date"
-                name="tripDate"
-                rules={[
-                  { required: true, message: "Please select your trip date!" },
-                ]}
-              >
-                <DatePicker
-                  disabledDate={(current) =>
-                    current && current < moment().endOf("day")
-                  }
-                  className="w-full"
-                />
-              </Form.Item>
+          {/* Hotels List */}
+          <div className="col-span-9">
+            <div className="mb-6 flex justify-between items-center">
+              <h3 className="text-2xl font-bold">
+                Ho Chi Minh City: {hotels.length} properties found
+              </h3>
+              <div className="flex items-center space-x-2">
+                <Button>List</Button>
+                <Button>Grid</Button>
+              </div>
+            </div>
 
-              {/* Số người tham gia */}
-              <Form.Item
-                label="Number of Participants"
-                name="participants"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please select the number of participants!",
-                  },
-                ]}
-              >
-                <InputNumber min={1} max={10} className="w-full" />
-              </Form.Item>
-
-              <Form.Item>
-                <Button
-                  type="primary"
-                  htmlType="submit"
-                  className="w-full bg-blue-600 text-white hover:bg-blue-500"
-                >
-                  Book Now
-                </Button>
-              </Form.Item>
-            </Form>
-          </TabPane>
-
-          {/* Tab "Tự đặt địa điểm" */}
-          <TabPane tab="Custom Tour" key="custom">
-            <Form
-              form={form}
-              layout="vertical"
-              onFinish={onFinish}
-              onFinishFailed={onFinishFailed}
-            >
-              {/* Chọn địa điểm */}
-              <Form.Item
-                label="Select Destinations"
-                name="customDestinations"
-                rules={[
-                  {
-                    required: tourType === "custom",
-                    message: "Please select at least one destination!",
-                  },
-                ]}
-              >
-                <Select
-                  mode="multiple"
-                  placeholder="Choose destinations"
-                  className="w-full"
-                >
-                  <Option value="Tokyo Tower">Tokyo Tower</Option>
-                  <Option value="Kyoto Temple">Kyoto Temple</Option>
-                  <Option value="Nara Deer Park">Nara Deer Park</Option>
-                  <Option value="Hiroshima Peace Park">
-                    Hiroshima Peace Park
-                  </Option>
-                </Select>
-              </Form.Item>
-
-              {/* Ngày đi */}
-              <Form.Item
-                label="Select Date"
-                name="tripDate"
-                rules={[
-                  { required: true, message: "Please select your trip date!" },
-                ]}
-              >
-                <DatePicker
-                  disabledDate={(current) =>
-                    current && current < moment().endOf("day")
-                  }
-                  className="w-full"
-                />
-              </Form.Item>
-
-              {/* Số người tham gia */}
-              <Form.Item
-                label="Number of Participants"
-                name="participants"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please select the number of participants!",
-                  },
-                ]}
-              >
-                <InputNumber min={1} max={10} className="w-full" />
-              </Form.Item>
-
-              {/* Các dịch vụ tùy chọn */}
-              <Form.Item name="extraOptions" valuePropName="checked">
-                <Checkbox.Group>
-                  <div className="flex flex-col gap-2">
-                    <Checkbox value="hotel">Hotel Booking Included</Checkbox>
-                    <Checkbox value="transport">
-                      Transport from Airport
-                    </Checkbox>
-                    <Checkbox value="guide">Personal Tour Guide</Checkbox>
-                    <Checkbox value="meals">Meals Included</Checkbox>
+            <div className="grid grid-cols-1 gap-6">
+              {loading ? (
+                <div className="text-center">Loading...</div>
+              ) : (
+                hotels.map((hotel, index) => (
+                  <div
+                    key={index}
+                    className="bg-white shadow rounded-lg overflow-hidden flex"
+                  >
+                    <img
+                      src={hotel.img}
+                      alt={hotel.name}
+                      className="w-1/3 h-auto"
+                    />
+                    <div className="p-4 flex-1">
+                      <h4 className="text-xl font-bold">{hotel.name}</h4>
+                      <p className="text-gray-500">
+                        {hotel.location} · {hotel.distance} km from centre
+                      </p>
+                      <Rate
+                        disabled
+                        defaultValue={hotel.rating}
+                        className="my-2"
+                      />
+                      <p>
+                        {hotel.reviews} reviews ·{" "}
+                        <span className="font-bold">
+                          Location {hotel.locationRating}
+                        </span>
+                      </p>
+                      <Button type="primary" className="mt-4">
+                        Show prices
+                      </Button>
+                    </div>
                   </div>
-                </Checkbox.Group>
-              </Form.Item>
+                ))
+              )}
+            </div>
 
-              <Form.Item>
-                <Button
-                  type="primary"
-                  htmlType="submit"
-                  className="w-full bg-blue-600 text-white hover:bg-blue-500"
-                >
-                  Book Custom Tour
-                </Button>
-              </Form.Item>
-            </Form>
-          </TabPane>
-        </Tabs>
+            {/* Pagination */}
+            <div className="mt-6 flex justify-center">
+              <Pagination defaultCurrent={1} total={hotels.length} />
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
 };
 
-export default Booking;
+export default App;
