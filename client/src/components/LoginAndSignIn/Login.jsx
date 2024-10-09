@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { jwtDecode } from "jwt-decode";
 const Login = () => {
   const navigate = useNavigate();
 
@@ -18,7 +19,12 @@ const Login = () => {
       });
 
       if (response.status === 200) {
-        localStorage.setItem("token", response.data.token); // Store the token (if you implement JWT)
+        console.log(response.data);
+        const { token } = response.data;
+        localStorage.setItem("token", token); // Store the token (if you implement JWT)
+        localStorage.setItem("email", values.email);
+        console.log(values.email);
+        console.log(token);
         toast.success("Login successful!"); // Notify user of success
         navigate("/"); // Redirect to homepage or another protected route
       } else {

@@ -1,5 +1,4 @@
-// Navbar.js
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import { Input, Dropdown, Menu, Avatar } from "antd";
 import { IoMdSearch } from "react-icons/io";
 import { Link, useNavigate } from "react-router-dom";
@@ -23,8 +22,22 @@ const MenuItems = [
 ];
 
 const Navbar = () => {
+  const [login, setLogin] = React.useState(false);
+  const [email, setEmail] = React.useState(null);
+
+  const emailSession = () => {
+    const email = localStorage.getItem("email");
+    if (email) {
+      try {
+        setEmail(email);
+        setLogin(true);
+      } catch (error) {
+        console.log("Invalid email", error);
+      }
+    }
+  };
+
   const navigate = useNavigate();
-  // const { isLoggedIn, userProfile, logout } = useContext(AuthContext); // Get login state and user profile from context
 
   const onSearch = (value) => {
     console.log(value);
@@ -38,15 +51,20 @@ const Navbar = () => {
     navigate("/");
   };
 
+  useEffect(() => {
+    emailSession();
+  });
+  // Define the handleSignOut function
   const handleSignOut = () => {
-    logout(); // Call the logout function
+    localStorage.removeItem("email"); // Clear email from localStorage
+    setLogin(false); // Set login to false
     navigate("/Login"); // Optionally, navigate to the login page after logging out
   };
 
   const userMenu = (
     <Menu>
       <Menu.Item key="1">
-        <Link to="/profile">Manage account</Link>
+        <Link to="/profile">View Profile</Link>
       </Menu.Item>
       <Menu.Item key="2">
         <Link to="/bookings">Bookings & Trips</Link>
@@ -68,11 +86,12 @@ const Navbar = () => {
       </Menu.Item>
     </Menu>
   );
+
   return (
     <div className="bg-[#c5bd92] w-full">
       {/* upper Navbar */}
       <div className="flex justify-between items-center w-full px-6 lg:px-12 py-3">
-        {/* Logo và tên trang */}
+        {/* Logo and site name */}
         <div className="flex items-center">
           <img
             src={Logo}
@@ -83,7 +102,7 @@ const Navbar = () => {
           <div className="text-white font-bold text-2xl ml-2">KOIBOOKING</div>
         </div>
 
-        {/* Thanh điều hướng */}
+        {/* Navigation menu */}
         <div className="hidden md:flex flex-grow justify-center rounded-3xl">
           <ul className="flex justify-between w-full max-w-4xl rounded-3xl">
             {MenuItems.map((data) => (
@@ -103,21 +122,18 @@ const Navbar = () => {
           </ul>
         </div>
 
-        {/* Search bar và Icons */}
+        {/* Search bar and Icons */}
         <div className="flex items-center space-x-6">
           <Search
             placeholder="Search Koi"
             onSearch={onSearch}
-            className="hidden md:block w-40 xl:w-60 bg-[#c5bd92]"
+            className="hidden md:block w-auto xl:w-60 bg-[#c5bd92]"
           />
-          {/* {isLoggedIn ? (
+          {login ? (
             <Dropdown overlay={userMenu} trigger={["click"]}>
               <div className="flex items-center cursor-pointer text-white">
-                <Avatar
-                  src={userProfile?.picture?.data?.url}
-                  icon={<UserOutlined />}
-                />
-                <span className="ml-2">{userProfile?.name}</span>
+                <Avatar icon={<UserOutlined />} />
+                <span className="ml-2">{email}</span>
                 <DownOutlined className="ml-2" />
               </div>
             </Dropdown>
@@ -126,7 +142,7 @@ const Navbar = () => {
               className="text-white text-2xl cursor-pointer"
               onClick={onMenuClick}
             />
-          )} */}
+          )}
           <ShoppingCartOutlined className="text-white text-2xl cursor-pointer" />
         </div>
       </div>
