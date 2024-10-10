@@ -9,7 +9,8 @@ import {
 } from "@ant-design/icons";
 // import { AuthContext } from "../../components/LoginAndSignIn/AuthContext";
 import Logo from "../../assets/bg_f8f8f8-flat_750x_075_f-pad_750x1000_f8f8f8-removebg-preview.png";
-
+import { useCookies } from "react-cookie";
+import { jwtDecode } from "jwt-decode";
 const { Search } = Input;
 
 const MenuItems = [
@@ -24,10 +25,12 @@ const MenuItems = [
 const Navbar = () => {
   const [login, setLogin] = React.useState(false);
   const [email, setEmail] = React.useState(null);
-
+  const [cookies] = useCookies(["token"]);
+  const token = cookies.token;
+  const decodedToken = jwtDecode(token);
   const emailSession = () => {
-    const email = localStorage.getItem("email");
-    if (email) {
+    const email = localStorage.getItem(decodedToken.email);
+    if (decodedToken.email) {
       try {
         setEmail(email);
         setLogin(true);
@@ -44,21 +47,18 @@ const Navbar = () => {
   };
 
   const onMenuClick = () => {
-    navigate("/Login");
+    navigate("/login");
   };
 
   const onHomeClick = () => {
     navigate("/");
   };
 
-  useEffect(() => {
-    emailSession();
-  });
   // Define the handleSignOut function
   const handleSignOut = () => {
-    localStorage.removeItem("email"); // Clear email from localStorage
+    localStorage.removeItem(decodedToken.email); // Clear email from localStorage
     setLogin(false); // Set login to false
-    navigate("/Login"); // Optionally, navigate to the login page after logging out
+    navigate("/login"); // Optionally, navigate to the login page after logging out
   };
 
   const userMenu = (
@@ -133,7 +133,7 @@ const Navbar = () => {
             <Dropdown menu={userMenu} trigger={["click"]}>
               <div className="flex items-center cursor-pointer text-white">
                 <Avatar icon={<UserOutlined />} />
-                <span className="ml-2">{email}</span>
+                <span className="ml-2">{decodedToken.email}</span>
                 <DownOutlined className="ml-2" />
               </div>
             </Dropdown>
@@ -143,6 +143,7 @@ const Navbar = () => {
               onClick={onMenuClick}
             />
           )}
+
           <ShoppingCartOutlined className="text-white text-2xl cursor-pointer" />
         </div>
       </div>

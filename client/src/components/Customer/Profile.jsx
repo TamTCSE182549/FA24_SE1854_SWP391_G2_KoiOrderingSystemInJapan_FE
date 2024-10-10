@@ -49,8 +49,6 @@ const Profile = () => {
   const handleCountryChange = (value) => {
     setUserInfo({ ...userInfo, country: value });
   };
-
-  // Handle avatar upload
   // const handleAvatarUpload = (e) => {
   //   const file = e.target.files[0];
   //   const reader = new FileReader();
@@ -65,7 +63,7 @@ const Profile = () => {
 
   // If the user is not logged in, redirect to login
   if (token == null) {
-    navigate("/Login");
+    navigate("/login");
     return null;
   }
 

@@ -35,14 +35,14 @@ const App = () => {
             <Route path="/" element={<Hero />} />
             <Route path="/koiforsale" element={<KoiForSale />} />
             <Route path="/farm" element={<Farm />} />
-            <Route path="/Login" element={<Login />} />
+            <Route path="/login" element={<Login />} />
             <Route path="/SignIn" element={<SignIn />} />
 
             <Route element={<PrivateRoute allowedRoles={["CUSTOMER"]} />}>
               <Route path="/profile" element={<Profile />} />
             </Route>
 
-            <Route path="/Bookings" element={<Booking />} />
+            <Route path="/bookings" element={<Booking />} />
             <Route path="/payment" element={<Payment />} />
 
             <Route element={<PrivateRoute allowedRoles={["MANAGER"]} />}>
@@ -50,7 +50,6 @@ const App = () => {
             </Route>
 
             <Route path="/paymentsuccess" element={<PaymentSuccess />} />
-            <Route path="*" element={<Delivery />} />
           </Routes>
         </div>
       </div>
