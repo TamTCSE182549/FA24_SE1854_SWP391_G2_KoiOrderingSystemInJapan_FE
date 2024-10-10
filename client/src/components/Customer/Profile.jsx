@@ -1,44 +1,97 @@
-import React, { useState, useEffect } from "react";
-import { Input, Button, Avatar, Typography } from "antd";
-import { UserOutlined, CheckOutlined } from "@ant-design/icons";
+import React, { useContext, useState } from "react";
+import { Input, Button, Avatar, Typography, Select } from "antd";
+import { jwtDecode } from "jwt-decode";
+// import { AuthContext } from "../../components/LoginAndSignIn/AuthContext"; // Import AuthContext to access the logged-in user
+import { UserOutlined, EditOutlined, CheckOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 
 const { Text } = Typography;
-
+const { Option } = Select;
+import { useCookies } from "react-cookie";
 const Profile = () => {
   const [email, setEmail] = useState(null);
   const [name, setName] = useState("John Doe"); // Default value for the name
   const navigate = useNavigate();
+  const [cookies] = useCookies(["token"]);
+  const token = cookies.token;
+  const decodedToken = jwtDecode(token);
+  // State for managing profile information editing
+  const [userInfo, setUserInfo] = useState({
+    name: decodedToken.lastname,
+    surname: decodedToken.firstname,
+    email: decodedToken.email,
+    phone: "",
+    addressLine1: "",
+    addressLine2: "",
+    postcode: "",
+    state: "",
+    area: "",
+    education: "",
+    country: "Vietnam",
+    region: "",
+  });
 
-  // Load the email from localStorage when the component mounts
-  useEffect(() => {
-    const storedEmail = localStorage.getItem("email");
-    if (storedEmail) {
-      setEmail(storedEmail);
-    } else {
-      navigate("/Login"); // Redirect to login if no email is found
-    }
-  }, [navigate]);
+  const [editingField, setEditingField] = useState(null);
 
-  // Save updated profile information
-  const handleSave = () => {
-    // Example: Save the updated name to the backend or localStorage
-    console.log("Updated profile:", { email, name });
-    // Here, you'd typically send the updated data to the server
+  // Handle saving edited fields
+  const handleSave = (field, value) => {
+    setUserInfo({ ...userInfo, [field]: value });
+    setEditingField(null);
   };
 
+  // Handle input change
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setUserInfo({ ...userInfo, [name]: value });
+  };
+
+  // Handle dropdown country change
+  const handleCountryChange = (value) => {
+    setUserInfo({ ...userInfo, country: value });
+  };
+
+  // Handle avatar upload
+  // const handleAvatarUpload = (e) => {
+  //   const file = e.target.files[0];
+  //   const reader = new FileReader();
+  //   reader.onloadend = () => {
+  //     setUserInfo({ ...userInfo, avatar: reader.result }); // Update avatar in base64 format
+  //   };
+  //   if (file) {
+  //     reader.readAsDataURL(file); // Convert the uploaded file to base64
+
+  //   }
+  // }, [navigate]);
+
+  // If the user is not logged in, redirect to login
+  if (token == null) {
+    navigate("/Login");
+    return null;
+  }
+
   return (
-    <div
-      className="profile-container"
-      style={{ padding: "20px", maxWidth: "600px", margin: "0 auto" }}
-    >
-      <div
-        className="profile-avatar"
-        style={{ textAlign: "center", marginBottom: "20px" }}
-      >
-        <Avatar size={100} icon={<UserOutlined />} />
-        <div style={{ marginTop: "10px" }}>
-          <Text strong>{email}</Text> {/* Display logged-in email */}
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-6">
+      <div className="w-full max-w-4xl bg-white shadow-lg rounded-lg p-6">
+        <div className="flex items-center mb-4 relative">
+          {/* Avatar Section */}
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleAvatarUpload}
+            className="hidden"
+            id="avatar-upload"
+          />
+          <label
+            htmlFor="avatar-upload"
+            className="absolute top-8 left-24 bg-gray-100 p-1 rounded-full cursor-pointer"
+            title="Change Avatar"
+          >
+            <EditOutlined className="text-gray-700" /> {/* Pencil Icon */}
+          </label>
+          <div className="ml-6">
+            <h2 className="text-3xl font-bold">{userInfo.name}</h2>
+            <Text className="text-gray-500">{userInfo.email}</Text>
+          </div>
         </div>
       </div>
 

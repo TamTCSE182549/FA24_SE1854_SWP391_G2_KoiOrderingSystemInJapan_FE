@@ -14,7 +14,7 @@ import Payment from "./components/Customer/Payment";
 import PaymentSuccess from "./components/Customer/PaymentSuccess";
 // import { AuthProvider } from "./components/LoginAndSignIn/AuthContext";
 import MainImg from "./assets/koi2.jpg"; // Import hình ảnh của bạn
-import Delivery from "./components/Customer/Delivery";
+import PrivateRoute from "./components/PrivateRouter/PrivateRouter";
 
 const App = () => {
   return (
@@ -37,10 +37,18 @@ const App = () => {
             <Route path="/farm" element={<Farm />} />
             <Route path="/Login" element={<Login />} />
             <Route path="/SignIn" element={<SignIn />} />
-            <Route path="/profile" element={<Profile />} />
+
+            <Route element={<PrivateRoute allowedRoles={["CUSTOMER"]} />}>
+              <Route path="/profile" element={<Profile />} />
+            </Route>
+
             <Route path="/Bookings" element={<Booking />} />
             <Route path="/payment" element={<Payment />} />
-            <Route path="/admin" element={<AdminDashboard />} />
+
+            <Route element={<PrivateRoute allowedRoles={["MANAGER"]} />}>
+              <Route path="/admin" element={<AdminDashboard />} />
+            </Route>
+
             <Route path="/paymentsuccess" element={<PaymentSuccess />} />
             <Route path="*" element={<Delivery />} />
           </Routes>
