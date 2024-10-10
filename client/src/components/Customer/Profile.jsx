@@ -17,8 +17,8 @@ const Profile = () => {
   const decodedToken = jwtDecode(token);
   // State for managing profile information editing
   const [userInfo, setUserInfo] = useState({
-    name: decodedToken.lastname,
-    surname: decodedToken.firstname,
+    name: decodedToken.last_name,
+    surname: decodedToken.first_name,
     email: decodedToken.email,
     phone: "",
     addressLine1: "",
@@ -70,47 +70,111 @@ const Profile = () => {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-6">
-      <div className="w-full max-w-4xl bg-white shadow-lg rounded-lg p-6">
-        <div className="flex items-center mb-4 relative">
-          {/* Avatar Section */}
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleAvatarUpload}
-            className="hidden"
-            id="avatar-upload"
-          />
-          <label
-            htmlFor="avatar-upload"
-            className="absolute top-8 left-24 bg-gray-100 p-1 rounded-full cursor-pointer"
-            title="Change Avatar"
-          >
-            <EditOutlined className="text-gray-700" /> {/* Pencil Icon */}
-          </label>
-          <div className="ml-6">
-            <h2 className="text-3xl font-bold">{userInfo.name}</h2>
-            <Text className="text-gray-500">{userInfo.email}</Text>
+    <div className="p-6 min-h-screen flex justify-center">
+      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-4xl">
+        <div className="flex items-center space-x-4 mb-6">
+          {/* Avatar */}
+          <Avatar size={64} icon={<UserOutlined />} />
+          {/* User Name next to Avatar */}
+          <div>
+            <h2 className="text-2xl font-bold text-black">
+              {userInfo.name} {userInfo.surname}
+            </h2>
+            <p className="text-gray-500">{userInfo.email}</p>
           </div>
         </div>
-      </div>
 
-      <div className="profile-info">
-        <Text strong>Name:</Text>
-        <Input
-          value={name}
-          onChange={(e) => setName(e.target.value)} // Update name state on change
-          style={{ marginTop: "10px" }}
-        />
-      </div>
+        <h2 className="text-xl font-bold mb-4">Personal details</h2>
+        <p className="text-gray-600 mb-6">
+          Update your information and find out how it's used.
+        </p>
 
-      <div
-        className="profile-actions"
-        style={{ marginTop: "20px", textAlign: "center" }}
-      >
-        <Button type="primary" icon={<CheckOutlined />} onClick={handleSave}>
-          Save Changes
-        </Button>
+        <div className="grid grid-cols-1 gap-6">
+          {/* Name */}
+          <div className="flex justify-between items-center border-b pb-2">
+            <div>
+              <h4 className="text-sm text-gray-500">Name</h4>
+              <div>
+                <p className="text-black">{userInfo.name}</p>
+              </div>
+            </div>
+            <Button type="link">Edit</Button>
+          </div>
+
+          {/* Display Name */}
+          <div className="flex justify-between items-center border-b pb-2">
+            <div>
+              <h4 className="text-sm text-gray-500">Display name</h4>
+              <p>{userInfo.displayName}</p>
+            </div>
+            <Button type="link">Edit</Button>
+          </div>
+
+          {/* Email */}
+          <div className="flex justify-between items-center border-b pb-2">
+            <div>
+              <h4 className="text-sm text-gray-500">Email address</h4>
+              <p>
+                {userInfo.email}{" "}
+                <span className="text-green-600">Verified</span>
+              </p>
+              <p className="text-xs text-gray-400">
+                This is the email address you use to sign in. It’s also where we
+                send your booking confirmations.
+              </p>
+            </div>
+            <Button type="link">Edit</Button>
+          </div>
+
+          {/* Phone */}
+          <div className="flex justify-between items-center border-b pb-2">
+            <div>
+              <h4 className="text-sm text-gray-500">Phone number</h4>
+              <p>{userInfo.phone}</p>
+              <p className="text-xs text-gray-400">
+                Properties or attractions you book will use this number if they
+                need to contact you.
+              </p>
+            </div>
+            <Button type="link">Edit</Button>
+          </div>
+
+          {/* Date of Birth */}
+          <div className="flex justify-between items-center border-b pb-2">
+            <div>
+              <h4 className="text-sm text-gray-500">Date of birth</h4>
+              <p>{userInfo.dob}</p>
+            </div>
+            <Button type="link">Edit</Button>
+          </div>
+
+          {/* Nationality */}
+          <div className="flex justify-between items-center border-b pb-2">
+            <div>
+              <h4 className="text-sm text-gray-500">Nationality</h4>
+              <p>{userInfo.nationality}</p>
+            </div>
+            <Button type="link">Edit</Button>
+          </div>
+
+          {/* Gender */}
+          <div className="flex justify-between items-center border-b pb-2">
+            <div>
+              <h4 className="text-sm text-gray-500">Gender</h4>
+              <p>{userInfo.gender}</p>
+            </div>
+            <Button type="link">Edit</Button>
+          </div>
+
+          {/* Address */}
+          <div className="flex justify-between items-center border-b pb-2">
+            <div>
+              <h4 className="text-sm text-gray-500">Address</h4>
+              <p>{userInfo.address}</p>
+            </div>
+            <Button type="link">Edit</Button>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Input, Dropdown, Menu, Avatar } from "antd";
 import { IoMdSearch } from "react-icons/io";
 import { Link, useNavigate } from "react-router-dom";
@@ -10,7 +10,9 @@ import {
 // import { AuthContext } from "../../components/LoginAndSignIn/AuthContext";
 import Logo from "../../assets/bg_f8f8f8-flat_750x_075_f-pad_750x1000_f8f8f8-removebg-preview.png";
 import { useCookies } from "react-cookie";
-import { jwtDecode } from "jwt-decode";
+import { jwtDecode } from "jwt-decode"; // Import chính xác mà không cần dấu ngoặc nhọn
+import { set } from "react-hook-form";
+
 const { Search } = Input;
 
 const MenuItems = [
@@ -23,27 +25,29 @@ const MenuItems = [
 ];
 
 const Navbar = () => {
-  const [login, setLogin] = React.useState(false);
-  const [email, setEmail] = React.useState(null);
-  const [cookies] = useCookies(["token"]);
-  const token = cookies.token;
-  const decodedToken = jwtDecode(token);
-
-  const emailSession = () => {
-    if (decodedToken.email) {
-      try {
-        setEmail(decodedToken.email);
-        setLogin(true);
-      } catch (error) {
-        console.log("Invalid email", error);
-      }
-    }
-  };
+  const [login, setLogin] = useState(false);
+  const [email, setEmail] = useState(null);
+  const [firstName, setFirstName] = useState(null);
+  const [lastName, setLastName] = useState(null);
+  const [cookies, setCookie, removeCookie] = useCookies(["token"]);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    emailSession();
-  }, []);
-  const navigate = useNavigate();
+    const token = cookies.token;
+    if (token) {
+      try {
+        const decodedToken = jwtDecode(token);
+        setEmail(decodedToken.email);
+        setFirstName(decodedToken.first_name);
+        setLastName(decodedToken.last_name);
+        console.log("Valid token", decodedToken.first_name);
+        setLogin(true);
+      } catch (error) {
+        console.log("Invalid token", error);
+        setLogin(false);
+      }
+    }
+  }, [cookies]);
 
   const onSearch = (value) => {
     console.log(value);
@@ -57,11 +61,11 @@ const Navbar = () => {
     navigate("/");
   };
 
-  // Define the handleSignOut function
+  // Handle sign out
   const handleSignOut = () => {
-    localStorage.removeItem(decodedToken.email); // Clear email from localStorage
-    setLogin(false); // Set login to false
-    navigate("/login"); // Optionally, navigate to the login page after logging out
+    removeCookie("token"); // Xóa token từ cookies
+    setLogin(false); // Đặt lại trạng thái đăng nhập
+    navigate("/login"); // Chuyển hướng đến trang đăng nhập
   };
 
   const userMenu = (
@@ -133,10 +137,10 @@ const Navbar = () => {
             className="hidden md:block w-auto xl:w-60 bg-[#c5bd92]"
           />
           {login ? (
-            <Dropdown menu={userMenu} trigger={["click"]}>
+            <Dropdown overlay={userMenu} trigger={["click"]}>
               <div className="flex items-center cursor-pointer text-white">
                 <Avatar icon={<UserOutlined />} />
-                <span className="ml-2">{decodedToken.email}</span>
+                <span className="ml-2">{`${firstName} ${lastName}`}</span>
                 <DownOutlined className="ml-2" />
               </div>
             </Dropdown>
