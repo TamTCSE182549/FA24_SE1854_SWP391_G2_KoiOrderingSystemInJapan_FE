@@ -29,10 +29,9 @@ const Navbar = () => {
   const token = cookies.token;
   const decodedToken = jwtDecode(token);
   const emailSession = () => {
-    const email = localStorage.getItem(decodedToken.email);
     if (decodedToken.email) {
       try {
-        setEmail(email);
+        setEmail(decodedToken.email);
         setLogin(true);
       } catch (error) {
         console.log("Invalid email", error);
@@ -40,6 +39,9 @@ const Navbar = () => {
     }
   };
 
+  useEffect(() => {
+    emailSession();
+  }, []);
   const navigate = useNavigate();
 
   const onSearch = (value) => {
