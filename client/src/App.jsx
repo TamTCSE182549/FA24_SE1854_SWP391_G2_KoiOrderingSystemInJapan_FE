@@ -15,7 +15,7 @@ import PaymentSuccess from "./components/Customer/PaymentSuccess";
 // import { AuthProvider } from "./components/LoginAndSignIn/AuthContext";
 import MainImg from "./assets/koi2.jpg"; // Import hình ảnh của bạn
 import PrivateRoute from "./components/PrivateRouter/PrivateRouter";
-
+import Tour from "./components/Hero/Tour";
 const App = () => {
   return (
     // <AuthProvider>
@@ -44,7 +44,7 @@ const App = () => {
 
             <Route path="/bookings" element={<Booking />} />
             <Route path="/payment" element={<Payment />} />
-
+            <Route path="/tour" element={<Tour />} />
             <Route element={<PrivateRoute allowedRoles={["MANAGER"]} />}>
               <Route path="/admin" element={<AdminDashboard />} />
             </Route>
