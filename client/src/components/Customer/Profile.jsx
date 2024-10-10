@@ -49,17 +49,19 @@ const Profile = () => {
   const handleCountryChange = (value) => {
     setUserInfo({ ...userInfo, country: value });
   };
-  // const handleAvatarUpload = (e) => {
-  //   const file = e.target.files[0];
-  //   const reader = new FileReader();
-  //   reader.onloadend = () => {
-  //     setUserInfo({ ...userInfo, avatar: reader.result }); // Update avatar in base64 format
-  //   };
-  //   if (file) {
-  //     reader.readAsDataURL(file); // Convert the uploaded file to base64
-
-  //   }
-  // }, [navigate]);
+  const handleAvatarUpload = (e) => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setUserInfo((prevUserInfo) => ({
+        ...prevUserInfo,
+        avatar: reader.result, // Update avatar in base64 format
+      }));
+    };
+    if (file) {
+      reader.readAsDataURL(file); // Convert the uploaded file to base64
+    }
+  };
 
   // If the user is not logged in, redirect to login
   if (token == null) {

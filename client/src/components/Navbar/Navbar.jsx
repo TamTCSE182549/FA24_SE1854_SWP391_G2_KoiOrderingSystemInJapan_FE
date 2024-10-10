@@ -28,6 +28,7 @@ const Navbar = () => {
   const [cookies] = useCookies(["token"]);
   const token = cookies.token;
   const decodedToken = jwtDecode(token);
+
   const emailSession = () => {
     if (decodedToken.email) {
       try {
