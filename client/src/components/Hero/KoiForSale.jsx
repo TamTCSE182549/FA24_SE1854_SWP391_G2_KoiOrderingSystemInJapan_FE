@@ -1,6 +1,6 @@
 import React from "react";
 import { Input, Slider, Checkbox, Pagination, Button, Tag } from "antd";
-// import { SearchOutlined } from "@ant-design/icons";
+import { SearchOutlined } from "@ant-design/icons";
 
 const { CheckableTag } = Tag;
 
