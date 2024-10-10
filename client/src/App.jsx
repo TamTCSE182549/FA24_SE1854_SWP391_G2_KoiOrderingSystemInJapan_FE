@@ -46,7 +46,7 @@ const App = () => {
             <Route path="/payment" element={<Payment />} />
 
             <Route element={<PrivateRoute allowedRoles={["MANAGER"]} />}>
-              <Route path="/admin-dashboard" element={<AdminDashboard />} />
+              <Route path="/admin" element={<AdminDashboard />} />
             </Route>
 
             <Route path="/paymentsuccess" element={<PaymentSuccess />} />
