@@ -7,6 +7,7 @@ import { toast } from "react-toastify";
 import { Cookies } from "react-cookie";
 import { jwtDecode } from "jwt-decode";
 import { useEffect } from "react";
+
 const Login = () => {
   const navigate = useNavigate();
 

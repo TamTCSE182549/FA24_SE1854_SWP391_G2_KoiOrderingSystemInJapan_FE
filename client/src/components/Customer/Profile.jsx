@@ -8,9 +8,9 @@ import { useNavigate } from "react-router-dom";
 const { Text } = Typography;
 const { Option } = Select;
 import { useCookies } from "react-cookie";
-
-const ProfileView = () => {
-  // const { userProfile, isLoggedIn } = useContext(AuthContext); // Get user profile and login state from context
+const Profile = () => {
+  const [email, setEmail] = useState(null);
+  const [name, setName] = useState("John Doe"); // Default value for the name
   const navigate = useNavigate();
   const [cookies] = useCookies(["token"]);
   const token = cookies.token;
@@ -59,76 +59,9 @@ const ProfileView = () => {
     };
     if (file) {
       reader.readAsDataURL(file); // Convert the uploaded file to base64
+
     }
-  };
-
-  // Render form field
-  const renderField = (label, field, placeholder, type = "text") => (
-    <div className="flex items-center justify-between mb-4">
-      <span className="w-1/4 font-semibold">{label}</span>
-      <div className="w-2/4">
-        {editingField === field ? (
-          <Input
-            type={type}
-            name={field}
-            value={userInfo[field]}
-            onChange={handleChange}
-            className="w-full"
-            placeholder={placeholder}
-          />
-        ) : (
-          <Text>{userInfo[field] || placeholder}</Text>
-        )}
-      </div>
-      <Button
-        type="primary"
-        shape="circle"
-        icon={editingField === field ? <CheckOutlined /> : <EditOutlined />}
-        onClick={() =>
-          editingField === field
-            ? handleSave(field, userInfo[field])
-            : setEditingField(field)
-        }
-        className="ml-4"
-      />
-    </div>
-  );
-
-  // Render dropdown for country selection
-  const renderCountryField = () => (
-    <div className="flex items-center justify-between mb-4">
-      <span className="w-1/4 font-semibold">Country</span>
-      <div className="w-2/4">
-        {editingField === "country" ? (
-          <Select
-            value={userInfo.country}
-            onChange={handleCountryChange}
-            className="w-full"
-          >
-            <Option value="Vietnam">Vietnam</Option>
-            <Option value="United States">United States</Option>
-            <Option value="Japan">Japan</Option>
-            <Option value="France">France</Option>
-            <Option value="Germany">Germany</Option>
-            <Option value="Canada">Canada</Option>
-          </Select>
-        ) : (
-          <Text>{userInfo.country || "Select your country"}</Text>
-        )}
-      </div>
-      <Button
-        type="primary"
-        shape="circle"
-        icon={editingField === "country" ? <CheckOutlined /> : <EditOutlined />}
-        onClick={() =>
-          editingField === "country"
-            ? handleSave("country", userInfo.country)
-            : setEditingField("country")
-        }
-        className="ml-4"
-      />
-    </div>
-  );
+  }, [navigate]);
 
   // If the user is not logged in, redirect to login
   if (token == null) {
@@ -160,41 +93,27 @@ const ProfileView = () => {
             <Text className="text-gray-500">{userInfo.email}</Text>
           </div>
         </div>
+      </div>
 
-        {/* Profile Settings Form */}
-        <h2 className="text-3xl font-bold mb-6">Profile Settings</h2>
-        <div className="grid grid-cols-2 gap-6">
-          {renderField("Name", "name", "Enter your name")}
-          {renderField("Surname", "surname", "Enter your surname")}
-          {renderField("Mobile Number", "phone", "Enter phone number")}
-          {renderField(
-            "Address Line 1",
-            "addressLine1",
-            "Enter address line 1"
-          )}
-          {renderField(
-            "Address Line 2",
-            "addressLine2",
-            "Enter address line 2"
-          )}
-          {renderField("Postcode", "postcode", "Enter postcode")}
-          {renderField("State", "state", "Enter state")}
-          {renderField("Area", "area", "Enter area")}
-          {renderField("Email ID", "email", "Enter email", "email")}
-          {renderField("Education", "education", "Enter education")}
-          {renderCountryField()} {/* Render dropdown for Country */}
-          {renderField("State/Region", "region", "Enter region")}
-        </div>
+      <div className="profile-info">
+        <Text strong>Name:</Text>
+        <Input
+          value={name}
+          onChange={(e) => setName(e.target.value)} // Update name state on change
+          style={{ marginTop: "10px" }}
+        />
+      </div>
 
-        {/* Save Profile Button */}
-        <div className="mt-6 text-center">
-          <Button type="primary" size="large">
-            Save Profile
-          </Button>
-        </div>
+      <div
+        className="profile-actions"
+        style={{ marginTop: "20px", textAlign: "center" }}
+      >
+        <Button type="primary" icon={<CheckOutlined />} onClick={handleSave}>
+          Save Changes
+        </Button>
       </div>
     </div>
   );
 };
 
-export default ProfileView;
+export default Profile;
