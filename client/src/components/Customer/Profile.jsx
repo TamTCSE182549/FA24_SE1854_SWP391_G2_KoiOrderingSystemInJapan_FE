@@ -1,21 +1,25 @@
 import React, { useContext, useState } from "react";
 import { Input, Button, Avatar, Typography, Select } from "antd";
+import { jwtDecode } from "jwt-decode";
 // import { AuthContext } from "../../components/LoginAndSignIn/AuthContext"; // Import AuthContext to access the logged-in user
 import { UserOutlined, EditOutlined, CheckOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 
 const { Text } = Typography;
 const { Option } = Select;
+import { useCookies } from "react-cookie";
 
 const ProfileView = () => {
   // const { userProfile, isLoggedIn } = useContext(AuthContext); // Get user profile and login state from context
   const navigate = useNavigate();
-
+  const [cookies] = useCookies(["token"]);
+  const token = cookies.token;
+  const decodedToken = jwtDecode(token);
   // State for managing profile information editing
   const [userInfo, setUserInfo] = useState({
-    name: userProfile?.name,
-    surname: userProfile?.surname,
-    email: userProfile?.email,
+    name: decodedToken.lastname,
+    surname: decodedToken.firstname,
+    email: decodedToken.email,
     phone: "",
     addressLine1: "",
     addressLine2: "",
@@ -25,7 +29,6 @@ const ProfileView = () => {
     education: "",
     country: "Vietnam",
     region: "",
-    avatar: userProfile?.picture?.data?.url || userProfile?.picture || null, // Use Facebook avatar or default
   });
 
   const [editingField, setEditingField] = useState(null);
@@ -128,7 +131,7 @@ const ProfileView = () => {
   );
 
   // If the user is not logged in, redirect to login
-  if (!isLoggedIn) {
+  if (token == null) {
     navigate("/Login");
     return null;
   }
@@ -138,11 +141,6 @@ const ProfileView = () => {
       <div className="w-full max-w-4xl bg-white shadow-lg rounded-lg p-6">
         <div className="flex items-center mb-4 relative">
           {/* Avatar Section */}
-          <Avatar
-            size={100}
-            src={userInfo.avatar} // Use avatar from userInfo
-            icon={<UserOutlined />}
-          />
           <input
             type="file"
             accept="image/*"

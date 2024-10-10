@@ -4,9 +4,15 @@ import { useNavigate } from "react-router-dom";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { Cookies } from "react-cookie";
+import { jwtDecode } from "jwt-decode";
+import { useEffect } from "react";
 const Login = () => {
   const navigate = useNavigate();
 
+  const cookies = new Cookies();
+
+  const [user, setUser] = useState(null);
   const clientId =
     "738391852199-e9cllf84bulqf7hsbgl5i7gofq1vrb8o.apps.googleusercontent.com";
 
@@ -16,9 +22,13 @@ const Login = () => {
         email: values.email,
         password: values.password,
       });
-
+      const decoded = jwtDecode(response.data.token);
+      setUser(decoded);
+      console.log(decoded);
       if (response.status === 200) {
-        localStorage.setItem("token", response.data.token); // Store the token (if you implement JWT)
+        cookies.set("token", response.data.token, {
+          expires: new Date(decoded.exp * 1000),
+        }); // Store the token (if you implement JWT)
         toast.success("Login successful!"); // Notify user of success
         navigate("/"); // Redirect to homepage or another protected route
       } else {
@@ -36,6 +46,12 @@ const Login = () => {
       }
     }
   };
+
+  useEffect(() => {
+    if (user) {
+      console.log(user); // This will log whenever `user` is updated
+    }
+  }, [user]);
 
   const onFinishFailed = (errorInfo) => {
     console.log("Failed:", errorInfo);
