@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Input, Dropdown, Menu, Avatar } from "antd";
 import { IoMdSearch } from "react-icons/io";
 import { Link, useNavigate } from "react-router-dom";
@@ -9,6 +9,9 @@ import {
 } from "@ant-design/icons";
 // import { AuthContext } from "../../components/LoginAndSignIn/AuthContext";
 import Logo from "../../assets/bg_f8f8f8-flat_750x_075_f-pad_750x1000_f8f8f8-removebg-preview.png";
+import { useCookies } from "react-cookie";
+import { jwtDecode } from "jwt-decode"; // Import chính xác mà không cần dấu ngoặc nhọn
+import { set } from "react-hook-form";
 
 const { Search } = Input;
 
@@ -22,43 +25,47 @@ const MenuItems = [
 ];
 
 const Navbar = () => {
-  const [login, setLogin] = React.useState(false);
-  const [email, setEmail] = React.useState(null);
+  const [login, setLogin] = useState(false);
+  const [email, setEmail] = useState(null);
+  const [firstName, setFirstName] = useState(null);
+  const [lastName, setLastName] = useState(null);
+  const [cookies, setCookie, removeCookie] = useCookies(["token"]);
+  const navigate = useNavigate();
 
-  const emailSession = () => {
-    const email = localStorage.getItem("email");
-    if (email) {
+  useEffect(() => {
+    const token = cookies.token;
+    if (token) {
       try {
-        setEmail(email);
+        const decodedToken = jwtDecode(token);
+        setEmail(decodedToken.email);
+        setFirstName(decodedToken.first_name);
+        setLastName(decodedToken.last_name);
+        console.log("Valid token", decodedToken.first_name);
         setLogin(true);
       } catch (error) {
-        console.log("Invalid email", error);
+        console.log("Invalid token", error);
+        setLogin(false);
       }
     }
-  };
-
-  const navigate = useNavigate();
+  }, [cookies]);
 
   const onSearch = (value) => {
     console.log(value);
   };
 
   const onMenuClick = () => {
-    navigate("/Login");
+    navigate("/login");
   };
 
   const onHomeClick = () => {
     navigate("/");
   };
 
-  useEffect(() => {
-    emailSession();
-  });
-  // Define the handleSignOut function
+  // Handle sign out
   const handleSignOut = () => {
-    localStorage.removeItem("email"); // Clear email from localStorage
-    setLogin(false); // Set login to false
-    navigate("/Login"); // Optionally, navigate to the login page after logging out
+    removeCookie("token"); // Xóa token từ cookies
+    setLogin(false); // Đặt lại trạng thái đăng nhập
+    navigate("/login"); // Chuyển hướng đến trang đăng nhập
   };
 
   const userMenu = (
@@ -133,7 +140,7 @@ const Navbar = () => {
             <Dropdown overlay={userMenu} trigger={["click"]}>
               <div className="flex items-center cursor-pointer text-white">
                 <Avatar icon={<UserOutlined />} />
-                <span className="ml-2">{email}</span>
+                <span className="ml-2">{`${firstName} ${lastName}`}</span>
                 <DownOutlined className="ml-2" />
               </div>
             </Dropdown>
@@ -143,6 +150,7 @@ const Navbar = () => {
               onClick={onMenuClick}
             />
           )}
+
           <ShoppingCartOutlined className="text-white text-2xl cursor-pointer" />
         </div>
       </div>
