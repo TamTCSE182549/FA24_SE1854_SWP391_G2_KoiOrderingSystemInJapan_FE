@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useCookies } from "react-cookie"; // Thêm useCookies để lấy token từ cookie
-import jwtDecode from "jwt-decode"; // Import đúng jwtDecode (không cần {})
+import { jwtDecode } from "jwt-decode"; // Import đúng jwtDecode (không cần {})
 
 const BookingList = () => {
   const [cookies] = useCookies(["token"]);
