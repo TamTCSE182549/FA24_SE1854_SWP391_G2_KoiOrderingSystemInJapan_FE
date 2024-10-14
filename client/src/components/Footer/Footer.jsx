@@ -11,30 +11,54 @@ import {
 
 const Footer = () => {
   return (
-    <footer className="bg-[#c5bd92] text-white py-10">
+    <footer className="bg-[#c5bd92] text-gray-900 py-10">
       <div className="container mx-auto px-4">
         <Row gutter={[16, 16]}>
           {/* Logo và Mạng Xã Hội */}
           <Col xs={24} md={8}>
             <div className="text-3xl font-bold mb-4">TNW</div>
-            <p className="text-white">The heart of tech</p>
+            <p className="text-gray-800">The heart of tech</p>
             <div className="flex space-x-4 mt-4">
-              <a href="#" className="text-white hover:text-gray-700">
+              <a
+                href="#"
+                aria-label="Facebook"
+                className="text-gray-800 hover:text-gray-600"
+              >
                 <FaFacebookF />
               </a>
-              <a href="#" className="text-white hover:text-gray-700">
+              <a
+                href="#"
+                aria-label="Instagram"
+                className="text-gray-800 hover:text-gray-600"
+              >
                 <FaInstagram />
               </a>
-              <a href="#" className="text-white hover:text-gray-700">
+              <a
+                href="#"
+                aria-label="Twitter"
+                className="text-gray-800 hover:text-gray-600"
+              >
                 <FaTwitter />
               </a>
-              <a href="#" className="text-white hover:text-gray-700">
+              <a
+                href="#"
+                aria-label="YouTube"
+                className="text-gray-800 hover:text-gray-600"
+              >
                 <FaYoutube />
               </a>
-              <a href="#" className="text-white hover:text-gray-700">
+              <a
+                href="#"
+                aria-label="Email"
+                className="text-gray-800 hover:text-gray-600"
+              >
                 <FaEnvelope />
               </a>
-              <a href="#" className="text-white hover:text-gray-700">
+              <a
+                href="#"
+                aria-label="LinkedIn"
+                className="text-gray-800 hover:text-gray-600"
+              >
                 <FaLinkedin />
               </a>
             </div>
@@ -42,35 +66,35 @@ const Footer = () => {
 
           {/* MORE TNW */}
           <Col xs={12} md={8}>
-            <h4 className="font-semibold mb-4">MORE TNW</h4>
+            <h4 className="font-semibold mb-4 text-gray-800">MORE TNW</h4>
             <ul className="space-y-2">
               <li>
-                <a href="#" className="text-white hover:text-gray-700">
+                <a href="#" className="text-gray-800 hover:text-gray-600">
                   Media
                 </a>
               </li>
               <li>
-                <a href="#" className="text-white hover:text-gray-700">
+                <a href="#" className="text-gray-800 hover:text-gray-600">
                   Events
                 </a>
               </li>
               <li>
-                <a href="#" className="text-white hover:text-gray-700">
+                <a href="#" className="text-gray-800 hover:text-gray-600">
                   Programs
                 </a>
               </li>
               <li>
-                <a href="#" className="text-white hover:text-gray-700">
+                <a href="#" className="text-gray-800 hover:text-gray-600">
                   Spaces
                 </a>
               </li>
               <li>
-                <a href="#" className="text-white hover:text-gray-700">
+                <a href="#" className="text-gray-800 hover:text-gray-600">
                   Newsletters
                 </a>
               </li>
               <li>
-                <a href="#" className="text-white hover:text-gray-700">
+                <a href="#" className="text-gray-800 hover:text-gray-600">
                   Deals
                 </a>
               </li>
@@ -79,35 +103,35 @@ const Footer = () => {
 
           {/* ABOUT TNW */}
           <Col xs={12} md={8}>
-            <h4 className="font-semibold mb-4">ABOUT TNW</h4>
+            <h4 className="font-semibold mb-4 text-gray-800">ABOUT TNW</h4>
             <ul className="space-y-2">
               <li>
-                <a href="#" className="text-white hover:text-gray-700">
+                <a href="#" className="text-gray-800 hover:text-gray-600">
                   Partner with us
                 </a>
               </li>
               <li>
-                <a href="#" className="text-white hover:text-gray-700">
+                <a href="#" className="text-gray-800 hover:text-gray-600">
                   Jobs
                 </a>
               </li>
               <li>
-                <a href="#" className="text-white hover:text-gray-700">
+                <a href="#" className="text-gray-800 hover:text-gray-600">
                   Terms & Conditions
                 </a>
               </li>
               <li>
-                <a href="#" className="text-white hover:text-gray-700">
+                <a href="#" className="text-gray-800 hover:text-gray-600">
                   Cookie Statement
                 </a>
               </li>
               <li>
-                <a href="#" className="text-white hover:text-gray-700">
+                <a href="#" className="text-gray-800 hover:text-gray-600">
                   Privacy Statement
                 </a>
               </li>
               <li>
-                <a href="#" className="text-white hover:text-gray-700">
+                <a href="#" className="text-gray-800 hover:text-gray-600">
                   Editorial Policy
                 </a>
               </li>
@@ -116,7 +140,7 @@ const Footer = () => {
         </Row>
 
         {/* Copyright */}
-        <div className="mt-10 border-t border-gray-700 pt-6 text-center text-white">
+        <div className="mt-10 border-t border-gray-500 pt-6 text-center text-gray-800">
           <p>
             TNW is a <span className="font-semibold">Financial Times</span>{" "}
             company.
@@ -130,5 +154,18 @@ const Footer = () => {
     </footer>
   );
 };
+
+// const PageLayout = ({ children }) => {
+//   return (
+//     <div className="flex flex-col min-h-screen">
+//       {/* Nội dung chính */}
+//       <div className="flex-grow">
+//         {children} {/* Đây là nơi đặt nội dung chính */}
+//       </div>
+//       {/* Footer luôn nằm cuối trang */}
+//       <Footer />
+//     </div>
+//   );
+// };
 
 export default Footer;

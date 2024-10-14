@@ -11,12 +11,7 @@ const Farm = () => {
   const fetchFarmData = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:8080/koi-farm/list-farm",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`, // Add the token to the Authorization header
-          },
-        }
+        "http://localhost:8080/koi-farm/list-farm"
       );
       setFarm(response.data);
       console.log(response.data);
@@ -28,14 +23,6 @@ const Farm = () => {
       setError("Failed to fetch farm data");
     }
   };
-
-  useEffect(() => {
-    if (token) {
-      fetchFarmData(); // Fetch data only if the token is available
-    } else {
-      setError("No token available. Please log in.");
-    }
-  }, [token]);
 
   return (
     <>

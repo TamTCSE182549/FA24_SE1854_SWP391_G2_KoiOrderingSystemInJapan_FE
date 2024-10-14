@@ -1,19 +1,18 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useCookies } from "react-cookie"; // Thêm useCookies để lấy token từ cookie
-import { jwtDecode } from "jwt-decode"; // Đảm bảo jwtDecode đúng
+import { useCookies } from "react-cookie";
+import { jwtDecode } from "jwt-decode"; // Ensure correct import
 
 const BookingTrip = () => {
   const [tourID, setTourID] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState("CASH"); // Default là "CASH"
+  const [paymentMethod, setPaymentMethod] = useState("CASH");
   const [participants, setParticipants] = useState(1);
   const [message, setMessage] = useState("");
-  const [decodedToken, setDecodedToken] = useState(null); // Lưu token đã giải mã
+  const [decodedToken, setDecodedToken] = useState(null);
 
   // Lấy token từ cookies
   const [cookies] = useCookies(["token"]);
   const token = cookies.token;
-
   // Sử dụng useEffect để giải mã token khi token thay đổi
   useEffect(() => {
     if (token) {
@@ -24,37 +23,40 @@ const BookingTrip = () => {
       } catch (error) {
         console.error("Error decoding token:", error);
       }
+    } else {
+      console.log("No token found");
     }
-  }, [token]); // Chỉ chạy khi token thay đổi
+  }, [token]);
 
   // Hàm gửi yêu cầu booking
   const handleBooking = async (e) => {
     e.preventDefault();
 
+    if (!token) {
+      setMessage("Token not found or invalid. Please log in.");
+      return;
+    }
+
     // Dữ liệu booking tương ứng với BookingRequest class
-    const bookingData = {
-      tourID: Number(tourID),
-      paymentMethod: paymentMethod, // Phải là CASH, VISA, hoặc TRANSFER
-      participants: participants,
-      accountID: decodedToken.sub,
-    };
+    // const bookingData = {
+    //   tourID: Number(tourID),
+    //   paymentMethod: paymentMethod,
+    //   participants: participants,
+    // };
 
     try {
       const response = await axios.post(
         "http://localhost:8080/bookings/create",
-        bookingData,
         {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${token}`, // Ensure the token is correctly passed
             "Content-Type": "application/json",
           },
         }
       );
-      // Xử lý thành công
       console.log("Booking successful:", response.data);
       setMessage("Booking successful!");
     } catch (error) {
-      // Xử lý lỗi
       if (error.response) {
         console.error("Error response:", error.response.data);
         setMessage(
