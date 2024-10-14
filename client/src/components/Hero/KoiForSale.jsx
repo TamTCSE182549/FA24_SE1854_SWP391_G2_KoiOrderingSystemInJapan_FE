@@ -15,7 +15,7 @@ const mockData = [
 
 const Filters = () => {
   return (
-    <div className="w-1/4 p-4 bg-white shadow-md">
+    <div className="w-1/4 p-4 shadow-md">
       <div className="mb-4">
         <h3 className="font-semibold mb-2">Keywords</h3>
         <div className="flex flex-wrap gap-2">
@@ -113,7 +113,7 @@ const ProductGrid = () => {
 
 const KoiForSale = () => {
   return (
-    <div className="flex min-h-screen bg-gray-100">
+    <div className="flex min-h-screen ">
       <Filters />
       <ProductGrid />
     </div>

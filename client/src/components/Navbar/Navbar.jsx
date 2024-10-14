@@ -17,7 +17,7 @@ const { Search } = Input;
 
 const MenuItems = [
   { id: 1, name: "Home", link: "/" },
-  { id: 2, name: "Bookings", link: "/bookings" },
+  { id: 2, name: "Tour", link: "/tour" },
   { id: 3, name: "Koi Products", link: "/koiforsale" },
   { id: 4, name: "Farm", link: "/farm" },
   { id: 5, name: "All About Koi", link: "/allaboutkoi" },
@@ -106,7 +106,9 @@ const Navbar = () => {
             className="w-14 h-auto cursor-pointer"
             onClick={onHomeClick}
           />
-          <div className="text-white font-bold text-2xl ml-2">KOIBOOKING</div>
+          <div className="text-gray-900 font-bold text-2xl ml-2">
+            KOIBOOKING
+          </div>
         </div>
 
         {/* Navigation menu */}
@@ -119,7 +121,7 @@ const Navbar = () => {
               >
                 <Link
                   to={data.link}
-                  className="text-white font-bold transition duration-500 ease-in-out text-base
+                  className="text-gray-900 font-bold transition duration-500 ease-in-out text-base
                             hover:bg-white hover:text-black hover:shadow-2xl hover:rounded-3xl px-4 py-2"
                 >
                   {data.name}
@@ -138,7 +140,7 @@ const Navbar = () => {
           />
           {login ? (
             <Dropdown overlay={userMenu} trigger={["click"]}>
-              <div className="flex items-center cursor-pointer text-white">
+              <div className="flex items-center cursor-pointer text-gray-800">
                 <Avatar icon={<UserOutlined />} />
                 <span className="ml-2">{`${firstName} ${lastName}`}</span>
                 <DownOutlined className="ml-2" />

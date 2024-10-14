@@ -15,14 +15,16 @@ import PaymentSuccess from "./components/Customer/PaymentSuccess";
 // import { AuthProvider } from "./components/LoginAndSignIn/AuthContext";
 import MainImg from "./assets/koi2.jpg"; // Import hình ảnh của bạn
 import PrivateRoute from "./components/PrivateRouter/PrivateRouter";
-import Tour from "./components/Hero/Tour";
+import Tour from "./components/Hero/TourList";
+import BookingList from "./components/Customer/BookingList";
+
 const App = () => {
   return (
     // <AuthProvider>
     <div className="flex flex-col min-h-screen">
       {/* Phần hình nền parallax */}
       <div
-        className="bg-fixed bg-center bg-cover h-screen"
+        className="bg-fixed bg-center bg-cover w-full h-full flex-grow"
         style={{
           backgroundImage: `url(${MainImg})`,
         }}
@@ -40,6 +42,7 @@ const App = () => {
 
             <Route element={<PrivateRoute allowedRoles={["CUSTOMER"]} />}>
               <Route path="/profile" element={<Profile />} />
+              <Route path="/bookinglist" element={<BookingList />} />
             </Route>
 
             <Route path="/bookings" element={<Booking />} />
@@ -54,7 +57,7 @@ const App = () => {
         </div>
       </div>
 
-      {/* Footer */}
+      {/* Footer luôn nằm cuối trang */}
       <Footer />
     </div>
     // </AuthProvider>
