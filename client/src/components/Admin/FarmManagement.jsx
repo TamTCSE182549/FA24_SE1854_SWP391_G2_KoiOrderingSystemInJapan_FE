@@ -1,34 +1,33 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useCookies } from "react-cookie";
-import { jwtDecode } from "jwt-decode"; // Import đúng jwtDecode
+import { jwtDecode } from "jwt-decode"; // Import correctly
 
 const FarmManagement = () => {
   const [cookies] = useCookies(["token"]);
   const token = cookies.token;
   const [decodedToken, setDecodedToken] = useState(null);
-
+  const [farms, setFarms] = useState([]); // State to store farm list
   const [newFarm, setNewFarm] = useState({
     farmName: "",
     farmPhoneNumber: "",
     farmEmail: "",
     farmAddress: "",
     farmImage: "",
-    createdBy: "", // Trường để lưu người tạo
+    createdBy: "", // Store the creator info
   });
 
-  const [editFarm, setEditFarm] = useState(null); // Để cập nhật farm hiện tại
-  const [deleteFarmId, setDeleteFarmId] = useState(""); // Để xóa farm theo ID
+  const [editFarm, setEditFarm] = useState(null); // To hold the farm being edited
 
-  // Giải mã token và lưu thông tin người dùng vào state
+  // Decode the token and store user info in state
   useEffect(() => {
     if (token) {
       try {
         const decoded = jwtDecode(token);
-        setDecodedToken(decoded); // Lưu token đã giải mã
+        setDecodedToken(decoded); // Store the decoded token
         setNewFarm((prevFarm) => ({
           ...prevFarm,
-          createdBy: decoded.sub, // Giả sử "sub" là ID người dùng
+          createdBy: decoded.sub, // Assuming "sub" is the user ID
         }));
       } catch (error) {
         console.error("Error decoding token:", error);
@@ -36,58 +35,103 @@ const FarmManagement = () => {
     }
   }, [token]);
 
-  // Create new farm using the correct endpoint
+  // Fetch the list of farms from API when component is loaded
+  useEffect(() => {
+    const fetchFarms = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:8080/koi-farm/list-farm",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        ); // Backend API to get farm list
+        setFarms(response.data); // Store farm list in state
+      } catch (error) {
+        console.error("Error fetching farms:", error);
+      }
+    };
+
+    fetchFarms(); // Fetch farms when component loads
+  }, [token]);
+
+  // Create a new farm
   const createFarm = async () => {
     try {
-      await axios.post("http://localhost:8080/koi-farm/create/res", newFarm, {
+      await axios.post("http://localhost:8080/koi-farm/create", newFarm, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      }); // API từ backend
+      });
       setNewFarm({
         farmName: "",
         farmPhoneNumber: "",
         farmEmail: "",
         farmAddress: "",
         farmImage: "",
-        createdBy: decodedToken?.sub || "", // Đảm bảo thông tin người tạo
-      }); // Reset form
-      alert("Farm created successfully!");
+        createdBy: decodedToken?.sub || "", // Ensure creator info is available
+      }); // Reset the form
+      setFarms(); // Fetch updated farm list
     } catch (error) {
       console.error("Error creating farm:", error);
     }
   };
 
-  // Update an existing farm using the correct endpoint
+  // Delete a farm by its ID
+  const deleteFarm = async (id) => {
+    try {
+      await axios.delete(`http://localhost:8080/koi-farm/deleteFarm/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      // Fetch updated farm list after deletion
+      const response = await axios.get(
+        "http://localhost:8080/koi-farm/list-farm",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setFarms(response.data); // Cập nhật lại danh sách farms
+    } catch (error) {
+      console.error(
+        "Error deleting farm:",
+        error.response?.data || error.message
+      );
+    }
+  };
+
+  // Update an existing farm
   const updateFarm = async (id) => {
     try {
       await axios.put(`http://localhost:8080/koi-farm/update/${id}`, editFarm, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      }); // API từ backend
-      setEditFarm(null); // Reset edit state
-      alert("Farm updated successfully!");
+      });
+      setEditFarm(null); // Clear the edit form
+      // Fetch updated farm list after update
+      const response = await axios.get(
+        "http://localhost:8080/koi-farm/list-farm",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setFarms(response.data); // Cập nhật lại danh sách farms
     } catch (error) {
-      console.error("Error updating farm:", error);
+      console.error(
+        "Error updating farm:",
+        error.response?.data || error.message
+      );
     }
   };
 
-  // Delete a farm using the correct endpoint
-  const deleteFarm = async (id) => {
-    try {
-      await axios.delete(`http://localhost:8080/koi-farm/delete/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }); // API từ backend
-      alert("Farm deleted successfully!");
-    } catch (error) {
-      console.error("Error deleting farm:", error);
-    }
-  };
-
-  // Handle input change for new farm
+  // Handle input change for the new farm
   const handleInputChange = (e) => {
     setNewFarm({
       ...newFarm,
@@ -95,7 +139,7 @@ const FarmManagement = () => {
     });
   };
 
-  // Handle input change for editing farm
+  // Handle input change for editing a farm
   const handleEditChange = (e) => {
     setEditFarm({
       ...editFarm,
@@ -103,6 +147,12 @@ const FarmManagement = () => {
     });
   };
 
+  // Set the farm to be edited
+  const handleEditClick = (farm) => {
+    setEditFarm(farm);
+  };
+
+  // Render the FarmManagement component
   return (
     <div className="p-4">
       <h2 className="text-2xl font-bold mb-4">Farm Management</h2>
@@ -211,22 +261,50 @@ const FarmManagement = () => {
         </div>
       )}
 
-      {/* Delete farm form */}
+      {/* Display list of created farms with update and delete buttons */}
       <div className="mb-4">
-        <h3 className="text-xl font-semibold">Delete Farm</h3>
-        <input
-          type="text"
-          name="farmId"
-          placeholder="Farm ID"
-          onChange={(e) => setDeleteFarmId(e.target.value)}
-          className="border p-2 mb-2"
-        />
-        <button
-          onClick={() => deleteFarm(deleteFarmId)}
-          className="bg-red-500 text-white px-4 py-2"
-        >
-          Delete Farm
-        </button>
+        <h3 className="text-xl font-semibold">Created Farms</h3>
+        <table className="min-w-full bg-white border-collapse">
+          <thead>
+            <tr>
+              <th className="border px-4 py-2">Name</th>
+              <th className="border px-4 py-2">Phone</th>
+              <th className="border px-4 py-2">Email</th>
+              <th className="border px-4 py-2">Address</th>
+              <th className="border px-4 py-2">Image URL</th>
+              <th className="border px-4 py-2">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {(farms || []).map((farm) => (
+              <tr key={farm.id}>
+                <td className="border px-4 py-2">{farm.farmName || "N/A"}</td>
+                <td className="border px-4 py-2">
+                  {farm.farmPhoneNumber || "N/A"}
+                </td>
+                <td className="border px-4 py-2">{farm.farmEmail || "N/A"}</td>
+                <td className="border px-4 py-2">
+                  {farm.farmAddress || "N/A"}
+                </td>
+                <td className="border px-4 py-2">{farm.farmImage || "N/A"}</td>
+                <td className="border px-4 py-2 flex space-x-2">
+                  <button
+                    onClick={() => handleEditClick(farm)}
+                    className="bg-yellow-500 text-white px-4 py-2"
+                  >
+                    Update
+                  </button>
+                  <button
+                    onClick={() => deleteFarm(farm.id)}
+                    className="bg-red-500 text-white px-4 py-2"
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );
