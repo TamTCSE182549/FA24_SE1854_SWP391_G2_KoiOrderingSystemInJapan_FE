@@ -62,6 +62,10 @@ const Login = () => {
     navigate("/SignIn"); // Điều hướng về trang đăng ký
   };
 
+  const handleNavigateToForgotPassword = () => {
+    navigate("/forgotpassword"); // Điều hướng về trang đăng ký
+  };
+
   const handleGoogleLoginSuccess = async (credentialResponse) => {
     console.log(credentialResponse); // The credential token from Google
 
@@ -71,25 +75,22 @@ const Login = () => {
         token: credentialResponse.credential,
       });
 
-      //     console.log("Backend Response:", response.data);
-      //     // After successful login, you can store the token or navigate to a protected route
-      //     navigate("/");
-
-      //   } catch (error) {
-      //     console.error("Error sending credential to backend:", error);
-      //   }
-      // };
-      if (response.status === 200) {
-        localStorage.setItem("token", response.data.token); // Store token in localStorage
-        toast.success("Google login successful!"); // Notify user of success
-        navigate("/"); // Redirect to homepage or another protected route
+      if (response.data && response.data.token) {
+        const decoded = jwtDecode(response.data.token);
+        cookies.set("token", response.data.token, {
+          expires: new Date(decoded.exp * 1000),
+        });
+        toast.success("Google login successful!");
+        navigate("/");
       } else {
-        // If the response status is not 200, handle it as an error
-        toast.error(
+        // If the response doesn't contain a token, handle it as an error
+        throw new Error(
           response.data?.message || "Google login failed. Please try again."
         );
       }
     } catch (error) {
+      console.error("Error during Google login:", error);
+
       // Handle Axios-specific errors and general errors
       if (axios.isAxiosError(error)) {
         toast.error(
@@ -97,7 +98,9 @@ const Login = () => {
             "An error occurred during Google login."
         );
       } else {
-        toast.error("An unknown error occurred during Google login.");
+        toast.error(
+          error.message || "An unknown error occurred during Google login."
+        );
       }
     }
   };
@@ -141,9 +144,12 @@ const Login = () => {
 
           <div className="flex justify-between items-center text-white">
             <Checkbox className="text-white">Remember me</Checkbox>
-            <a href="#" className="text-white hover:underline">
-              Forgot your password?
-            </a>
+            <span
+              className="text-white hover:underline ml-2 cursor-pointer"
+              onClick={handleNavigateToForgotPassword}
+            >
+              Forgot password?
+            </span>
           </div>
 
           <Form.Item className="mt-6">
