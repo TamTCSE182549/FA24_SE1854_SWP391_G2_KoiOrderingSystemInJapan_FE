@@ -1,28 +1,56 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { useCookies } from "react-cookie";
+import { jwtDecode } from "jwt-decode"; // Import đúng jwtDecode
 
 const FarmManagement = () => {
+  const [cookies] = useCookies(["token"]);
+  const token = cookies.token;
+  const [decodedToken, setDecodedToken] = useState(null);
+
   const [newFarm, setNewFarm] = useState({
     farmName: "",
     farmPhoneNumber: "",
     farmEmail: "",
     farmAddress: "",
     farmImage: "",
+    createdBy: "", // Trường để lưu người tạo
   });
 
   const [editFarm, setEditFarm] = useState(null); // Để cập nhật farm hiện tại
   const [deleteFarmId, setDeleteFarmId] = useState(""); // Để xóa farm theo ID
 
+  // Giải mã token và lưu thông tin người dùng vào state
+  useEffect(() => {
+    if (token) {
+      try {
+        const decoded = jwtDecode(token);
+        setDecodedToken(decoded); // Lưu token đã giải mã
+        setNewFarm((prevFarm) => ({
+          ...prevFarm,
+          createdBy: decoded.sub, // Giả sử "sub" là ID người dùng
+        }));
+      } catch (error) {
+        console.error("Error decoding token:", error);
+      }
+    }
+  }, [token]);
+
   // Create new farm using the correct endpoint
   const createFarm = async () => {
     try {
-      await axios.post("http://localhost:8080/koi-farm/create", newFarm); // API từ backend
+      await axios.post("http://localhost:8080/koi-farm/create/res", newFarm, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }); // API từ backend
       setNewFarm({
         farmName: "",
         farmPhoneNumber: "",
         farmEmail: "",
         farmAddress: "",
         farmImage: "",
+        createdBy: decodedToken?.sub || "", // Đảm bảo thông tin người tạo
       }); // Reset form
       alert("Farm created successfully!");
     } catch (error) {
@@ -33,7 +61,11 @@ const FarmManagement = () => {
   // Update an existing farm using the correct endpoint
   const updateFarm = async (id) => {
     try {
-      await axios.put(`http://localhost:8080/koi-farm/update/${id}`, editFarm); // API từ backend
+      await axios.put(`http://localhost:8080/koi-farm/update/${id}`, editFarm, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }); // API từ backend
       setEditFarm(null); // Reset edit state
       alert("Farm updated successfully!");
     } catch (error) {
@@ -44,7 +76,11 @@ const FarmManagement = () => {
   // Delete a farm using the correct endpoint
   const deleteFarm = async (id) => {
     try {
-      await axios.delete(`http://localhost:8080/koi-farm/delete/${id}`); // API từ backend
+      await axios.delete(`http://localhost:8080/koi-farm/delete/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }); // API từ backend
       alert("Farm deleted successfully!");
     } catch (error) {
       console.error("Error deleting farm:", error);
