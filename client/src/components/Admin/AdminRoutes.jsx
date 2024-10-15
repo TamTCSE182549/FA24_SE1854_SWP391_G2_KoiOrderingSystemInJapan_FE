@@ -1,0 +1,20 @@
+// components/Admin/AdminRoutes.js
+import React from "react";
+import { Route, Routes } from "react-router-dom";
+import AdminDashboard from "./AdminDashboard";
+import PrivateRoute from "../PrivateRouter/PrivateRouter"; // Đường dẫn tới PrivateRoute
+
+const AdminRoutes = () => {
+  return (
+    <Routes>
+      {/* Sử dụng PrivateRoute để bảo vệ các route admin */}
+      <Route>
+        {/* AdminDashboard là trang chính với các route con */}
+        <Route path="/admin/*" element={<AdminDashboard />} /> {/* Thêm * */}
+      </Route>
+    </Routes>
+    // element={<PrivateRoute allowedRoles={["ADMIN"]} />}
+  );
+};
+
+export default AdminRoutes;

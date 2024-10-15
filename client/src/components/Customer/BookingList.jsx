@@ -15,7 +15,7 @@ const BookingList = () => {
   const fetchBookingList = async (userId) => {
     try {
       const response = await axios.get(
-        `http://localhost:8080/bookings/listBookingTourResponse/${userId}`,
+        "http://localhost:8080/bookings/listBookingTourResponse",
         {
           headers: {
             Authorization: `Bearer ${token}`,

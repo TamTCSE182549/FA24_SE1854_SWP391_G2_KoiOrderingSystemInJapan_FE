@@ -57,9 +57,17 @@ const Tour = () => {
     },
   ];
 
-  const fetchTourData = async () => {
+  const fetchTourData = async (values) => {
     try {
-      const response = await axios.get("http://localhost:8080/tour/list");
+      const response = await axios.get("http://localhost:8080/tour/showAll", {
+        // tourName: values.tourName,
+        // unitPrice: values.unitPrice,
+        // maxParticipants: values.maxParticipants,
+        // description: values.description,
+        // startTime: values.startTime,
+        // endTime: values.endTime,
+        // image: values.tourImng,
+      });
       if (Array.isArray(response.data)) {
         setTours(response.data);
       } else {
