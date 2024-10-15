@@ -17,7 +17,8 @@ import MainImg from "./assets/koi2.jpg"; // Import hình ảnh của bạn
 import PrivateRoute from "./components/PrivateRouter/PrivateRouter";
 import Tour from "./components/Hero/TourList";
 import BookingList from "./components/Customer/BookingList";
-
+import ResetPassword from "./components/LoginAndSignIn/ResetPassword";
+import ForgotPassword from "./components/LoginAndSignIn/ForgotPassword";
 const App = () => {
   return (
     // <AuthProvider>
@@ -44,14 +45,14 @@ const App = () => {
               <Route path="/profile" element={<Profile />} />
               <Route path="/bookinglist" element={<BookingList />} />
             </Route>
-
+            <Route path="/resetpassword" element={<ResetPassword />} />
             <Route path="/bookings" element={<Booking />} />
             <Route path="/payment" element={<Payment />} />
             <Route path="/tour" element={<Tour />} />
             <Route element={<PrivateRoute allowedRoles={["MANAGER"]} />}>
               <Route path="/admin" element={<AdminDashboard />} />
             </Route>
-
+            <Route path="/forgotpassword" element={<ForgotPassword />} />
             <Route path="/paymentsuccess" element={<PaymentSuccess />} />
           </Routes>
         </div>
