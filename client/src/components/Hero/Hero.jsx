@@ -84,7 +84,7 @@ const Hero = () => {
   };
 
   return (
-    <div className="mx-auto px-1 max-w-[100%]">
+    <div className="mx-auto max-w-[100%] overflow-hidden">
       <div className="w-full h-[100vh] relative">
         {/* Ensure carousel container takes full viewport height */}
         <Carousel
@@ -100,7 +100,7 @@ const Hero = () => {
               <img
                 src={img}
                 alt={`carousel-img-${id}`}
-                className="w-full h-full object-cover" // Full image cover
+                className="w-screen h-full object-cover" // Full image cover
               />
               {/* View Now Button inside each carousel slide */}
             </div>

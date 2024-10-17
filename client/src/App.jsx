@@ -19,8 +19,6 @@ import Tour from "./components/Hero/TourList";
 import BookingList from "./components/Customer/BookingList";
 import AdminRoutes from "./components/Admin/AdminRoutes";
 
-import ReactFullpage from "./components/Hero/ReactFullpage";
-
 
 import Delivery from "./components/Customer/Delivery";
 import ResetPassword from "./components/LoginAndSignIn/ResetPassword";
@@ -37,10 +35,7 @@ const App = () => {
           backgroundImage: `url(${MainImg})`,
         }}
       >
-        {/* Navbar */}
-
-        {/* Content Area */}
-
+        <Navbar />
         <div className="flex-grow text-white ">
           <Routes>
             <Route path="/" element={<Hero />} />
@@ -72,8 +67,7 @@ const App = () => {
           </Routes>
         </div>
       </div>
-
-      {/* Footer luôn nằm cuối trang */}
+      <Footer />
     </div>
     // </AuthProvider>
   );

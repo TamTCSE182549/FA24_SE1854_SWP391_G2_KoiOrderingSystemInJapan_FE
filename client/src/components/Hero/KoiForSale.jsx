@@ -73,7 +73,7 @@ const ProductCard = ({ name, location, price, rating }) => {
       <p className="text-gray-900">{location}</p>
       <div className="font-bold text-black">{price}</div>
       <p className="text-gray-900">{rating}</p>
-      <div className="ml-[90%]">
+      <div className="ml-[60%]">
         <button className="bg-green-900 text-white rounded-md px-4 py-2 transition duration-300 ease-in-out hover:bg-green-700 ">
           Book Now
         </button>
@@ -99,7 +99,7 @@ const ProductGrid = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-6">
+      <div className="grid grid-cols-3 gap-6">
         {mockData.map((item, index) => (
           <ProductCard
             key={index}
@@ -120,15 +120,11 @@ const ProductGrid = () => {
 
 const KoiForSale = () => {
   return (
-    <div className="min-h-screen">
-      <div className="sticky top-0 z-50">
-        <Navbar />
-      </div>
+    <div>
       <div className="flex pt-4 container mx-auto justify-between backdrop-filter backdrop-blur-3xl">
         <Filters />
         <ProductGrid />
       </div>
-      <Footer />
     </div>
   );
 };
