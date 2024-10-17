@@ -1,163 +1,173 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import { useCookies } from "react-cookie";
-import { jwtDecode } from "jwt-decode"; // Import correctly
+import React, { useState, useEffect } from "react"; // Import React và các hook useState, useEffect
+import axios from "axios"; // Import axios để thực hiện các yêu cầu HTTP
+import { useCookies } from "react-cookie"; // Import useCookies để lấy và sử dụng cookie
+import { jwtDecode } from "jwt-decode"; // Import jwtDecode để giải mã token JWT
 
 const FarmManagement = () => {
-  const [cookies] = useCookies(["token"]);
-  const token = cookies.token;
-  const [decodedToken, setDecodedToken] = useState(null);
-  const [farms, setFarms] = useState([]); // State to store farm list
+  const [cookies] = useCookies(["token"]); // Lấy cookie "token" từ trình duyệt
+  const token = cookies.token; // Lấy giá trị token từ cookie để sử dụng trong các yêu cầu
+  const [decodedToken, setDecodedToken] = useState(null); // Khởi tạo state để lưu thông tin token đã giải mã
+  const [farms, setFarms] = useState([]); // Khởi tạo state để lưu danh sách các trang trại (farms)
   const [newFarm, setNewFarm] = useState({
-    farmName: "",
-    farmPhoneNumber: "",
-    farmEmail: "",
-    farmAddress: "",
-    farmImage: "",
-    createdBy: "", // Store the creator info
+    farmName: "", // Tên trang trại
+    farmPhoneNumber: "", // Số điện thoại của trang trại
+    farmEmail: "", // Email của trang trại
+    farmAddress: "", // Địa chỉ của trang trại
+    farmImage: "", // URL hình ảnh của trang trại
+    createdBy: "", // Thông tin người tạo trang trại, sẽ được lấy từ token
   });
 
-  const [editFarm, setEditFarm] = useState(null); // To hold the farm being edited
+  const [editFarm, setEditFarm] = useState(null); // State để lưu thông tin trang trại đang được chỉnh sửa
 
-  // Decode the token and store user info in state
+  // useEffect để giải mã token và lưu thông tin người dùng vào state khi token thay đổi
   useEffect(() => {
     if (token) {
       try {
-        const decoded = jwtDecode(token);
-        setDecodedToken(decoded); // Store the decoded token
+        const decoded = jwtDecode(token); // Giải mã token để lấy thông tin người dùng
+        setDecodedToken(decoded); // Lưu token đã giải mã vào state
         setNewFarm((prevFarm) => ({
           ...prevFarm,
-          createdBy: decoded.sub, // Assuming "sub" is the user ID
+          createdBy: decoded.sub, // Giả sử "sub" là ID của người dùng, lưu vào thuộc tính createdBy
         }));
       } catch (error) {
-        console.error("Error decoding token:", error);
+        console.error("Error decoding token:", error); // In ra lỗi nếu có vấn đề khi giải mã token
       }
     }
-  }, [token]);
+  }, [token]); // useEffect sẽ chạy mỗi khi giá trị `token` thay đổi
 
-  // Fetch the list of farms from API when component is loaded
+  // useEffect để lấy danh sách trang trại từ API khi component được load
   useEffect(() => {
     const fetchFarms = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:8080/koi-farm/list-farm",
+          "http://localhost:8080/koi-farm/list-farm", // Gọi API lấy danh sách trang trại từ backend
           {
             headers: {
-              Authorization: `Bearer ${token}`,
+              Authorization: `Bearer ${token}`, // Gửi token để xác thực người dùng
             },
           }
-        ); // Backend API to get farm list
-        setFarms(response.data); // Store farm list in state
+        );
+        setFarms(response.data); // Lưu danh sách trang trại vào state
       } catch (error) {
-        console.error("Error fetching farms:", error);
+        console.error("Error fetching farms:", error); // In ra lỗi nếu có vấn đề khi lấy danh sách trang trại
       }
     };
 
-    fetchFarms(); // Fetch farms when component loads
-  }, [token]);
+    fetchFarms(); // Gọi hàm lấy danh sách trang trại khi component được load
+  }, [token]); // useEffect sẽ chạy mỗi khi token thay đổi
 
-  // Create a new farm
+  // Hàm để tạo trang trại mới
   const createFarm = async () => {
     try {
       await axios.post("http://localhost:8080/koi-farm/create", newFarm, {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${token}`, // Gửi token để xác thực người dùng khi tạo trang trại
         },
       });
+      // Sau khi tạo thành công, reset lại form
       setNewFarm({
         farmName: "",
         farmPhoneNumber: "",
         farmEmail: "",
         farmAddress: "",
         farmImage: "",
-        createdBy: decodedToken?.sub || "", // Ensure creator info is available
-      }); // Reset the form
-      setFarms(); // Fetch updated farm list
+        createdBy: decodedToken?.sub || "", // Đảm bảo rằng ID người tạo được giữ nguyên
+      });
+      // Lấy lại danh sách trang trại sau khi tạo thành công
+      const response = await axios.get(
+        "http://localhost:8080/koi-farm/list-farm",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // Gửi token để xác thực
+          },
+        }
+      );
+      setFarms(response.data); // Cập nhật lại danh sách trang trại sau khi tạo
     } catch (error) {
-      console.error("Error creating farm:", error);
+      console.error("Error creating farm:", error); // Xử lý lỗi khi tạo trang trại
     }
   };
 
-  // Delete a farm by its ID
+  // Hàm để xóa trang trại dựa theo ID
   const deleteFarm = async (id) => {
     try {
       await axios.delete(`http://localhost:8080/koi-farm/deleteFarm/${id}`, {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${token}`, // Gửi token để xác thực khi xóa
         },
       });
-      // Fetch updated farm list after deletion
+      // Lấy lại danh sách trang trại sau khi xóa thành công
       const response = await axios.get(
         "http://localhost:8080/koi-farm/list-farm",
         {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${token}`, // Gửi token để xác thực
           },
         }
       );
-      setFarms(response.data); // Cập nhật lại danh sách farms
+      setFarms(response.data); // Cập nhật lại danh sách trang trại sau khi xóa
     } catch (error) {
       console.error(
         "Error deleting farm:",
-        error.response?.data || error.message
+        error.response?.data || error.message // Xử lý lỗi khi xóa trang trại
       );
     }
   };
 
-  // Update an existing farm
+  // Hàm để cập nhật trang trại dựa theo ID
   const updateFarm = async (id) => {
     try {
       await axios.put(`http://localhost:8080/koi-farm/update/${id}`, editFarm, {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${token}`, // Gửi token để xác thực khi cập nhật
         },
       });
-      setEditFarm(null); // Clear the edit form
-      // Fetch updated farm list after update
+      setEditFarm(null); // Sau khi cập nhật xong, reset trạng thái chỉnh sửa
+      // Lấy lại danh sách trang trại sau khi cập nhật
       const response = await axios.get(
         "http://localhost:8080/koi-farm/list-farm",
         {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${token}`, // Gửi token để xác thực
           },
         }
       );
-      setFarms(response.data); // Cập nhật lại danh sách farms
+      setFarms(response.data); // Cập nhật lại danh sách trang trại sau khi cập nhật
     } catch (error) {
       console.error(
         "Error updating farm:",
-        error.response?.data || error.message
+        error.response?.data || error.message // Xử lý lỗi khi cập nhật trang trại
       );
     }
   };
 
-  // Handle input change for the new farm
+  // Hàm để xử lý khi nhập liệu cho form tạo trang trại
   const handleInputChange = (e) => {
     setNewFarm({
       ...newFarm,
-      [e.target.name]: e.target.value,
+      [e.target.name]: e.target.value, // Cập nhật giá trị mới cho từng trường trong form dựa trên name của input
     });
   };
 
-  // Handle input change for editing a farm
+  // Hàm để xử lý khi nhập liệu cho form chỉnh sửa trang trại
   const handleEditChange = (e) => {
     setEditFarm({
       ...editFarm,
-      [e.target.name]: e.target.value,
+      [e.target.name]: e.target.value, // Cập nhật giá trị mới cho từng trường trong form chỉnh sửa dựa trên name của input
     });
   };
 
-  // Set the farm to be edited
+  // Hàm để gán trang trại đang được chỉnh sửa
   const handleEditClick = (farm) => {
-    setEditFarm(farm);
+    setEditFarm(farm); // Gán trang trại cần chỉnh sửa vào state
   };
 
-  // Render the FarmManagement component
+  // Render giao diện của component FarmManagement
   return (
     <div className="p-4">
       <h2 className="text-2xl font-bold mb-4">Farm Management</h2>
 
-      {/* Create new farm form */}
+      {/* Form tạo trang trại mới */}
       <div className="mb-4">
         <h3 className="text-xl font-semibold">Create New Farm</h3>
         <input
@@ -165,7 +175,7 @@ const FarmManagement = () => {
           name="farmName"
           value={newFarm.farmName}
           onChange={handleInputChange}
-          placeholder="Farm Name"
+          placeholder="Farm Name" // Input cho tên trang trại
           className="border p-2 mb-2"
         />
         <input
@@ -173,7 +183,7 @@ const FarmManagement = () => {
           name="farmPhoneNumber"
           value={newFarm.farmPhoneNumber}
           onChange={handleInputChange}
-          placeholder="Phone Number"
+          placeholder="Phone Number" // Input cho số điện thoại trang trại
           className="border p-2 mb-2"
         />
         <input
@@ -181,7 +191,7 @@ const FarmManagement = () => {
           name="farmEmail"
           value={newFarm.farmEmail}
           onChange={handleInputChange}
-          placeholder="Email"
+          placeholder="Email" // Input cho email trang trại
           className="border p-2 mb-2"
         />
         <input
@@ -189,7 +199,7 @@ const FarmManagement = () => {
           name="farmAddress"
           value={newFarm.farmAddress}
           onChange={handleInputChange}
-          placeholder="Address"
+          placeholder="Address" // Input cho địa chỉ trang trại
           className="border p-2 mb-2"
         />
         <input
@@ -197,18 +207,18 @@ const FarmManagement = () => {
           name="farmImage"
           value={newFarm.farmImage}
           onChange={handleInputChange}
-          placeholder="Image URL"
+          placeholder="Image URL" // Input cho URL hình ảnh trang trại
           className="border p-2 mb-2"
         />
         <button
-          onClick={createFarm}
+          onClick={createFarm} // Nút để tạo trang trại mới khi nhấn
           className="bg-blue-500 text-white px-4 py-2"
         >
           Create Farm
         </button>
       </div>
 
-      {/* Edit farm form */}
+      {/* Form chỉnh sửa trang trại */}
       {editFarm && (
         <div className="mb-4">
           <h3 className="text-xl font-semibold">Edit Farm</h3>
@@ -217,7 +227,7 @@ const FarmManagement = () => {
             name="farmName"
             value={editFarm.farmName}
             onChange={handleEditChange}
-            placeholder="Farm Name"
+            placeholder="Farm Name" // Input chỉnh sửa tên trang trại
             className="border p-2 mb-2"
           />
           <input
@@ -225,7 +235,7 @@ const FarmManagement = () => {
             name="farmPhoneNumber"
             value={editFarm.farmPhoneNumber}
             onChange={handleEditChange}
-            placeholder="Phone Number"
+            placeholder="Phone Number" // Input chỉnh sửa số điện thoại trang trại
             className="border p-2 mb-2"
           />
           <input
@@ -233,7 +243,7 @@ const FarmManagement = () => {
             name="farmEmail"
             value={editFarm.farmEmail}
             onChange={handleEditChange}
-            placeholder="Email"
+            placeholder="Email" // Input chỉnh sửa email trang trại
             className="border p-2 mb-2"
           />
           <input
@@ -241,7 +251,7 @@ const FarmManagement = () => {
             name="farmAddress"
             value={editFarm.farmAddress}
             onChange={handleEditChange}
-            placeholder="Address"
+            placeholder="Address" // Input chỉnh sửa địa chỉ trang trại
             className="border p-2 mb-2"
           />
           <input
@@ -249,11 +259,11 @@ const FarmManagement = () => {
             name="farmImage"
             value={editFarm.farmImage}
             onChange={handleEditChange}
-            placeholder="Image URL"
+            placeholder="Image URL" // Input chỉnh sửa URL hình ảnh trang trại
             className="border p-2 mb-2"
           />
           <button
-            onClick={() => updateFarm(editFarm.id)}
+            onClick={() => updateFarm(editFarm.id)} // Nút để lưu các thay đổi khi nhấn
             className="bg-green-500 text-white px-4 py-2"
           >
             Save Changes
@@ -261,7 +271,7 @@ const FarmManagement = () => {
         </div>
       )}
 
-      {/* Display list of created farms with update and delete buttons */}
+      {/* Bảng hiển thị danh sách các trang trại đã tạo với nút cập nhật và xóa */}
       <div className="mb-4">
         <h3 className="text-xl font-semibold">Created Farms</h3>
         <table className="min-w-full bg-white border-collapse">
@@ -289,13 +299,13 @@ const FarmManagement = () => {
                 <td className="border px-4 py-2">{farm.farmImage || "N/A"}</td>
                 <td className="border px-4 py-2 flex space-x-2">
                   <button
-                    onClick={() => handleEditClick(farm)}
+                    onClick={() => handleEditClick(farm)} // Nút để chỉnh sửa trang trại
                     className="bg-yellow-500 text-white px-4 py-2"
                   >
                     Update
                   </button>
                   <button
-                    onClick={() => deleteFarm(farm.id)}
+                    onClick={() => deleteFarm(farm.id)} // Nút để xóa trang trại
                     className="bg-red-500 text-white px-4 py-2"
                   >
                     Delete
@@ -310,4 +320,4 @@ const FarmManagement = () => {
   );
 };
 
-export default FarmManagement;
+export default FarmManagement; // Xuất component ra để sử dụng nơi khác
