@@ -18,7 +18,6 @@ import PrivateRoute from "./components/PrivateRouter/PrivateRouter";
 import Tour from "./components/Hero/TourList";
 import BookingList from "./components/Customer/BookingList";
 import AdminRoutes from "./components/Admin/AdminRoutes";
-import ReactFullpage from "./components/Hero/ReactFullpage";
 
 const App = () => {
   return (

@@ -96,8 +96,6 @@ const Tour = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar />
-
       <div className="flex-grow">
         <div className="container mx-auto p-4">
           <div className="flex">
@@ -215,9 +213,6 @@ const Tour = () => {
           </div>
         </div>
       </div>
-
-      {/* Footer */}
-      <Footer />
     </div>
   );
 };

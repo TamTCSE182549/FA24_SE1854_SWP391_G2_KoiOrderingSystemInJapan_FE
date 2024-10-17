@@ -84,7 +84,7 @@ const Hero = () => {
   };
 
   return (
-    <div className="mx-auto px-1 max-w-[100%]">
+    <div className="mx-auto px-1 max-w-[100%] overflow-hidden ">
       <div className="w-full h-[100vh] relative">
         {/* Ensure carousel container takes full viewport height */}
         <Carousel

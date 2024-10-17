@@ -12,7 +12,7 @@ import {
 const Footer = () => {
   return (
     <footer>
-      <div className="bg-gradient-to-t from-green-600 to-green-900 shadow-lg text-wh300 py-10 mt-10">
+      <div className="bg-gradient-to-t from-green-600 to-green-900 shadow-lg text-wh300 py-10">
         <div className="container mx-auto px-4">
           <Row gutter={[16, 16]}>
             {/* Logo và Mạng Xã Hội */}

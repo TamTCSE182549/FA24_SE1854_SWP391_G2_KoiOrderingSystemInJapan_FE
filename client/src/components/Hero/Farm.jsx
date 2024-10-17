@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useCookies } from "react-cookie"; // Assuming you're using react-cookie for token management
-import Footer from "../Footer/Footer";
-import Navbar from "../Navbar/Navbar";
 
 const Farm = () => {
   const [farm, setFarm] = useState([]);
@@ -32,10 +30,6 @@ const Farm = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Navbar */}
-      <Navbar />
-
-      {/* Content */}
       <div className="flex-grow">
         <div className="container mx-auto p-4">
           {error && <p className="text-red-500">{error}</p>}
@@ -52,9 +46,6 @@ const Farm = () => {
           )}
         </div>
       </div>
-
-      {/* Footer */}
-      <Footer />
     </div>
   );
 };
