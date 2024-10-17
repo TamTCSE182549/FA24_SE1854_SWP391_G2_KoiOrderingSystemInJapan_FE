@@ -19,6 +19,11 @@ import Tour from "./components/Hero/TourList";
 import BookingList from "./components/Customer/BookingList";
 import AdminRoutes from "./components/Admin/AdminRoutes";
 
+
+import Delivery from "./components/Customer/Delivery";
+import ResetPassword from "./components/LoginAndSignIn/ResetPassword";
+import ForgotPassword from "./components/LoginAndSignIn/ForgotPassword";
+
 const App = () => {
   return (
     // <AuthProvider>
@@ -38,17 +43,26 @@ const App = () => {
             <Route path="/farm" element={<Farm />} />
             <Route path="/login" element={<Login />} />
             <Route path="/SignIn" element={<SignIn />} />
-
+            <Route path="/delivery/:bookingId" element={<Delivery />} />
             <Route element={<PrivateRoute allowedRoles={["CUSTOMER"]} />}>
               <Route path="/profile" element={<Profile />} />
               <Route path="/bookinglist" element={<BookingList />} />
             </Route>
-
+            <Route path="/resetpassword" element={<ResetPassword />} />
             <Route path="/bookings" element={<Booking />} />
             <Route path="/payment" element={<Payment />} />
             <Route path="/tour" element={<Tour />} />
 
             <Route path="/*" element={<AdminRoutes />} />
+
+
+
+            <Route
+              element={<PrivateRoute allowedRoles={["MANAGER"]} />}
+            ></Route>
+            <Route path="/forgotpassword" element={<ForgotPassword />} />
+
+
             <Route path="/paymentsuccess" element={<PaymentSuccess />} />
           </Routes>
         </div>
