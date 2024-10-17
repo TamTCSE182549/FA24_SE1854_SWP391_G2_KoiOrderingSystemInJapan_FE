@@ -30,10 +30,7 @@ const App = () => {
           backgroundImage: `url(${MainImg})`,
         }}
       >
-        {/* Navbar */}
-
-        {/* Content Area */}
-
+        <Navbar />
         <div className="flex-grow text-white ">
           <Routes>
             <Route path="/" element={<Hero />} />
@@ -56,8 +53,7 @@ const App = () => {
           </Routes>
         </div>
       </div>
-
-      {/* Footer luôn nằm cuối trang */}
+      <Footer />
     </div>
     // </AuthProvider>
   );
