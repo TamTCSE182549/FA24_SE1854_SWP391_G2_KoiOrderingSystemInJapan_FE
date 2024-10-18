@@ -42,8 +42,8 @@ const App = () => {
             <Route path="/login" element={<Login />} />
             <Route path="/SignIn" element={<SignIn />} />
             <Route path="/delivery/:bookingId" element={<Delivery />} />
+            <Route path="/profile" element={<Profile />} />
             <Route element={<PrivateRoute allowedRoles={["CUSTOMER"]} />}>
-              <Route path="/profile" element={<Profile />} />
               <Route path="/bookinglist" element={<BookingList />} />
             </Route>
             <Route path="/resetpassword" element={<ResetPassword />} />
@@ -52,6 +52,7 @@ const App = () => {
             <Route path="/tour" element={<Tour />} />
 
             <Route path="/*" element={<AdminRoutes />} />
+
 
 
 
