@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { useNavigate } from 'react-router-dom';
+import Navbar from "../Navbar/Navbar";
+import Footer from "../Footer/Footer";
 
 const Tour = () => {
   const [tours, setTours] = useState([]); // State to store tour data
@@ -57,23 +60,22 @@ const Tour = () => {
     },
   ];
 
+  const navigate = useNavigate();
+
+  const handleBooking = (tour) => {
+    // Điều hướng sang trang booking và truyền tour object qua state
+    navigate('/bookings', { state: { tour } });
+  };
+
   const fetchTourData = async (values) => {
     try {
-      const response = await axios.get("http://localhost:8080/tour/showAll", {
-        // tourName: values.tourName,
-        // unitPrice: values.unitPrice,
-        // maxParticipants: values.maxParticipants,
-        // description: values.description,
-        // startTime: values.startTime,
-        // endTime: values.endTime,
-        // image: values.tourImng,
-      });
-      if (Array.isArray(response.data)) {
-        setTours(response.data);
+      const response = await axios.get("http://localhost:8080/tour/showAllPageable");
+      if (Array.isArray(response.data.content)) {
+        setTours(response.data.content);
       } else {
         setTours(hardcodedTours);
       }
-      console.log("Tour Data:", response.data);
+      console.log("Tour Data:", response.data.content);
     } catch (error) {
       console.error("Error fetching tour data:", error);
       setError("Failed to fetch tour data. Displaying fallback data.");
@@ -101,114 +103,122 @@ const Tour = () => {
   }, []);
 
   return (
-    <div className="container mx-auto p-4">
-      <div className="flex">
-        {/* Sidebar Filters */}
-        <div className="w-1/4 p-4  rounded-lg bg-[#c5bd92] shadow-md">
-          <h2 className="text-xl text-gray-800 font-bold mb-4">Filter by:</h2>
-          {/* Popular Filters */}
-          <div className="mb-6">
-            <h3 className="text-lg font-bold mb-2">Popular Filters</h3>
-            <div className="mb-2">
-              <input
-                type="checkbox"
-                name="privatePool"
-                checked={filters.privatePool}
-                onChange={handleFilterChange}
-              />
-              <label className="ml-2">Private pool</label>
-            </div>
-            <div className="mb-2">
-              <input
-                type="checkbox"
-                name="villas"
-                checked={filters.villas}
-                onChange={handleFilterChange}
-              />
-              <label className="ml-2">Villas</label>
-            </div>
-            <div className="mb-2">
-              <input
-                type="checkbox"
-                name="swimmingPool"
-                checked={filters.swimmingPool}
-                onChange={handleFilterChange}
-              />
-              <label className="ml-2">Swimming Pool</label>
-            </div>
-          </div>
-          {/* Beach Access */}
-          <div className="mb-6">
-            <h3 className="text-lg font-bold mb-2">Beach Access</h3>
-            <div className="mb-2">
-              <input
-                type="checkbox"
-                name="beachfront"
-                checked={filters.beachfront}
-                onChange={handleFilterChange}
-              />
-              <label className="ml-2">Beachfront</label>
-            </div>
-          </div>
-          {/* Facilities */}
-          <div className="mb-6">
-            <h3 className="text-lg font-bold mb-2">Facilities</h3>
-            <div className="mb-2">
-              <input
-                type="checkbox"
-                name="parking"
-                checked={filters.parking}
-                onChange={handleFilterChange}
-              />
-              <label className="ml-2">Parking</label>
-            </div>
-          </div>
-        </div>
-
-        {/* Tour List */}
-        <div className="w-3/4 ml-4">
-          <h1 className="text-2xl font-bold mb-4 text-black">Tour List</h1>
-          {error && <p className="text-red-500">{error}</p>}
-          <div className="space-y-6">
-            {filteredTours.length === 0 ? (
-              <p>No tours found.</p>
-            ) : (
-              filteredTours.map((tour) => (
-                <div
-                  key={tour.id}
-                  className="bg-white shadow-lg rounded-lg overflow-hidden flex flex-col justify-between"
-                >
-                  <img
-                    src={`https://via.placeholder.com/400x200?text=${tour.tourName}`}
-                    alt={tour.tourName}
-                    className="w-full h-48 object-cover"
+    <div className="min-h-screen flex flex-col">
+      <div className="flex-grow">
+        <div className="container mx-auto p-4">
+          <div className="flex">
+            {/* Sidebar Filters */}
+            <div className="w-1/4 p-4  rounded-lg bg-[#c5bd92] shadow-md">
+              <h2 className="text-xl text-gray-800 font-bold mb-4">
+                Filter by:
+              </h2>
+              {/* Popular Filters */}
+              <div className="mb-6">
+                <h3 className="text-lg font-bold mb-2">Popular Filters</h3>
+                <div className="mb-2">
+                  <input
+                    type="checkbox"
+                    name="privatePool"
+                    checked={filters.privatePool}
+                    onChange={handleFilterChange}
                   />
-                  <div className="p-4 flex-grow">
-                    <h3 className="text-xl font-bold mb-2 text-black">
-                      {tour.tourName}
-                    </h3>
-                    <p className="text-gray-700 mb-2">{tour.description}</p>
-                    <p className="text-sm text-gray-500">
-                      Price: {tour.unitPrice} USD
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      Max Participants: {tour.maxParticipants}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      Start Time: {new Date(tour.startTime).toLocaleString()}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      End Time: {new Date(tour.endTime).toLocaleString()}
-                    </p>
-                  </div>
-                  <div className="p-4">
-                    <button className="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
-                      Book Now
-                    </button>
-                  </div>
+                  <label className="ml-2">Private pool</label>
                 </div>
-              ))
-            )}
+                <div className="mb-2">
+                  <input
+                    type="checkbox"
+                    name="villas"
+                    checked={filters.villas}
+                    onChange={handleFilterChange}
+                  />
+                  <label className="ml-2">Villas</label>
+                </div>
+                <div className="mb-2">
+                  <input
+                    type="checkbox"
+                    name="swimmingPool"
+                    checked={filters.swimmingPool}
+                    onChange={handleFilterChange}
+                  />
+                  <label className="ml-2">Swimming Pool</label>
+                </div>
+              </div>
+              {/* Beach Access */}
+              <div className="mb-6">
+                <h3 className="text-lg font-bold mb-2">Beach Access</h3>
+                <div className="mb-2">
+                  <input
+                    type="checkbox"
+                    name="beachfront"
+                    checked={filters.beachfront}
+                    onChange={handleFilterChange}
+                  />
+                  <label className="ml-2">Beachfront</label>
+                </div>
+              </div>
+              {/* Facilities */}
+              <div className="mb-6">
+                <h3 className="text-lg font-bold mb-2">Facilities</h3>
+                <div className="mb-2">
+                  <input
+                    type="checkbox"
+                    name="parking"
+                    checked={filters.parking}
+                    onChange={handleFilterChange}
+                  />
+                  <label className="ml-2">Parking</label>
+                </div>
+              </div>
+            </div>
+
+            {/* Tour List */}
+            <div className="w-3/4 ml-4">
+              <h1 className="text-2xl font-bold mb-4 text-lime-950">Tour List</h1>
+              {error && <p className="text-red-500">{error}</p>}
+              <div className="space-y-6">
+                {filteredTours.length === 0 ? (
+                  <p>No tours found.</p>
+                ) : (
+                  filteredTours.map((tour) => (
+                    <div
+                      key={tour.id}
+                      className="bg-white shadow-lg rounded-lg overflow-hidden flex flex-col justify-between"
+                    >
+                      <img
+                        src={tour.tourImg ? tour.tourImg : `https://via.placeholder.com/400x200?text=No+image`}
+                        alt={tour.tourName}
+                        className="w-full h-64 object-none"
+                      />
+                      <div className="p-4 flex-grow">
+                        <h3 className="text-xl font-bold mb-2 text-black">
+                          {tour.tourName}
+                        </h3>
+                        <p className="text-gray-700 mb-2">{tour.description}</p>
+                        <p className="text-sm text-gray-500">
+                          Price: {tour.unitPrice} USD
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          Max Participants: {tour.maxParticipants}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          Start Time:{" "}
+                          {new Date(tour.startTime).toLocaleString()}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          End Time: {new Date(tour.endTime).toLocaleString()}
+                        </p>
+                      </div>
+                      <div className="p-4">
+                        <button className="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+                                onClick={() => handleBooking(tour)}>
+                          Book Now
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </div>

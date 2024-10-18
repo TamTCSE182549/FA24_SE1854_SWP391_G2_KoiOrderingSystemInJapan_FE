@@ -1,7 +1,9 @@
 import React from "react";
 import { Input, Slider, Checkbox, Pagination, Button, Tag } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
-
+import Nabar from "../Navbar/Navbar";
+import Navbar from "../Navbar/Navbar";
+import Footer from "../Footer/Footer";
 const { CheckableTag } = Tag;
 
 const mockData = [
@@ -27,16 +29,16 @@ const Filters = () => {
 
       <div className="mb-4">
         <h3 className="font-semibold mb-2">Label</h3>
-        <Checkbox className="mb-2">
-          Label <span className="text-gray-400">Description</span>
+        <Checkbox className="mb-2 text-white">
+          Label <span className="text-white">Description</span>
         </Checkbox>{" "}
         <br />
-        <Checkbox className="mb-2">
-          Label <span className="text-gray-400">Description</span>
+        <Checkbox className="mb-2 text-white">
+          Label <span className="text-white">Description</span>
         </Checkbox>{" "}
         <br />
-        <Checkbox>
-          Label <span className="text-gray-400">Description</span>
+        <Checkbox className="text-white mb-2">
+          Label <span className="text-white">Description</span>
         </Checkbox>{" "}
         <br />
       </div>
@@ -65,12 +67,17 @@ const Filters = () => {
 
 const ProductCard = ({ name, location, price, rating }) => {
   return (
-    <div className="p-4 bg-white shadow-md rounded-md">
+    <div className="p-4 bg-gray-100 shadow-md rounded-md">
       <div className="h-48 bg-gray-200 mb-4" /> {/* Placeholder cho hình ảnh */}
-      <h3 className="font-semibold">{name}</h3>
-      <p>{location}</p>
-      <div className="font-bold">{price}</div>
-      <p className="text-gray-500">{rating}</p>
+      <h3 className="font-semibold text-black">{name}</h3>
+      <p className="text-gray-900">{location}</p>
+      <div className="font-bold text-black">{price}</div>
+      <p className="text-gray-900">{rating}</p>
+      <div className="ml-[60%]">
+        <button className="bg-green-900 text-white rounded-md px-4 py-2 transition duration-300 ease-in-out hover:bg-green-700 ">
+          Book Now
+        </button>
+      </div>
     </div>
   );
 };
@@ -113,9 +120,11 @@ const ProductGrid = () => {
 
 const KoiForSale = () => {
   return (
-    <div className="flex min-h-screen ">
-      <Filters />
-      <ProductGrid />
+    <div>
+      <div className="flex pt-4 container mx-auto justify-between backdrop-filter backdrop-blur-3xl">
+        <Filters />
+        <ProductGrid />
+      </div>
     </div>
   );
 };
