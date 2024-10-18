@@ -1,9 +1,6 @@
 import React from "react";
 import { Input, Slider, Checkbox, Pagination, Button, Tag } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
-import Nabar from "../Navbar/Navbar";
-import Navbar from "../Navbar/Navbar";
-import Footer from "../Footer/Footer";
 const { CheckableTag } = Tag;
 
 const mockData = [
@@ -15,6 +12,29 @@ const mockData = [
   { name: "Tour name", location: "Location", price: "5.99$", rating: "Rating" },
 ];
 
+const getFishesByCategory = async (categoryId) => {
+  try {
+    // Lấy thông tin danh mục từ API ban đầu
+    const categoryResponse = await axios.get(
+      `https://example.com/api/categories/${categoryId}`
+    );
+    const categoryData = categoryResponse.data;
+
+    // Dùng categoryId để lấy danh sách cá từ API khác
+    const fishesResponse = await axios.get(`https://example.com/api/fishes`, {
+      params: {
+        categoryId: categoryId,
+      },
+    });
+    const fishesData = fishesResponse.data;
+
+    console.log(fishesData); // Hiển thị danh sách cá
+  } catch (error) {
+    console.error("Error:", error);
+  }
+};
+
+getFishesByCategory("123");
 const Filters = () => {
   return (
     <div className="w-1/4 p-4 shadow-md">

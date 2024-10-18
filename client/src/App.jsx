@@ -17,6 +17,9 @@ import Tour from "./components/Hero/TourList";
 import BookingList from "./components/Customer/BookingList";
 import AdminRoutes from "./components/Admin/AdminRoutes";
 
+import FarmDetail from "./components/Hero/FarmDetail";
+
+
 
 import Delivery from "./components/Customer/Delivery";
 import ResetPassword from "./components/LoginAndSignIn/ResetPassword";
@@ -50,6 +53,7 @@ const App = () => {
             <Route path="/bookings" element={<Booking />} />
             <Route path="/payment" element={<Payment />} />
             <Route path="/tour" element={<Tour />} />
+            <Route path="/farm/:id" element={<FarmDetail />} />
 
             <Route path="/*" element={<AdminRoutes />} />
 
