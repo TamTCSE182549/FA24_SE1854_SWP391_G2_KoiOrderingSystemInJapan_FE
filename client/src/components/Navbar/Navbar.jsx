@@ -93,7 +93,7 @@ const Navbar = () => {
   );
 
   return (
-    <div className="bg-gradient-to-t from-green-600 to-green-900 w-full shadow-lg mb-10">
+    <div className="bg-gradient-to-t from-green-600 to-green-900 w-full shadow-lg z-50">
       {/* upper Navbar */}
       <div className="flex justify-between items-center w-full px-6 lg:px-12 py-3">
         {/* Logo and site name */}
