@@ -100,7 +100,7 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center">
-      <div className="bg-[#c5bd92] p-8 rounded-lg shadow-lg w-full max-w-md">
+      <div className="backdrop-filter backdrop-blur-3xl p-8 rounded-lg shadow-lg w-full max-w-md">
         <h2 className="text-white text-3xl font-bold text-center mb-6">
           Log In
         </h2>
@@ -150,7 +150,7 @@ const Login = () => {
             <Button
               type="custom"
               htmlType="submit"
-              className="w-full bg-[#b7aa61] text-white hover:bg-[#b7aa59] hover:scale-105 transition-all duration-300"
+              className="w-full backdrop-filter backdrop-blur-3xl text-white hover:bg-gradient-to-r from-green-600 to-green-950 hover:scale-105 transition-all duration-300 border border-white"
             >
               Sign in
             </Button>

@@ -178,7 +178,7 @@ const Hero = () => {
           </div>
         </div>
       </div>
-      <div className="sticky bottom-5 pl-96 translate-x-3/4 ">
+      <div className="fixed bottom-5 right-5  ">
         <button
           className=" hover:text-red-800 text-6xl  text-red-500 mb-5 px-4 py-2 rounded-full"
           onClick={() => {

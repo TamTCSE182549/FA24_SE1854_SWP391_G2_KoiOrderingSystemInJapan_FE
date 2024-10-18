@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { Input, Dropdown, Menu, Avatar } from "antd";
-import { Link, useNavigate } from "react-router-dom";
+import { Input, Dropdown, Menu, Avatar, Drawer } from "antd";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
   UserOutlined,
   ShoppingCartOutlined,
   DownOutlined,
+  MenuOutlined,
 } from "@ant-design/icons";
-// import { AuthContext } from "../../components/LoginAndSignIn/AuthContext";
 import Logo from "../../assets/bg_f8f8f8-flat_750x_075_f-pad_750x1000_f8f8f8-removebg-preview.png";
 import { useCookies } from "react-cookie";
-import { jwtDecode } from "jwt-decode"; // Import chính xác mà không cần dấu ngoặc nhọn
+import { jwtDecode } from "jwt-decode";
+import { div } from "framer-motion/client";
 
 const { Search } = Input;
 
@@ -28,7 +29,9 @@ const Navbar = () => {
   const [firstName, setFirstName] = useState(null);
   const [lastName, setLastName] = useState(null);
   const [cookies, setCookie, removeCookie] = useCookies(["token"]);
+  const [drawerVisible, setDrawerVisible] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const token = cookies.token;
@@ -59,11 +62,18 @@ const Navbar = () => {
     navigate("/");
   };
 
+  const onOpenDrawer = () => {
+    setDrawerVisible(true);
+  };
+
+  const onCloseDrawer = () => {
+    setDrawerVisible(false);
+  };
   // Handle sign out
   const handleSignOut = () => {
-    removeCookie("token"); // Xóa token từ cookies
-    setLogin(false); // Đặt lại trạng thái đăng nhập
-    navigate("/login"); // Chuyển hướng đến trang đăng nhập
+    removeCookie("token"); // Remove token from cookies
+    setLogin(false); // Reset login state
+    navigate("/"); // Redirect to login page
   };
 
   const userMenu = (
@@ -92,8 +102,92 @@ const Navbar = () => {
     </Menu>
   );
 
-  return (
-    <div className="bg-gradient-to-t from-green-600 to-green-900 w-full shadow-lg z-50">
+  const Sidebar = () => (
+    <Drawer
+      placement="left"
+      onClose={onCloseDrawer}
+      open={drawerVisible}
+      maskTransitionName="fade"
+      closable={false}
+      style={{ backgroundColor: "rgba(0, 0, 0, 0.85)" }}
+      bodyStyle={{ display: "flex", flexDirection: "column", height: "100%" }}
+    >
+      <div className="flex flex-col justify-between items-center">
+        {/* Logo và tên website */}
+        <div className="flex items-center">
+          <img src={Logo} alt="Logo" className="w-16 h-auto pr-4" />
+          <span className="text-white font-serif text-xl">KOIBOOKING</span>
+        </div>
+
+        {/* Nút Login hoặc Avatar */}
+        {login ? (
+          <div className="p-6">
+            <div className="flex flex-col items-center text-center">
+              <Avatar icon={<UserOutlined />} size={64} />
+              <span className="text-white font-serif text-lg">{`${firstName} ${lastName}`}</span>
+            </div>
+          </div>
+        ) : (
+          <div className="text-center mt-6">
+            <Link
+              to="/login"
+              className="text-white font-serif text-lg transition duration-500
+                       hover:text-white hover:shadow-2xl hover:rounded-3xl hover:font-bold w-full h-[50px]
+                       flex justify-center items-center"
+              onClick={() => setDrawerVisible(false)}
+            >
+              Login
+            </Link>
+          </div>
+        )}
+
+        {/* Menu items */}
+        <div className="flex flex-col">
+          <ul className="flex-1 overflow-auto">
+            {MenuItems.map((data) => (
+              <li
+                key={data.id}
+                className="flex-1 flex justify-center text-center items-center"
+              >
+                <Link
+                  to={data.link}
+                  className="text-white font-serif text-lg transition duration-500
+                           hover:text-white hover:shadow-2xl hover:rounded-3xl hover:font-bold w-full h-[50px]
+                          flex justify-center items-center"
+                  onClick={() => setDrawerVisible(false)}
+                >
+                  {data.name}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+
+      {/* Nút Logout ở dưới cùng */}
+      {login && (
+        <div className="p-6 border-t border-gray-700">
+          <button
+            onClick={handleSignOut}
+            className="bg-red-500 text-white px-4 py-2 rounded-md transition duration-300 hover:bg-red-600 w-full h-[50px] flex justify-center items-center"
+          >
+            Logout
+          </button>
+        </div>
+      )}
+    </Drawer>
+  );
+
+  return location.pathname === "/" ? (
+    <>
+      <MenuOutlined
+        className="text-white text-2xl cursor-pointer z-50 fixed top-3 left-3"
+        onClick={onOpenDrawer}
+      />
+      <Sidebar />
+    </>
+  ) : (
+    <div className="bg-gradient-to-t from-green-600 to-green-900 w-full shadow-lg mb-10">
       {/* upper Navbar */}
       <div className="flex justify-between items-center w-full px-6 lg:px-12 py-3">
         {/* Logo and site name */}
