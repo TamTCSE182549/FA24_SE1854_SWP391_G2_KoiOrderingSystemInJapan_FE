@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useCookies } from "react-cookie";
 import { jwtDecode } from "jwt-decode"; // Ensure correct import
+import { useLocation } from 'react-router-dom';
 
 const BookingTrip = () => {
   const [tourID, setTourID] = useState("");
@@ -9,6 +10,8 @@ const BookingTrip = () => {
   const [participants, setParticipants] = useState(1);
   const [message, setMessage] = useState("");
   const [decodedToken, setDecodedToken] = useState(null);
+  const location = useLocation();
+  const { tour } = location.state || {};
 
   // Lấy token từ cookies
   const [cookies] = useCookies(["token"]);
@@ -38,15 +41,15 @@ const BookingTrip = () => {
     }
 
     // Dữ liệu booking tương ứng với BookingRequest class
-    // const bookingData = {
-    //   tourID: Number(tourID),
-    //   paymentMethod: paymentMethod,
-    //   participants: participants,
-    // };
+    const bookingData = {
+      tourID: Number(tour.id),
+      paymentMethod: paymentMethod,
+      participants: Number(participants),
+    };
 
     try {
       const response = await axios.post(
-        "http://localhost:8080/bookings/create",
+        "http://localhost:8080/bookings/CreateForTour", bookingData,
         {
           headers: {
             Authorization: `Bearer ${token}`, // Ensure the token is correctly passed
@@ -78,13 +81,16 @@ const BookingTrip = () => {
       <h1 className="text-xl font-bold">Book a Trip</h1>
       <form onSubmit={handleBooking}>
         <div className="mb-4">
-          <label className="block">Tour ID: </label>
-          <input
-            type="text"
-            value={tourID}
-            onChange={(e) => setTourID(e.target.value)}
-            required
+          <label className="block">Tour: </label>
+          <input 
+            value={tour.tourName} // Hiển thị tên tour
+            readOnly
             className="border border-gray-300 rounded-md p-2 w-full"
+          />
+          <input 
+            type="hidden" 
+            value={tour.tourID} // Lưu tourID ẩn
+            onChange={(e) => setTourID(e.target.value)} 
           />
         </div>
         <div className="mb-4">
