@@ -29,7 +29,7 @@ const CardsData = [
   {
     id: 2,
     img: Img3,
-    title: "Koi Of Farm",
+    title: "Farm",
     desc: "Each character will appear one by one",
     link: "/farm", // Correct link
   },
