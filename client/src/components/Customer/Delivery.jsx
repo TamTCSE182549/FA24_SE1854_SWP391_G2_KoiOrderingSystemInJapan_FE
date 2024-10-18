@@ -10,13 +10,18 @@ import {
   Modal,
   Input,
   message,
+  Card,
+  DatePicker,
+  Select,
 } from "antd";
 import { useParams } from "react-router-dom";
 import { useCookies } from "react-cookie";
 import { format } from "date-fns"; // Import date-fns
 import { jwtDecode } from "jwt-decode";
+import moment from "moment";
 
-const { Title } = Typography;
+const { Title, Text } = Typography;
+const { Option } = Select;
 
 const Delivery = () => {
   const [loading, setLoading] = useState(true);
@@ -34,6 +39,16 @@ const Delivery = () => {
   const [isAddModalVisible, setIsAddModalVisible] = useState(false);
   const [newDeliveryRoute, setNewDeliveryRoute] = useState("");
   const [newDeliveryDescription, setNewDeliveryDescription] = useState("");
+  const [checkoutInfo, setCheckoutInfo] = useState(null);
+  const [isCheckoutModalVisible, setIsCheckoutModalVisible] = useState(false);
+  const [checkoutCustomerName, setCheckoutCustomerName] = useState("");
+  const [checkoutReceiveDate, setCheckoutReceiveDate] = useState(null);
+  const [checkoutHealthDescription, setCheckoutHealthDescription] =
+    useState("");
+  const [checkoutStatus, setCheckoutStatus] = useState("");
+  const [isUpdateCheckoutModalVisible, setIsUpdateCheckoutModalVisible] =
+    useState(false);
+  const [checkoutReason, setCheckoutReason] = useState("");
 
   const deliveryList = async () => {
     setLoading(true);
@@ -58,8 +73,29 @@ const Delivery = () => {
     }
   };
 
+  const fetchCheckoutInfo = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:8080/api/delivery/${bookingId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        setCheckoutInfo(response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching checkout info:", error);
+      message.error("Failed to fetch checkout information");
+    }
+  };
+
   useEffect(() => {
     deliveryList();
+    fetchCheckoutInfo();
   }, []);
 
   const formatDateTime = (dateTimeString) => {
@@ -183,6 +219,107 @@ const Delivery = () => {
       console.error("Error adding delivery:", error);
       setError("Failed to add delivery data.");
       message.error("Failed to add delivery");
+    }
+  };
+
+  const showCheckoutModal = () => {
+    setCheckoutCustomerName("");
+    setCheckoutReceiveDate(null);
+    setCheckoutHealthDescription("");
+    setCheckoutStatus("");
+    setCheckoutReason("");
+    setIsCheckoutModalVisible(true);
+  };
+
+  const handleCheckout = async () => {
+    if (checkoutStatus === "CANCELLED" && !checkoutReason.trim()) {
+      message.error("Please provide a reason for cancellation");
+      return;
+    }
+
+    try {
+      const payload = {
+        customerName: checkoutCustomerName,
+        receiveDate: checkoutReceiveDate,
+        healthKoiDescription: checkoutHealthDescription,
+        status: checkoutStatus,
+      };
+
+      if (checkoutStatus === "CANCELLED") {
+        payload.reason = checkoutReason;
+      }
+
+      const response = await axios.post(
+        `http://localhost:8080/api/delivery/${bookingId}`,
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        message.success("Delivery checked out successfully");
+        setIsCheckoutModalVisible(false);
+        await fetchCheckoutInfo();
+        setCheckoutReason(""); // Reset reason after successful checkout
+      }
+    } catch (error) {
+      console.error("Error checking out delivery:", error);
+      message.error("Failed to checkout delivery");
+    }
+  };
+
+  const showUpdateCheckoutModal = () => {
+    if (checkoutInfo) {
+      setCheckoutCustomerName(checkoutInfo.customerName);
+      setCheckoutReceiveDate(
+        checkoutInfo.receiveDate ? new Date(checkoutInfo.receiveDate) : null
+      );
+      setCheckoutHealthDescription(checkoutInfo.healthKoiDescription);
+      setCheckoutStatus(checkoutInfo.status);
+      setCheckoutReason(checkoutInfo.reason || "");
+    }
+    setIsUpdateCheckoutModalVisible(true);
+  };
+
+  const handleUpdateCheckout = async () => {
+    if (checkoutStatus === "CANCELLED" && !checkoutReason.trim()) {
+      message.error("Please provide a reason for cancellation");
+      return;
+    }
+
+    try {
+      const payload = {
+        customerName: checkoutCustomerName,
+        receiveDate: checkoutReceiveDate,
+        healthKoiDescription: checkoutHealthDescription,
+        status: checkoutStatus,
+      };
+
+      if (checkoutStatus === "CANCELLED") {
+        payload.reason = checkoutReason;
+      }
+
+      const response = await axios.put(
+        `http://localhost:8080/api/delivery/${bookingId}`,
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        message.success("Checkout information updated successfully");
+        setIsUpdateCheckoutModalVisible(false);
+        await fetchCheckoutInfo();
+      }
+    } catch (error) {
+      console.error("Error updating checkout information:", error);
+      message.error("Failed to update checkout information");
     }
   };
 
@@ -328,6 +465,160 @@ const Delivery = () => {
           placeholder="New Health Koi Description"
           rows={4}
         />
+      </Modal>
+      <Modal
+        title="Checkout Delivery"
+        visible={isCheckoutModalVisible}
+        onOk={handleCheckout}
+        onCancel={() => setIsCheckoutModalVisible(false)}
+      >
+        <Input
+          value={checkoutCustomerName}
+          onChange={(e) => setCheckoutCustomerName(e.target.value)}
+          placeholder="Customer Name"
+          style={{ marginBottom: 16 }}
+        />
+        <DatePicker
+          value={checkoutReceiveDate}
+          onChange={(date) => setCheckoutReceiveDate(date)}
+          style={{ marginBottom: 16, width: "100%" }}
+          placeholder="Receive Date"
+        />
+        <Input.TextArea
+          value={checkoutHealthDescription}
+          onChange={(e) => setCheckoutHealthDescription(e.target.value)}
+          placeholder="Health Koi Description"
+          rows={4}
+          style={{ marginBottom: 16 }}
+        />
+        <Select
+          value={checkoutStatus}
+          onChange={(value) => setCheckoutStatus(value)}
+          style={{ width: "100%", marginBottom: 16 }}
+          placeholder="Select Delivery Status"
+        >
+          <Option value="COMPLETED">COMPLETED</Option>
+          <Option value="CANCELLED">CANCELLED</Option>
+        </Select>
+        {checkoutStatus === "CANCELLED" && (
+          <Input.TextArea
+            value={checkoutReason}
+            onChange={(e) => setCheckoutReason(e.target.value)}
+            placeholder="Reason for cancellation"
+            rows={4}
+            style={{ marginBottom: 16 }}
+            required
+          />
+        )}
+      </Modal>
+
+      {checkoutInfo && (
+        <Card
+          title="Checkout Information"
+          style={{ marginTop: "20px", marginBottom: "20px" }}
+        >
+          <div
+            style={{ display: "flex", flexDirection: "column", gap: "10px" }}
+          >
+            <Text>
+              <strong>Customer Name:</strong> {checkoutInfo.customerName}
+            </Text>
+            <Text>
+              <strong>Delivery Date:</strong>{" "}
+              {formatDateTime(checkoutInfo.receiveDate)}
+            </Text>
+            <Text>
+              <strong>Koi Health:</strong> {checkoutInfo.healthKoiDescription}
+            </Text>
+            <Text>
+              <strong>Delivery Status:</strong> {checkoutInfo.status}
+            </Text>
+            <Text>
+              <strong>Payment Amount:</strong>
+              {checkoutInfo.remainAmount}
+            </Text>
+            <Text>
+              <strong>Delivery Staff:</strong> {checkoutInfo.staffName}
+            </Text>
+            {checkoutInfo.reason && (
+              <Text>
+                <strong>Reason:</strong> {checkoutInfo.reason}
+              </Text>
+            )}
+          </div>
+        </Card>
+      )}
+
+      {!loading &&
+        !error &&
+        deliveries.length > 0 &&
+        role === "DELIVERING_STAFF" && (
+          <div style={{ marginTop: "20px", textAlign: "center" }}>
+            <Button
+              type="primary"
+              size="large"
+              onClick={showCheckoutModal}
+              style={{ marginRight: "10px" }}
+            >
+              Checkout Delivery
+            </Button>
+            {checkoutInfo && (
+              <Button
+                type="default"
+                size="large"
+                onClick={showUpdateCheckoutModal}
+              >
+                Update Checkout Info
+              </Button>
+            )}
+          </div>
+        )}
+
+      {/* Update Checkout Modal */}
+      <Modal
+        title="Update Checkout Information"
+        visible={isUpdateCheckoutModalVisible}
+        onOk={handleUpdateCheckout}
+        onCancel={() => setIsUpdateCheckoutModalVisible(false)}
+      >
+        <Input
+          value={checkoutCustomerName}
+          onChange={(e) => setCheckoutCustomerName(e.target.value)}
+          placeholder="Customer Name"
+          style={{ marginBottom: 16 }}
+        />
+        <DatePicker
+          value={checkoutReceiveDate ? moment(checkoutReceiveDate) : null}
+          onChange={(date) => setCheckoutReceiveDate(date)}
+          style={{ marginBottom: 16, width: "100%" }}
+          placeholder="Receive Date"
+        />
+        <Input.TextArea
+          value={checkoutHealthDescription}
+          onChange={(e) => setCheckoutHealthDescription(e.target.value)}
+          placeholder="Health Koi Description"
+          rows={4}
+          style={{ marginBottom: 16 }}
+        />
+        <Select
+          value={checkoutStatus}
+          onChange={(value) => setCheckoutStatus(value)}
+          style={{ width: "100%", marginBottom: 16 }}
+          placeholder="Select Delivery Status"
+        >
+          <Option value="COMPLETED">COMPLETED</Option>
+          <Option value="CANCELLED">CANCELLED</Option>
+        </Select>
+        {checkoutStatus === "CANCELLED" && (
+          <Input.TextArea
+            value={checkoutReason}
+            onChange={(e) => setCheckoutReason(e.target.value)}
+            placeholder="Reason for cancellation"
+            rows={4}
+            style={{ marginBottom: 16 }}
+            required
+          />
+        )}
       </Modal>
     </div>
   );
