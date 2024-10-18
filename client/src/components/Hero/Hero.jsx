@@ -84,7 +84,7 @@ const Hero = () => {
   };
 
   return (
-    <div className="mx-auto max-w-[100%] overflow-hidden">
+    <div className="mx-auto max-w-[100%] overflow-hidden z-10 ">
       <div className="w-full h-[100vh] relative">
         {/* Ensure carousel container takes full viewport height */}
         <Carousel
@@ -187,9 +187,6 @@ const Hero = () => {
         >
           <FaArrowAltCircleUp />
         </button>
-      </div>
-      <div>
-        <Footer />
       </div>
     </div>
   );

@@ -5,14 +5,12 @@ import Hero from "./components/Hero/Hero";
 import KoiForSale from "./components/Hero/KoiForSale";
 import Footer from "./components/Footer/Footer";
 import Farm from "./components/Hero/Farm";
-import AdminDashboard from "./components/Admin/AdminDashboard";
 import Login from "./components/LoginAndSignIn/Login";
 import SignIn from "./components/LoginAndSignIn/SignIn";
 import Profile from "./components/Customer/Profile";
 import Booking from "./components/Customer/Booking";
 import Payment from "./components/Customer/Payment";
 import PaymentSuccess from "./components/Customer/PaymentSuccess";
-// import { AuthProvider } from "./components/LoginAndSignIn/AuthContext";
 import MainImg from "./assets/9543121.jpg"; // Import hình ảnh của bạn
 import PrivateRoute from "./components/PrivateRouter/PrivateRouter";
 import Tour from "./components/Hero/TourList";
@@ -53,7 +51,9 @@ const App = () => {
           </Routes>
         </div>
       </div>
-      <Footer />
+      <div>
+        <Footer />
+      </div>
     </div>
     // </AuthProvider>
   );
