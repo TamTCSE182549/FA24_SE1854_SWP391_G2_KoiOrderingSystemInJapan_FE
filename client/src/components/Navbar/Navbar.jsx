@@ -39,9 +39,9 @@ const Navbar = () => {
       try {
         const decodedToken = jwtDecode(token);
         setEmail(decodedToken.email);
-        setFirstName(decodedToken.first_name);
-        setLastName(decodedToken.last_name);
-        console.log("Valid token", decodedToken.first_name);
+        setFirstName(decodedToken.firstName);
+        setLastName(decodedToken.lastName);
+        console.log("Valid token", decodedToken.firstName);
         setLogin(true);
       } catch (error) {
         console.log("Invalid token", error);
