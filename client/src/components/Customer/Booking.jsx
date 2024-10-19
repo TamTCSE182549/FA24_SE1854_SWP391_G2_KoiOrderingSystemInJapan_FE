@@ -18,14 +18,14 @@ const BookingTrip = () => {
   const { tour } = location.state || {};
 
   //mesage
-  useEffect(() => {
-    if (message) {
-      const timer = setTimeout(() => {
-        setMessage(""); // Ẩn thông báo sau 5 giây
-      }, 5000);
-      return () => clearTimeout(timer); // Dọn dẹp bộ hẹn giờ khi component unmount
-    }
-  }, [message]);
+  // useEffect(() => {
+  //   if (message) {
+  //     const timer = setTimeout(() => {
+  //       setMessage(""); // Ẩn thông báo sau 5 giây
+  //     }, 5000);
+  //     return () => clearTimeout(timer); // Dọn dẹp bộ hẹn giờ khi component unmount
+  //   }
+  // }, [message]);
 
   // Lấy token từ cookies
   const [cookies] = useCookies(["token"]);
