@@ -41,7 +41,6 @@ const Navbar = () => {
         setEmail(decodedToken.email);
         setFirstName(decodedToken.firstName);
         setLastName(decodedToken.lastName);
-        console.log("Valid token", decodedToken.firstName);
         setLogin(true);
       } catch (error) {
         console.log("Invalid token", error);
@@ -69,11 +68,11 @@ const Navbar = () => {
   const onCloseDrawer = () => {
     setDrawerVisible(false);
   };
-  // Handle sign out
+
   const handleSignOut = () => {
-    removeCookie("token"); // Remove token from cookies
-    setLogin(false); // Reset login state
-    navigate("/"); // Redirect to login page
+    removeCookie("token");
+    setLogin(false);
+    navigate("/");
   };
 
   const userMenu = (
@@ -113,13 +112,11 @@ const Navbar = () => {
       bodyStyle={{ display: "flex", flexDirection: "column", height: "100%" }}
     >
       <div className="flex flex-col justify-between items-center">
-        {/* Logo và tên website */}
         <div className="flex items-center">
           <img src={Logo} alt="Logo" className="w-16 h-auto pr-4" />
           <span className="text-white font-serif text-xl">KOIBOOKING</span>
         </div>
 
-        {/* Nút Login hoặc Avatar */}
         {login ? (
           <div className="p-6">
             <div className="flex flex-col items-center text-center">
@@ -131,9 +128,7 @@ const Navbar = () => {
           <div className="text-center mt-6">
             <Link
               to="/login"
-              className="text-white font-serif text-lg transition duration-500
-                       hover:text-white hover:shadow-2xl hover:rounded-3xl hover:font-bold w-full h-[50px]
-                       flex justify-center items-center"
+              className="text-white font-serif text-lg transition duration-500 hover:text-white hover:shadow-2xl hover:rounded-3xl hover:font-bold w-full h-[50px] flex justify-center items-center"
               onClick={() => setDrawerVisible(false)}
             >
               Login
@@ -141,7 +136,6 @@ const Navbar = () => {
           </div>
         )}
 
-        {/* Menu items */}
         <div className="flex flex-col">
           <ul className="flex-1 overflow-auto">
             {MenuItems.map((data) => (
@@ -151,9 +145,7 @@ const Navbar = () => {
               >
                 <Link
                   to={data.link}
-                  className="text-white font-serif text-lg transition duration-500
-                           hover:text-white hover:shadow-2xl hover:rounded-3xl hover:font-bold w-full h-[50px]
-                          flex justify-center items-center"
+                  className="text-white font-serif text-lg transition duration-500 hover:text-white hover:shadow-2xl hover:rounded-3xl hover:font-bold w-full h-[50px] flex justify-center items-center"
                   onClick={() => setDrawerVisible(false)}
                 >
                   {data.name}
@@ -164,7 +156,6 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Nút Logout ở dưới cùng */}
       {login && (
         <div className="p-6 border-t border-gray-700">
           <button
@@ -188,9 +179,7 @@ const Navbar = () => {
     </>
   ) : (
     <div className="bg-gradient-to-t from-green-600 to-green-900 w-full shadow-lg mb-10">
-      {/* upper Navbar */}
       <div className="flex justify-between items-center w-full px-6 lg:px-12 py-3">
-        {/* Logo and site name */}
         <div className="flex items-center">
           <img
             src={Logo}
@@ -203,7 +192,6 @@ const Navbar = () => {
           </div>
         </div>
 
-        {/* Navigation menu */}
         <div className="hidden md:flex flex-grow justify-center rounded-3xl">
           <ul className="flex justify-between w-[70%] rounded-3xl ">
             {MenuItems.map((data) => (
@@ -213,9 +201,7 @@ const Navbar = () => {
               >
                 <Link
                   to={data.link}
-                  className="text-white font-serif text-lg transition duration-500
-                             hover:text-white hover:shadow-2xl hover:rounded-3xl hover:font-bold w-full h-[50px]
-                            flex justify-center items-center"
+                  className="text-white font-serif text-lg transition duration-500 hover:text-white hover:shadow-2xl hover:rounded-3xl hover:font-bold w-full h-[50px] flex justify-center items-center"
                 >
                   {data.name}
                 </Link>
@@ -224,7 +210,6 @@ const Navbar = () => {
           </ul>
         </div>
 
-        {/* Search bar and Icons */}
         <div className="flex items-center space-x-6">
           {login ? (
             <Dropdown overlay={userMenu} trigger={["click"]}>

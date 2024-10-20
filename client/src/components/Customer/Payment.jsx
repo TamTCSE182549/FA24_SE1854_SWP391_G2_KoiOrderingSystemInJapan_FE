@@ -1,86 +1,135 @@
-import React from "react";
-import { Form, Input, Button, Card } from "antd";
+import React, { useState } from "react";
+import {
+  Button,
+  Card,
+  Radio,
+  Row,
+  Col,
+  Typography,
+  Divider,
+  Form,
+  Input,
+  DatePicker,
+} from "antd";
+import { CreditCardOutlined, DollarOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 
-const TicketPaymentForm = () => {
-  const [form] = Form.useForm();
-  const navigate = useNavigate();
+const { Title, Text } = Typography;
 
-  const onFinish = (values) => {
-    console.log("Received values:", values);
-    // Thực hiện hành động thêm thẻ
-  };
+const TicketPaymentForm = () => {
+  const navigate = useNavigate();
+  const [form] = Form.useForm();
 
   const onSuccess = () => {
-    navigate("/paymentsuccess");
+    form
+      .validateFields()
+      .then((values) => {
+        console.log("Form values:", values);
+        navigate("/paymentsuccess");
+      })
+      .catch((errorInfo) => {
+        console.log("Validation failed:", errorInfo);
+      });
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
-      <Card className="w-full max-w-md p-8 rounded-lg shadow-lg bg-white">
-        <h2 className="text-2xl font-semibold mb-6 text-center">Settings</h2>
-
-        <h3 className="text-lg font-semibold mb-4">Add new card:</h3>
-
-        <Form
-          form={form}
-          name="paymentForm"
-          onFinish={onFinish}
-          layout="vertical"
-          className="space-y-4"
-        >
-          <Form.Item
-            name="cardholderName"
-            label={<span className="font-semibold">Card holder name</span>}
-            rules={[
-              { required: true, message: "Please enter cardholder's name" },
-            ]}
-          >
-            <Input placeholder="Card holder name" />
-          </Form.Item>
-
-          <Form.Item
-            name="cardNumber"
-            label={<span className="font-semibold">Card number</span>}
-            rules={[
-              { required: true, message: "Please enter your card number" },
-            ]}
-          >
-            <Input placeholder="XXXX-XXXX-XXXX-XXXX" />
-          </Form.Item>
-
-          <div className="flex space-x-4">
-            <Form.Item
-              name="expiryDate"
-              label={<span className="font-semibold">Exp. date</span>}
-              className="flex-1"
-              rules={[
-                { required: true, message: "Please enter the expiry date" },
-              ]}
-            >
-              <Input placeholder="MM/YY" />
-            </Form.Item>
-
-            <Form.Item
-              name="cvv"
-              label={<span className="font-semibold">CVV</span>}
-              className="flex-1"
-              rules={[{ required: true, message: "Please enter CVV" }]}
-            >
-              <Input placeholder="CVV" />
-            </Form.Item>
-          </div>
-
-          <Form.Item>
-            <Button
-              type="primary"
-              htmlType="submit"
-              className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold"
-              onClick={onSuccess}
-            >
-              Add card
-            </Button>
-          </Form.Item>
+    <div style={{ background: "#f0f2f5", padding: "50px 0" }}>
+      <Card style={{ width: 800, margin: "0 auto" }}>
+        <Title level={2}>Ticket Payment</Title>
+        <Divider />
+        <Form form={form} layout="vertical">
+          <Row gutter={24}>
+            <Col span={16}>
+              <Card title="Personal Information" style={{ marginBottom: 24 }}>
+                <Form.Item
+                  name="fullName"
+                  label="Full Name"
+                  rules={[
+                    { required: true, message: "Please input your full name!" },
+                  ]}
+                >
+                  <Input />
+                </Form.Item>
+                <Form.Item
+                  name="email"
+                  label="Email"
+                  rules={[
+                    { required: true, message: "Please input your email!" },
+                    { type: "email", message: "Please enter a valid email!" },
+                  ]}
+                >
+                  <Input />
+                </Form.Item>
+                <Form.Item
+                  name="phoneNumber"
+                  label="Phone Number"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please input your phone number!",
+                    },
+                  ]}
+                >
+                  <Input />
+                </Form.Item>
+                <Form.Item
+                  name="dateOfBirth"
+                  label="Date of Birth"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please select your date of birth!",
+                    },
+                  ]}
+                >
+                  <DatePicker style={{ width: "100%" }} />
+                </Form.Item>
+              </Card>
+              <Card
+                title="Payment Method"
+                extra={<a href="#">Add new card</a>}
+                style={{ marginBottom: 24 }}
+              >
+                <Form.Item name="paymentMethod" initialValue="visa">
+                  <Radio.Group style={{ width: "100%" }}>
+                    <Radio.Button
+                      value="visa"
+                      style={{
+                        height: 60,
+                        marginBottom: 16,
+                        width: "100%",
+                        display: "flex",
+                        alignItems: "center",
+                      }}
+                    >
+                      <CreditCardOutlined
+                        style={{ fontSize: 20, marginRight: 8 }}
+                      />
+                      VN Pay
+                    </Radio.Button>
+                  </Radio.Group>
+                </Form.Item>
+                <Button type="primary" size="large" block onClick={onSuccess}>
+                  Pay $50.00
+                </Button>
+              </Card>
+            </Col>
+            <Col span={8}>
+              <Card title="Order Summary">
+                <div style={{ marginBottom: 16 }}>
+                  <Text>Ticket Price</Text>
+                  <Text style={{ float: "right" }}>$50.00</Text>
+                </div>
+                <Divider />
+                <div>
+                  <Text strong>Total</Text>
+                  <Text strong style={{ float: "right" }}>
+                    $50.00
+                  </Text>
+                </div>
+              </Card>
+            </Col>
+          </Row>
         </Form>
       </Card>
     </div>

@@ -3,10 +3,10 @@ import axios from "axios";
 import { useCookies } from "react-cookie";
 import { jwtDecode } from "jwt-decode"; // Ensure correct import
 import { useLocation } from "react-router-dom";
-import 'react-notifications/lib/notifications.css';
+import "react-notifications/lib/notifications.css";
 // import {NotificationContainer, NotificationManager} from 'react-notifications';
-import { ToastContainer, toast } from 'react-toastify'; // Import ToastContainer và toast
-import 'react-toastify/dist/ReactToastify.css'; // Import CSS cho Toast
+import { ToastContainer, toast } from "react-toastify"; // Import ToastContainer và toast
+import "react-toastify/dist/ReactToastify.css"; // Import CSS cho Toast
 
 const BookingTrip = () => {
   const [tourID, setTourID] = useState("");
@@ -83,7 +83,10 @@ const BookingTrip = () => {
     } catch (error) {
       if (error.response) {
         console.error("Error response:", error.response.data);
-        toast.error(error.response.data.message || "Failed to book the trip. Please try again."); // Hiển thị thông báo lỗi
+        toast.error(
+          error.response.data.message ||
+            "Failed to book the trip. Please try again."
+        ); // Hiển thị thông báo lỗi
       } else if (error.request) {
         console.error("Error request:", error.request);
         toast.error("No response from server. Please check your connection.");
