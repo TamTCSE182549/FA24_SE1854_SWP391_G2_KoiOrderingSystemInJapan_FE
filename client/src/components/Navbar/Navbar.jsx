@@ -215,7 +215,7 @@ const Navbar = () => {
                 >
                   <Link
                     to={data.link}
-                    className="text-white font-serif text-2xl transition duration-500
+                    className="text-white font-serif text-lg transition duration-500
                              hover:text-white hover:shadow-2xl hover:rounded-3xl hover:font-bold w-full h-[50px]
                             flex justify-center items-center"
                   >
