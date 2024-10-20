@@ -1,83 +1,195 @@
-import React from "react";
+import React, { useRef } from "react";
 import ImgF from "../../assets/yyy9eozrvny3kslirjgcyxcvu2lgf7crxbdhxp79fevfsd352w6npqwnz3qikmvk-o.jpg";
-import { Carousel, Row, Col } from "antd";
-import Img1 from "../../assets/Screenshot 2024-10-08 130030.png";
+import { Carousel } from "antd";
+import Img1 from "../../assets/321.jpg";
+import Img2 from "../../assets/291281.jpg";
+import Img3 from "../../assets/koi+shopping.jpg";
+import Im1 from "../../assets/1.jpg";
+import Im2 from "../../assets/2.jpg";
+import Im3 from "../../assets/3.jpg";
+
+import { Slide, Fade } from "react-awesome-reveal";
+import { useNavigate } from "react-router-dom";
+import {
+  FaArrowCircleLeft,
+  FaArrowCircleRight,
+  FaArrowAltCircleUp,
+} from "react-icons/fa";
+import Footer from "../Footer/Footer";
 
 // Dữ liệu MenuHero
-const menuHeroData = [
+const CardsData = [
   {
     id: 1,
-    img: Img1,
-    title: "Lorem ipsum dolor sit amet consectetur adipisicing elit.",
+    img: Img2,
+    title: "Koi Products",
+    desc: "Each character will appear one by one",
+    link: "/koiforsale", // Correct link
   },
   {
     id: 2,
-    img: ImgF,
-    title: "Lorem ipsum dolor sit amet consectetur adipisicing elit.",
+    img: Img3,
+    title: "Farm",
+    desc: "Each character will appear one by one",
+    link: "/farm", // Correct link
   },
   {
     id: 3,
-    img: ImgF,
-    title: "Lorem ipsum dolor sit amet consectetur adipisicing elit.",
+    img: Img1,
+    title: "Buying Koi Tours",
+    desc: "Each character will appear one by one",
+    link: "/tour", // Correct link
   },
   {
     id: 4,
-    img: ImgF,
-    title: "Lorem ipsum dolor sit amet consectetur adipisicing elit.",
+    img: Img1,
+    title: "Sunset",
+    desc: "Each character will appear one by one",
+    link: "/tour", // Correct link
+  },
+];
+
+const CarouselItem = [
+  {
+    id: 1,
+    img: Im1,
+  },
+  {
+    id: 2,
+    img: Im2,
+  },
+  {
+    id: 3,
+    img: Im3,
   },
 ];
 
 const Hero = () => {
-  return (
-    <div className="w-full pb-10">
-      <div className="flex justify-center items-center">
-        {/* top of hero */}
-        <div className="w-full border-white px-10 py-10 bg-[#c5bd92] mt-10 rounded-3xl">
-          <div className="w-full">
-            <Carousel autoplay arrows infinite={false} autoplaySpeed={3000}>
-              {menuHeroData.map((item) => (
-                <div key={item.id} className="w-full h-[600px]">
-                  <Row gutter={[32, 32]} className="h-full" align="middle">
-                    {/* Hình ảnh */}
-                    <Col span={12} className="h-full">
-                      <div className="h-full flex justify-center items-center pb-10">
-                        <img
-                          src={item.img}
-                          className="object-cover w-full h-full rounded-3xl"
-                          alt={item.title}
-                          style={{ marginRight: "10px", overflow: "hidden" }}
-                        />
-                      </div>
-                    </Col>
+  const newsRef = useRef(null);
+  const navigate = useNavigate();
+  const carouselRef = useRef(null); // Create a reference for the carousel
 
-                    {/* Văn bản */}
-                    <Col span={12} className="h-full">
-                      <div className="h-full flex justify-center items-center text-white text-lg">
-                        <p className="w-[80%] text-center leading-relaxed">
-                          {item.title}
-                        </p>
+  // Function to go to the previous slide
+  const goToPrevSlide = () => {
+    carouselRef.current.prev(); // Access the carousel's prev method
+  };
+
+  // Function to go to the next slide
+  const goToNextSlide = () => {
+    carouselRef.current.next(); // Access the carousel's next method
+  };
+
+  const handleSwitch = (link) => {
+    navigate(link); // Use navigate from react-router-dom
+  };
+
+  return (
+    <div className="mx-auto max-w-[100%] overflow-hidden z-10">
+      <div className="w-full h-[100vh] relative">
+        {/* Ensure carousel container takes full viewport height */}
+        <Carousel
+          ref={carouselRef}
+          autoplay
+          autoplaySpeed={10000}
+          dotPosition="bottom"
+          pauseOnHover={false}
+        >
+          {CarouselItem.map(({ id, img }) => (
+            <div key={id} className="relative w-full h-[100vh]">
+              {/* Ensure each slide takes full viewport height */}
+              <img
+                src={img}
+                alt={`carousel-img-${id}`}
+                className="w-screen h-full object-cover" // Full image cover
+              />
+            </div>
+          ))}
+        </Carousel>
+
+        {/* Custom Prev Button */}
+        <button
+          onClick={goToPrevSlide}
+          className="absolute left-5 top-1/2 transform -translate-y-1/2 text-white text-4xl px-4 py-2 rounded-full z-10 hover:text-red-500 duration-300"
+        >
+          <FaArrowCircleLeft />
+        </button>
+
+        {/* Custom Next Button */}
+        <button
+          onClick={goToNextSlide}
+          className="absolute right-5 top-1/2 transform -translate-y-1/2 text-white text-4xl px-4 py-2 rounded-lg z-10 hover:text-red-500 duration-300"
+        >
+          <FaArrowCircleRight />
+        </button>
+        <button
+          className="bg-red-500 hover:bg-red-800 text-white font-bold rounded-full px-8 md:px-20 py-3 md:py-5 mb-20 bottom-1/4 absolute center right-1/2 transform translate-x-1/2 -translate-y-1/2"
+          onClick={() => {
+            newsRef.current.scrollIntoView({
+              behavior: "smooth",
+            });
+          }}
+        >
+          EXPLORE
+        </button>
+        <p className="absolute font-serif text-gray-100 bottom-1/4 left-1/2 transform px-5 md:px-20 mb-15 center -translate-x-1/2 -translate-y-1/2 text-4xl md:text-9xl text-center">
+          WELCOME <br />
+          TO <br />
+          MY WEBSITE
+        </p>
+      </div>
+      <div ref={newsRef} className="w-full h-[100vh]">
+        <div className="mt-5 pt-10 pl-5 md:pl-10 px-1">
+          <p className="text-3xl md:text-5xl font-serif text-white">
+            KOI WEBSITE MENU
+          </p>
+        </div>
+        <div className="my-10 md:my-20 px-5 md:px-10 mb-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 place-items-center items-center gap-10 md:gap-20">
+            {CardsData.map(({ id, img, title, desc, link }) => (
+              <div
+                key={id}
+                className="text-white shadow-md rounded-lg overflow-hidden relative group"
+              >
+                <img
+                  src={img}
+                  alt=""
+                  className="w-[300px] md:w-[700px] h-[200px] md:h-[400px] rounded-lg"
+                />
+                {/* overlay section */}
+                <div className="absolute left-0 top-[-100%] opacity-0 group-hover:opacity-100 group-hover:top-[0] p-4 w-full h-full bg-black/60 group-hover:backdrop-blur-sm duration-500">
+                  <div className="space-y-4">
+                    <Slide cascade>
+                      <h1 className="text-2xl md:text-4xl font-serif">
+                        {title}
+                      </h1>
+                      <Fade cascade damping={0.01}>
+                        {desc}
+                      </Fade>
+                      <div>
+                        <button
+                          onClick={() => handleSwitch(link)} // Pass the correct link here
+                          className="border border-white px-4 py-2 -my-7 rounded-lg hover:bg-white hover:text-black hover:shadow-sm duration-300 right-10 absolute top-40 md:top-60"
+                        >
+                          View
+                        </button>
                       </div>
-                    </Col>
-                  </Row>
+                    </Slide>
+                  </div>
                 </div>
-              ))}
-            </Carousel>
+              </div>
+            ))}
           </div>
         </div>
       </div>
-      <div>
-        <div className="w-[80%] mx-auto mt-10 bg-[#c5bd92]">
-          <h1 className="text-black">
-            Lorem ipsum dolor sit amet consectetur adipisicing elit.
-            Voluptatibus non ad necessitatibus cumque earum quaerat, sit
-            exercitationem aspernatur deserunt esse molestiae debitis ipsam
-            architecto quam modi hic? Ipsam, ex itaque. Lorem ipsum dolor sit,
-            amet consectetur adipisicing elit. Voluptatem animi dolores ipsa
-            assumenda corrupti quos necessitatibus quo atque dolorum? Magni,
-            iusto labore perspiciatis a placeat exercitationem? Blanditiis
-            aperiam exercitationem incidunt?
-          </h1>
-        </div>
+      <div className="fixed bottom-5 right-5">
+        <button
+          className="hover:text-red-800 text-5xl md:text-6xl text-red-500 mb-5 px-4 py-2 rounded-full"
+          onClick={() => {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }}
+        >
+          <FaArrowAltCircleUp />
+        </button>
       </div>
     </div>
   );

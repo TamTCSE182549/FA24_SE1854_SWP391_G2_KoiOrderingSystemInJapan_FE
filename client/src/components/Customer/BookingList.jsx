@@ -15,7 +15,7 @@ const BookingList = () => {
   const fetchBookingList = async (userId) => {
     try {
       const response = await axios.get(
-        `http://localhost:8080/bookings/listBookingTourResponse/${userId}`,
+        "http://localhost:8080/bookings/listBookingTourResponse",
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -62,36 +62,52 @@ const BookingList = () => {
 
   // Hiển thị dữ liệu booking
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Tour Booking List</h1>
-      {tourlist.length === 0 ? (
-        <p>No bookings found.</p>
-      ) : (
-        <table className="min-w-full bg-white">
-          <thead>
-            <tr>
-              <th className="py-2">Tour Name</th>
-              <th className="py-2">Customer Name</th>
-              <th className="py-2">Created By</th>
-              <th className="py-2">Updated By</th>
-            </tr>
-          </thead>
-          <tbody>
-            {tourlist.map((booking) => (
-              <tr key={booking.id}>
-                <td className="border px-4 py-2">{booking.tourName}</td>
-                <td className="border px-4 py-2">{booking.nameCus}</td>
-                <td className="border px-4 py-2">
-                  {booking.createdBy || "N/A"}
-                </td>
-                <td className="border px-4 py-2">
-                  {booking.updatedBy || "N/A"}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+    // 
+    <div className="grid grid-cols-1 gap-6 p-6">
+      {bookingList.map((booking, index) => (
+        <div
+          key={index}
+          className="bg-white rounded-lg shadow-lg p-6 flex flex-col md:flex-row"
+        >
+          <div className="md:w-1/3 text-center">
+            <img
+              src="https://pics.craiyon.com/2023-11-06/0bf2f94c7ce64f9688d24f54e24b034f.webp"
+              alt="Koi Fish"
+              className="rounded-lg object-cover w-full h-48"
+            />
+            <p className="mt-4 text-gray-600 text-sm">
+              BOOKING TIME: {booking.bookingTime}
+            </p>
+          </div>
+          <div className="md:w-2/3 mt-4 md:mt-0 md:ml-6">
+            <h2 className="text-xl font-bold text-red-600">Booking Information</h2>
+            <p className="mt-2">
+              <strong>VAT:</strong> {booking.vat}
+            </p>
+            <p className="mt-2">
+              <strong>VAT AMOUNT:</strong> {booking.vatAmount}
+            </p>
+            <p className="mt-2">
+              <strong>DISCOUNT AMOUNT:</strong> {booking.discountAmount}
+            </p>
+            <p className="mt-2 text-red-600">
+              <strong>TOTAL AMOUNT:</strong> {booking.totalAmount}
+            </p>
+            <p className="mt-2 text-red-600">
+              <strong>PAYMENT METHOD:</strong> {booking.paymentMethod}
+            </p>
+            <p className="mt-2 text-blue-600">
+              <strong>PAYMENT STATUS:</strong> {booking.paymentStatus}
+            </p>
+            <p className="mt-2 font-bold">
+              <strong>TOTAL AMOUNT WITH VAT:</strong> {booking.totalAmountWithVAT}
+            </p>
+            <button className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+              View Detail
+            </button>
+          </div>
+        </div>
+      ))}
     </div>
   );
 };
