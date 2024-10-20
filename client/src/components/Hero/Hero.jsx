@@ -29,7 +29,7 @@ const CardsData = [
   {
     id: 2,
     img: Img3,
-    title: "Koi Of Farm",
+    title: "Farm",
     desc: "Each character will appear one by one",
     link: "/farm", // Correct link
   },
@@ -84,11 +84,11 @@ const Hero = () => {
   };
 
   return (
-    <div className="mx-auto max-w-[100%] overflow-hidden z-10 ">
+    <div className="mx-auto max-w-[100%] overflow-hidden z-10">
       <div className="w-full h-[100vh] relative">
         {/* Ensure carousel container takes full viewport height */}
         <Carousel
-          ref={carouselRef} // Attach ref to the Carousel
+          ref={carouselRef}
           autoplay
           autoplaySpeed={10000}
           dotPosition="bottom"
@@ -102,7 +102,6 @@ const Hero = () => {
                 alt={`carousel-img-${id}`}
                 className="w-screen h-full object-cover" // Full image cover
               />
-              {/* View Now Button inside each carousel slide */}
             </div>
           ))}
         </Carousel>
@@ -123,7 +122,7 @@ const Hero = () => {
           <FaArrowCircleRight />
         </button>
         <button
-          className="bg-red-500 hover:bg-red-800 text-white font-bold rounded-full px-20 py-5 mb-20 bottom-1/4 absolute  center right-1/2 transform translate-x-1/2 -translate-y-1/2 "
+          className="bg-red-500 hover:bg-red-800 text-white font-bold rounded-full px-8 md:px-20 py-3 md:py-5 mb-20 bottom-1/4 absolute center right-1/2 transform translate-x-1/2 -translate-y-1/2"
           onClick={() => {
             newsRef.current.scrollIntoView({
               behavior: "smooth",
@@ -132,40 +131,44 @@ const Hero = () => {
         >
           EXPLORE
         </button>
-        <p className="absolute font-serif text-gray-100 bottom-1/4 left-1/2 transform px-20 mb-15  center -translate-x-1/2 -translate-y-1/2 text-9xl text-center">
+        <p className="absolute font-serif text-gray-100 bottom-1/4 left-1/2 transform px-5 md:px-20 mb-15 center -translate-x-1/2 -translate-y-1/2 text-4xl md:text-9xl text-center">
           WELCOME <br />
           TO <br />
           MY WEBSITE
         </p>
       </div>
       <div ref={newsRef} className="w-full h-[100vh]">
-        <div className="mt-5 pt-10 pl-10 px-1">
-          <p className="text-5xl font-serif text-white">KOI WEBSITE MENU</p>
+        <div className="mt-5 pt-10 pl-5 md:pl-10 px-1">
+          <p className="text-3xl md:text-5xl font-serif text-white">
+            KOI WEBSITE MENU
+          </p>
         </div>
-        <div className="my-20 px-10 mb-10">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 place-items-center items-center gap-20">
+        <div className="my-10 md:my-20 px-5 md:px-10 mb-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 place-items-center items-center gap-10 md:gap-20">
             {CardsData.map(({ id, img, title, desc, link }) => (
               <div
                 key={id}
-                className="text-white shadow-md rounded-lg overflow-hidden relative group "
+                className="text-white shadow-md rounded-lg overflow-hidden relative group"
               >
                 <img
                   src={img}
                   alt=""
-                  className="w-[700px] h-[400px] rounded-lg"
+                  className="w-[300px] md:w-[700px] h-[200px] md:h-[400px] rounded-lg"
                 />
                 {/* overlay section */}
                 <div className="absolute left-0 top-[-100%] opacity-0 group-hover:opacity-100 group-hover:top-[0] p-4 w-full h-full bg-black/60 group-hover:backdrop-blur-sm duration-500">
                   <div className="space-y-4">
                     <Slide cascade>
-                      <h1 className="text-4xl font-serif">{title}</h1>
-                      <Fade cascade damping={0.05}>
+                      <h1 className="text-2xl md:text-4xl font-serif">
+                        {title}
+                      </h1>
+                      <Fade cascade damping={0.01}>
                         {desc}
                       </Fade>
                       <div>
                         <button
                           onClick={() => handleSwitch(link)} // Pass the correct link here
-                          className="border border-white px-4 py-2 -my-7 rounded-lg hover:bg-white hover:text-black hover:shadow-sm duration-300  right-10 absolute top-60 "
+                          className="border border-white px-4 py-2 -my-7 rounded-lg hover:bg-white hover:text-black hover:shadow-sm duration-300 right-10 absolute top-40 md:top-60"
                         >
                           View
                         </button>
@@ -178,9 +181,9 @@ const Hero = () => {
           </div>
         </div>
       </div>
-      <div className="fixed bottom-5 right-5  ">
+      <div className="fixed bottom-5 right-5">
         <button
-          className=" hover:text-red-800 text-6xl  text-red-500 mb-5 px-4 py-2 rounded-full"
+          className="hover:text-red-800 text-5xl md:text-6xl text-red-500 mb-5 px-4 py-2 rounded-full"
           onClick={() => {
             window.scrollTo({ top: 0, behavior: "smooth" });
           }}

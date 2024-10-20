@@ -18,14 +18,14 @@ const BookingTrip = () => {
   const { tour } = location.state || {};
 
   //mesage
-  useEffect(() => {
-    if (message) {
-      const timer = setTimeout(() => {
-        setMessage(""); // Ẩn thông báo sau 5 giây
-      }, 5000);
-      return () => clearTimeout(timer); // Dọn dẹp bộ hẹn giờ khi component unmount
-    }
-  }, [message]);
+  // useEffect(() => {
+  //   if (message) {
+  //     const timer = setTimeout(() => {
+  //       setMessage(""); // Ẩn thông báo sau 5 giây
+  //     }, 5000);
+  //     return () => clearTimeout(timer); // Dọn dẹp bộ hẹn giờ khi component unmount
+  //   }
+  // }, [message]);
 
   // Lấy token từ cookies
   const [cookies] = useCookies(["token"]);
@@ -67,19 +67,24 @@ const BookingTrip = () => {
     };
 
     try {
-      const response = await axios.post(
-        "http://localhost:8080/bookings/CreateForTour",
-        bookingData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`, // Ensure the token is correctly passed
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      console.log("Booking successful:", response.data);
-      // NotificationManager.success("Booking successful!", "Success", 5000);
-      toast.success("Booking successful!");
+      if(participants<=tour.remaining){
+        const response = await axios.post(
+          "http://localhost:8080/bookings/CreateForTour",
+          bookingData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`, // Ensure the token is correctly passed
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        console.log("Booking successful:", response.data);
+        // NotificationManager.success("Booking successful!", "Success", 5000);
+        toast.success("Booking successful!");
+      } else {
+        toast.warning("Participants must be less than or equal remaning of tour AND must be greater than 0");
+      }
+      
     } catch (error) {
       if (error.response) {
         console.error("Error response:", error.response.data);
@@ -165,6 +170,15 @@ const BookingTrip = () => {
             type="hidden"
             value={tourID} // Lưu tourID ẩn
             onChange={(e) => setTourID(e.target.value)}
+          />
+        </div>
+
+        <div className="mb-4">
+          <label className="block font-semibold mb-2">Remaning of Tour:</label>
+          <input
+            value={tour.remaining} // Hiển thị tên tour
+            readOnly
+            className="border border-gray-300 rounded-md p-2 w-full bg-gray-100"
           />
         </div>
 
