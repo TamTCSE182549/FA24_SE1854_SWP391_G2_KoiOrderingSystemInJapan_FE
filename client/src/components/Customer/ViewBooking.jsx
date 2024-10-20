@@ -59,13 +59,13 @@ const BookingInformation = () => {
           key={index}
           className="bg-white rounded-lg shadow-lg p-6 flex flex-col md:flex-row"
         >
-          <div className="md:w-3/4 text-center">
+          <div className="md:w-2/4 text-center">
             <img
               src="https://pics.craiyon.com/2023-11-06/0bf2f94c7ce64f9688d24f54e24b034f.webp"
               alt="Koi Fish"
               className="rounded-lg object-cover w-full h-60"
             />
-            <p className="mt-4 text-gray-700 text-3xl font-semibold pt-20">
+            <p className="mt-4 text-gray-700 text-2xl font-semibold pt-20">
               BOOKING TIME: {formatDateTime(booking.createdDate)}
             </p>
           </div>
@@ -90,7 +90,7 @@ const BookingInformation = () => {
               <p className="mt-1 text-black text-2xl">
                 PAYMENT STATUS: <span className="text-blue-600 uppercase"><strong>{booking.paymentStatus}</strong></span>
               </p>
-              <p className="mt-1 text-3xl underline font-bold text-black">
+              <p className="mt-1 text-2xl underline font-bold text-black">
               <strong>TOTAL AMOUNT WITH VAT:</strong> {booking.totalAmountWithVAT}
               </p>
             </div>
