@@ -22,7 +22,7 @@ import KoiDetail from "./components/KoiDetail";
 import FarmDetail from "./components/Hero/FarmDetail";
 
 import TourDetail from "./components/Hero/TourDetail";
-
+import ViewBooking from "./components/Customer/ViewBooking"
 
 import Delivery from "./components/Customer/Delivery";
 import ResetPassword from "./components/LoginAndSignIn/ResetPassword";
@@ -63,7 +63,7 @@ const App = () => {
             <Route path="/farmdetail" element={<FarmDetail />} />
             <Route path="/tourdetail" element={<TourDetail />} />
             <Route path="/*" element={<AdminRoutes />} />
-
+            <Route path="/ViewBooking" element={<ViewBooking />} />
             <Route
               element={<PrivateRoute allowedRoles={["MANAGER"]} />}
             ></Route>

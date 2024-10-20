@@ -81,7 +81,7 @@ const Navbar = () => {
         <Link to="/profile">View Profile</Link>
       </Menu.Item>
       <Menu.Item key="2">
-        <Link to="/bookings">Bookings & Trips</Link>
+        <Link to="/ViewBooking">Bookings & Trips</Link>
       </Menu.Item>
       <Menu.Item key="3">
         <Link to="/loyalty">Genius loyalty programme</Link>
