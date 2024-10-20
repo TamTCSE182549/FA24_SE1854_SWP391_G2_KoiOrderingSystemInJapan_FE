@@ -20,7 +20,7 @@ import AdminRoutes from "./components/Admin/AdminRoutes";
 import FarmDetail from "./components/Hero/FarmDetail";
 
 import TourDetail from "./components/Hero/TourDetail";
-
+import ViewBooking from "./components/Customer/ViewBooking"
 
 
 import Delivery from "./components/Customer/Delivery";
@@ -59,7 +59,7 @@ const App = () => {
             <Route path="/farmdetail" element={<FarmDetail />} />
             <Route path="/tourdetail" element={<TourDetail />} />
             <Route path="/*" element={<AdminRoutes />} />
-
+            <Route path="/ViewBooking" element={<ViewBooking />} />
 
 
 
