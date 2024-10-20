@@ -27,3 +27,9 @@
     text-shadow: 2px 2px 2px #015b60;
   }
 }
+
+@ultility {
+  .paused {
+    animation-play-state: paused;
+  }
+}

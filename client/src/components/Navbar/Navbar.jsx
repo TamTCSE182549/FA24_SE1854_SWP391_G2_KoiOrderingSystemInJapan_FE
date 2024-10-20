@@ -187,61 +187,64 @@ const Navbar = () => {
       <Sidebar />
     </>
   ) : (
-    <div className="bg-gradient-to-t from-green-600 to-green-900 w-full shadow-lg mb-10">
-      {/* upper Navbar */}
-      <div className="flex justify-between items-center w-full px-6 lg:px-12 py-3">
-        {/* Logo and site name */}
-        <div className="flex items-center">
-          <img
-            src={Logo}
-            alt="Logo"
-            className="w-14 h-auto cursor-pointer"
-            onClick={onHomeClick}
-          />
-          <div className="text-gray-300 font-serif text-2xl ml-2">
-            KOIBOOKING
-          </div>
-        </div>
+    <div className="sticky z-20">
+      <div className="backdrop-filter backdrop-blur-3xl w-full shadow-lg fixed z-10">
+        {/* upper Navbar */}
 
-        {/* Navigation menu */}
-        <div className="hidden md:flex flex-grow justify-center rounded-3xl">
-          <ul className="flex justify-between w-[70%] rounded-3xl ">
-            {MenuItems.map((data) => (
-              <li
-                key={data.id}
-                className="flex-1 flex justify-center text-center items-center"
-              >
-                <Link
-                  to={data.link}
-                  className="text-white font-serif text-lg transition duration-500
+        <div className="flex justify-between items-center w-full px-6 lg:px-12 py-3">
+          {/* Logo and site name */}
+          <div className="flex items-center">
+            <img
+              src={Logo}
+              alt="Logo"
+              className="w-14 h-auto cursor-pointer"
+              onClick={onHomeClick}
+            />
+            <div className="text-gray-300 font-serif text-2xl ml-2">
+              KOIBOOKING
+            </div>
+          </div>
+
+          {/* Navigation menu */}
+          <div className="hidden md:flex flex-grow justify-center rounded-3xl">
+            <ul className="flex justify-between w-[70%] rounded-3xl ">
+              {MenuItems.map((data) => (
+                <li
+                  key={data.id}
+                  className="flex-1 flex justify-center text-center items-center"
+                >
+                  <Link
+                    to={data.link}
+                    className="text-white font-serif text-2xl transition duration-500
                              hover:text-white hover:shadow-2xl hover:rounded-3xl hover:font-bold w-full h-[50px]
                             flex justify-center items-center"
-                >
-                  {data.name}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
+                  >
+                    {data.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-        {/* Search bar and Icons */}
-        <div className="flex items-center space-x-6">
-          {login ? (
-            <Dropdown overlay={userMenu} trigger={["click"]}>
-              <div className="flex items-center cursor-pointer text-gray-800 ">
-                <Avatar icon={<UserOutlined />} />
-                <span className="ml-2 text-white">{`${firstName} ${lastName}`}</span>
-                <DownOutlined className="ml-2" />
-              </div>
-            </Dropdown>
-          ) : (
-            <UserOutlined
-              className="text-gray-300 text-2xl cursor-pointer"
-              onClick={onMenuClick}
-            />
-          )}
+          {/* Search bar and Icons */}
+          <div className="flex items-center space-x-6">
+            {login ? (
+              <Dropdown overlay={userMenu} trigger={["click"]}>
+                <div className="flex items-center cursor-pointer text-gray-800 ">
+                  <Avatar icon={<UserOutlined />} />
+                  <span className="ml-2 text-white">{`${firstName} ${lastName}`}</span>
+                  <DownOutlined className="ml-2" />
+                </div>
+              </Dropdown>
+            ) : (
+              <UserOutlined
+                className="text-gray-300 text-2xl cursor-pointer"
+                onClick={onMenuClick}
+              />
+            )}
 
-          <ShoppingCartOutlined className="text-gray-300 text-2xl cursor-pointer" />
+            <ShoppingCartOutlined className="text-gray-300 text-2xl cursor-pointer" />
+          </div>
         </div>
       </div>
     </div>

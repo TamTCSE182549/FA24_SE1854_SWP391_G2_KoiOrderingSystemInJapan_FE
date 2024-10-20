@@ -19,11 +19,14 @@ import AdminRoutes from "./components/Admin/AdminRoutes";
 
 import FarmDetail from "./components/Hero/FarmDetail";
 
+import TourDetail from "./components/Hero/TourDetail";
+
 
 
 import Delivery from "./components/Customer/Delivery";
 import ResetPassword from "./components/LoginAndSignIn/ResetPassword";
 import ForgotPassword from "./components/LoginAndSignIn/ForgotPassword";
+
 
 const App = () => {
   return (
@@ -53,8 +56,8 @@ const App = () => {
             <Route path="/bookings" element={<Booking />} />
             <Route path="/payment" element={<Payment />} />
             <Route path="/tour" element={<Tour />} />
-            <Route path="/farm/:id" element={<FarmDetail />} />
-
+            <Route path="/farmdetail" element={<FarmDetail />} />
+            <Route path="/tourdetail" element={<TourDetail />} />
             <Route path="/*" element={<AdminRoutes />} />
 
 
@@ -69,9 +72,9 @@ const App = () => {
             <Route path="/paymentsuccess" element={<PaymentSuccess />} />
           </Routes>
         </div>
-      </div>
-      <div>
-        <Footer />
+        <div>
+          <Footer />
+        </div>
       </div>
     </div>
     // </AuthProvider>
