@@ -141,7 +141,7 @@ const ProductGrid = () => {
 const KoiForSale = () => {
   return (
     <div>
-      <div className="flex pt-4 container mx-auto justify-between backdrop-filter backdrop-blur-3xl">
+      <div className="flex pt-4 container mx-auto justify-between backdrop-filter backdrop-blur-3xl mt-40">
         <Filters />
         <ProductGrid />
       </div>
