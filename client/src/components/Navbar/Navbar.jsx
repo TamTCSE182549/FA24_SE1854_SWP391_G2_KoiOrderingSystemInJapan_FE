@@ -81,7 +81,7 @@ const Navbar = () => {
         <Link to="/profile">View Profile</Link>
       </Menu.Item>
       <Menu.Item key="2">
-        <Link to="/bookings">Bookings & Trips</Link>
+        <Link to="/ViewBooking">Bookings & Trips</Link>
       </Menu.Item>
       <Menu.Item key="3">
         <Link to="/loyalty">Genius loyalty programme</Link>
@@ -208,7 +208,7 @@ const Navbar = () => {
                 >
                   <Link
                     to={data.link}
-                    className="text-white font-serif text-2xl transition duration-500
+                    className="text-white font-serif text-lg transition duration-500
                              hover:text-white hover:shadow-2xl hover:rounded-3xl hover:font-bold w-full h-[50px]
                             flex justify-center items-center"
                   >

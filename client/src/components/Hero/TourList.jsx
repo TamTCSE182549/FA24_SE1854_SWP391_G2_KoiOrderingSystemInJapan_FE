@@ -70,13 +70,13 @@ const Tour = () => {
   const fetchTourData = async (values) => {
     try {
       // const response = await axios.get("http://localhost:8080/tour/listTourResponseActive");
-      const response = await axios.get("http://localhost:8080/tour/listTourPageable");
-      if (Array.isArray(response.data)) {
-        setTours(response.data);
+      const response = await axios.get("http://localhost:8080/tour/showAllPageable");
+      if (Array.isArray(response.data.content)) {
+        setTours(response.data.content);
       } else {
         setTours(hardcodedTours);
       }
-      console.log("Tour Data:", response.data);
+      console.log("Tour Data:", response.data.content);
     } catch (error) {
       console.error("Error fetching tour data:", error);
       setError("Failed to fetch tour data. Displaying fallback data.");

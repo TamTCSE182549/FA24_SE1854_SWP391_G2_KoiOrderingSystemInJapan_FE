@@ -23,6 +23,9 @@ import FarmDetail from "./components/Hero/FarmDetail";
 
 import TourDetail from "./components/Hero/TourDetail";
 
+import ViewBooking from "./components/Customer/ViewBooking"
+
+
 import Delivery from "./components/Customer/Delivery";
 import ResetPassword from "./components/LoginAndSignIn/ResetPassword";
 import ForgotPassword from "./components/LoginAndSignIn/ForgotPassword";
@@ -61,7 +64,7 @@ const App = () => {
             <Route path="/farmdetail/:id" element={<FarmDetail />} />
             <Route path="/tourdetail/:id" element={<TourDetail />} />
             <Route path="/*" element={<AdminRoutes />} />
-
+            <Route path="/ViewBooking" element={<ViewBooking />} />
             <Route
               element={<PrivateRoute allowedRoles={["MANAGER"]} />}
             ></Route>
