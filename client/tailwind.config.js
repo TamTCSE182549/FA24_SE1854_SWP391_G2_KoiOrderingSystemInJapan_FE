@@ -4,6 +4,15 @@ export default {
   darkMode: "class",
   theme: {
     extend: {
+      animation: {
+        "loop-scroll": "loop-scroll 50s linear infinite",
+      },
+      keyframes: {
+        "loop-scroll": {
+          "0%": { transform: "translateX(100%)" },
+          "100%": { transform: "translateX(-100%)" },
+        },
+      },
       colors: {
         primary: "#D97706",
         secondary: "#f3f3f3",
