@@ -22,13 +22,13 @@ import KoiDetail from "./components/KoiDetail";
 import FarmDetail from "./components/Hero/FarmDetail";
 
 import TourDetail from "./components/Hero/TourDetail";
-import ViewBooking from "./components/Customer/ViewBooking"
+import ViewBooking from "./components/Customer/ViewBooking";
 
 import Delivery from "./components/Customer/Delivery";
 import ResetPassword from "./components/LoginAndSignIn/ResetPassword";
 import ForgotPassword from "./components/LoginAndSignIn/ForgotPassword";
-
-
+import BookingKoiDetail from "./components/Hero/BookingKoiDetail";
+import CreateBooking from "./components/Hero/CreateBooking";
 const App = () => {
   return (
     // <AuthProvider>
@@ -64,6 +64,8 @@ const App = () => {
             <Route path="/tourdetail" element={<TourDetail />} />
             <Route path="/*" element={<AdminRoutes />} />
             <Route path="/ViewBooking" element={<ViewBooking />} />
+            <Route path="/bookingkoidetail" element={<BookingKoiDetail />} />
+            <Route path="/createbooking" element={<CreateBooking />} />
             <Route
               element={<PrivateRoute allowedRoles={["MANAGER"]} />}
             ></Route>
