@@ -19,8 +19,7 @@ const MenuItems = [
   { id: 2, name: "Tour", link: "/tour" },
   { id: 3, name: "Koi Products", link: "/koiforsale" },
   { id: 4, name: "Farm", link: "/farm" },
-  { id: 5, name: "All About Koi", link: "/allaboutkoi" },
-  { id: 6, name: "About us", link: "/aboutus" },
+  { id: 5, name: "About us", link: "/aboutus" },
 ];
 
 const Navbar = () => {
@@ -195,6 +194,7 @@ const Navbar = () => {
               KOIBOOKING
             </div>
           </div>
+
           {/* Navigation menu */}
           <div className="hidden md:flex flex-grow justify-center rounded-3xl">
             <ul className="flex justify-between w-[70%] rounded-3xl ">
@@ -215,6 +215,7 @@ const Navbar = () => {
               ))}
             </ul>
           </div>
+
           {/* Search bar and Icons */}
           <div className="flex items-center space-x-6">
             {login ? (

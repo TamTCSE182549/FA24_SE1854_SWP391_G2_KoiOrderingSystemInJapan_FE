@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import Navbar from "../Navbar/Navbar";
+import Footer from "../Footer/Footer";
+
 import { useCookies } from "react-cookie";
 import { jwtDecode } from "jwt-decode"; // Để decode JWT
 // import Navbar from "../Navbar/Navbar";
 // import Footer from "../Footer/Footer";
+
 
 const Tour = () => {
   const [tours, setTours] = useState([]); // State to store tour data
@@ -72,14 +76,18 @@ const Tour = () => {
 
   const handleBooking = (tour) => {
     // Điều hướng sang trang booking và truyền tour object qua state
-    navigate("/bookings", { state: { tour } });
+
+    navigate(`/tourdetail/${tour.id}`);
+
   };
 
   const fetchTourData = async (page = 0) => {
     try {
       // const response = await axios.get("http://localhost:8080/tour/listTourResponseActive");
       const response = await axios.get(
+
         `http://localhost:8080/tour/showAllPageable?page=${page}`
+
       );
       if (Array.isArray(response.data.content)) {
         setTours(response.data.content);
@@ -133,7 +141,7 @@ const Tour = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col mt-40">
       <div className="flex-grow">
         <div className="container mx-auto p-40">
           <div className="flex">
@@ -203,6 +211,7 @@ const Tour = () => {
 
             {/* Tour List */}
             <div className="w-3/4 ml-4">
+
               <div className="flex items-center mb-4">
                 <h1 className="text-2xl font-bold text-white mr-4">
                   Tour List
@@ -220,6 +229,7 @@ const Tour = () => {
                   Search
                 </button>
               </div>
+
               {error && <p className="text-red-500">{error}</p>}
               <div className="space-y-6">
                 {filteredTours.length === 0 ? (
@@ -261,6 +271,7 @@ const Tour = () => {
                           End Time: {new Date(tour.endTime).toLocaleString()}
                         </p>
                       </div>
+
                       {role === "CUSTOMER" && (
                         <div className="p-4">
                           <button
@@ -287,6 +298,7 @@ const Tour = () => {
                           </button>
                         </div>
                       )}
+
                     </div>
                   ))
                 )}

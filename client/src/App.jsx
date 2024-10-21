@@ -19,7 +19,11 @@ import AdminRoutes from "./components/Admin/AdminRoutes";
 import KoiDetail from "./components/KoiDetail";
 import FarmDetail from "./components/Hero/FarmDetail";
 import TourDetail from "./components/Hero/TourDetail";
+
+
 import ViewBooking from "./components/Customer/ViewBooking";
+
+
 import Delivery from "./components/Customer/Delivery";
 import ResetPassword from "./components/LoginAndSignIn/ResetPassword";
 import ForgotPassword from "./components/LoginAndSignIn/ForgotPassword";
@@ -38,7 +42,7 @@ const App = () => {
         }}
       >
         <Navbar />
-        <div className="flex-grow text-white ">
+        <div className="flex-grow text-white">
           <Routes>
             <Route path="/quotation" element={<Quotation />} />
             <Route path="/" element={<Hero />} />
@@ -78,7 +82,7 @@ const App = () => {
             <Route path="/paymentsuccess" element={<PaymentSuccess />} />
           </Routes>
         </div>
-        <div>
+        <div className="mt-20">
           <Footer />
         </div>
       </div>

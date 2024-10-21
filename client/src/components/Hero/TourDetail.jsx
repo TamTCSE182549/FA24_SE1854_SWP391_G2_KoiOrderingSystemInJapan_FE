@@ -1,26 +1,52 @@
-import React, { useState } from "react";
-import { Carousel, DatePicker, InputNumber, Select } from "antd";
+import React, { useState, useEffect } from "react";
+import { DatePicker, InputNumber, Select } from "antd";
 import "antd/dist/reset.css"; // Import Ant Design CSS if not already done
 import { FaPlane } from "react-icons/fa"; // Import plane icon from react-icons
+import { getTourById } from "../../services/tourservice"; // Import the API function
 import Img1 from "../../assets/321.jpg";
 import Img2 from "../../assets/291281.jpg";
 import Img3 from "../../assets/koi+shopping.jpg";
+import { useParams } from "react-router-dom";
+
+const { Option } = Select; // Ensure Option is imported
 
 const TourDetail = () => {
-  // Mock Data
-  const tour = {
-    title: "Amazing Kyoto Tour",
-    description:
-      "This tour takes you through the heart of Kyoto, showcasing its historic temples, stunning gardens, and vibrant culture. Enjoy guided visits, delicious local cuisine, and unique experiences that will make your trip unforgettable.",
-    images: [
-      "https://via.placeholder.com/800x600?text=Kyoto+Tour+1",
-      "https://via.placeholder.com/800x600?text=Kyoto+Tour+2",
-      "https://via.placeholder.com/800x600?text=Kyoto+Tour+3",
-    ],
-    location: "Kyoto, Japan",
-    duration: "3 days",
-    price: "$299",
-  };
+  const [tour, setTour] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // State for departure date and number of guests
+  const [departureDate, setDepartureDate] = useState(null);
+  const [guests, setGuests] = useState(1);
+  const { id } = useParams(); // Get the id from the URL
+
+  useEffect(() => {
+    const fetchTourData = async () => {
+      try {
+        const data = await getTourById(id);
+        setTour(data);
+      } catch (error) {
+        console.error("Error fetching tour data:", error);
+        setError("Failed to fetch tour data.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTourData();
+  }, [id]); // Use id in the dependency array
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>{error}</div>;
+  }
+
+  if (!tour) {
+    return <div>No tour data available.</div>;
+  }
 
   const Img = [
     { id: 1, img: Img1 },
@@ -28,31 +54,16 @@ const TourDetail = () => {
     { id: 3, img: Img3 },
   ];
 
-  // State for departure date and number of guests
-  const [departureDate, setDepartureDate] = useState(null);
-  const [guests, setGuests] = useState(1);
-
   return (
     <div className="p-10 max-w-7xl mx-auto backdrop-filter backdrop-blur-3xl rounded-2xl shadow-lg mt-40 relative">
       <div className="flex flex-col md:flex-row space-y-8 md:space-y-0 md:space-x-12">
-        {/* Carousel for Tour Images */}
+        {/* Single Image for Tour */}
         <div className="md:w-1/2">
-          <Carousel
-            autoplay
-            autoplaySpeed={5000}
-            dotPosition="bottom"
-            pauseOnHover={false}
-          >
-            {tour.images.map((image, index) => (
-              <div key={index}>
-                <img
-                  src={image}
-                  alt={`Tour Image ${index + 1}`}
-                  className="w-full h-[530px] object-cover rounded-lg"
-                />
-              </div>
-            ))}
-          </Carousel>
+          <img
+            src={tour.tourImg} // Display the first image from tour.tourImg
+            alt="Tour Image"
+            className="w-full h-[530px] object-cover rounded-lg"
+          />
         </div>
 
         {/* Tour Info */}
