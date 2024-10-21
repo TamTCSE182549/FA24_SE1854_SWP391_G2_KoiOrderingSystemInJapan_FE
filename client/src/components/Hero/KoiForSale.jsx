@@ -6,34 +6,31 @@ import Footer from "../Footer/Footer";
 import axios from "axios"; // Import axios for API calls
 import { useNavigate } from "react-router-dom";
 import { useCookies } from "react-cookie";
-
-
 const { CheckableTag } = Tag;
 const { Meta } = Card;
+// const getFishesByCategory = async (categoryId) => {
+//   try {
+//     // Lấy thông tin danh mục từ API ban đầu
+//     const categoryResponse = await axios.get(
+//       `https://example.com/api/categories/${categoryId}`
+//     );
+//     const categoryData = categoryResponse.data;
 
-const getFishesByCategory = async (categoryId) => {
-  try {
-    // Lấy thông tin danh mục từ API ban đầu
-    const categoryResponse = await axios.get(
-      `https://example.com/api/categories/${categoryId}`
-    );
-    const categoryData = categoryResponse.data;
+//     // Dùng categoryId để lấy danh sách cá từ API khác
+//     const fishesResponse = await axios.get(`https://example.com/api/fishes`, {
+//       params: {
+//         categoryId: categoryId,
+//       },
+//     });
+//     const fishesData = fishesResponse.data;
 
-    // Dùng categoryId để lấy danh sách cá từ API khác
-    const fishesResponse = await axios.get(`https://example.com/api/fishes`, {
-      params: {
-        categoryId: categoryId,
-      },
-    });
-    const fishesData = fishesResponse.data;
+//     console.log(fishesData); // Hiển thị danh sách cá
+//   } catch (error) {
+//     console.error("Error:", error);
+//   }
+// };
 
-    console.log(fishesData); // Hiển thị danh sách cá
-  } catch (error) {
-    console.error("Error:", error);
-  }
-};
-
-getFishesByCategory("123");
+// getFishesByCategory("123");
 const Filters = () => {
   return (
     <>
@@ -191,8 +188,8 @@ const KoiForSale = () => {
   }, [cookies]);
 
   return (
-    <div>
-      <div className="flex pt-4 container mx-auto justify-between backdrop-filter backdrop-blur-3xl mt-40">
+    <div className="mt-20">
+      <div className="flex pt-4 container mx-auto justify-between backdrop-filter backdrop-blur-3xl">
         <Filters />
         <ProductGrid
           products={products}

@@ -6,14 +6,20 @@ import Dashboard from "./Dashboard";
 import Users from "./Users";
 import TourManagement from "./TourManagement";
 import Settings from "./Settings";
+
 import SiderBoard from "./SiderBoard";
 import FarmManagement from "./FarmManagement";
 import CreateNewFarm from "./CreateNewFarm";
+
+import SiderBoard from "./SiderBoard"; // Import SiderBoard
+import FarmManagement from "./FarmManagement";
+
 
 const { Header, Content } = Layout;
 
 const AdminDashboard = () => {
   return (
+
     <Layout className="min-h-screen mt-40 backdrop-filter backdrop-blur-3xl">
       <SiderBoard />
 
@@ -28,7 +34,9 @@ const AdminDashboard = () => {
             <Route path="tour-management" element={<TourManagement />} />
             <Route path="farm-management" element={<FarmManagement />} />
             <Route path="settings" element={<Settings />} />
+
             <Route path="create-new-farm" element={<CreateNewFarm />} />
+
           </Routes>
         </Content>
       </Layout>

@@ -34,7 +34,7 @@ const KoiDetail = () => {
   }
 
   return (
-    <div className="flex justify-center pt-4">
+    <div className="flex justify-center pt-4 mt-40">
       <div className="w-full max-w-4xl mx-auto px-6 py-12 bg-white shadow-lg rounded-lg ">
         <div className="flex flex-wrap -mx-4">
           {/* Image Gallery */}

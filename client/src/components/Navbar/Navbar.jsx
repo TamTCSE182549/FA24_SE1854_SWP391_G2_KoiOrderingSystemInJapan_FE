@@ -156,6 +156,7 @@ const Navbar = () => {
         </div>
       </div>
 
+
       {login && (
         <div className="p-6 border-t border-gray-700">
           <button
@@ -168,7 +169,6 @@ const Navbar = () => {
       )}
     </Drawer>
   );
-
   return location.pathname === "/" ? (
     <>
       <MenuOutlined
@@ -195,7 +195,6 @@ const Navbar = () => {
               KOIBOOKING
             </div>
           </div>
-
           {/* Navigation menu */}
           <div className="hidden md:flex flex-grow justify-center rounded-3xl">
             <ul className="flex justify-between w-[70%] rounded-3xl ">
@@ -216,7 +215,6 @@ const Navbar = () => {
               ))}
             </ul>
           </div>
-
           {/* Search bar and Icons */}
           <div className="flex items-center space-x-6">
             {login ? (

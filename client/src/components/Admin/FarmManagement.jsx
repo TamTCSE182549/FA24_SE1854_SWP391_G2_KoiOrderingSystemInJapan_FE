@@ -1,3 +1,4 @@
+
 // components/Admin/FarmManagement.js
 import React, { useState, useEffect } from "react";
 import axios from "axios";
@@ -26,10 +27,12 @@ const FarmManagement = () => {
 
   const fetchFarms = async () => {
     try {
+
       const response = await axios.get(
         "http://localhost:8080/koi-farm/list-farm",
         {
           headers: {
+
             Authorization: `Bearer ${token}`,
           },
         }
@@ -43,7 +46,6 @@ const FarmManagement = () => {
   useEffect(() => {
     fetchFarms();
   }, [token]);
-
   const deleteFarm = async (id) => {
     try {
       await axios.delete(`http://localhost:8080/koi-farm/deleteFarm/${id}`, {
@@ -85,7 +87,7 @@ const FarmManagement = () => {
               <th className="border border-black px-4 py-2">Email</th>
               <th className="border border-black px-4 py-2">Address</th>
               <th className="border border-black px-4 py-2">Image URL</th>
-              <th className="border border-black px-2 py-2">Actions</th>
+              <th className="border border-black px-2 py-2">Actions</th> 
             </tr>
           </thead>
           <tbody>
@@ -109,7 +111,7 @@ const FarmManagement = () => {
                 <td className="border border-black px-1 py-2 text-center">
                   <button
                     onClick={() => handleEditClick(farm)}
-                    className="bg-yellow-500 text-white px-3 py-1"
+                    className="bg-yellow-500 text-white px-3 py-1"  
                   >
                     Update
                   </button>
@@ -128,5 +130,5 @@ const FarmManagement = () => {
     </div>
   );
 };
-
 export default FarmManagement;
+
