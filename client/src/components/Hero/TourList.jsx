@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useNavigate } from 'react-router-dom';
-import Navbar from "../Navbar/Navbar";
-import Footer from "../Footer/Footer";
+import { useNavigate } from "react-router-dom";
+import { useCookies } from "react-cookie";
+import { jwtDecode } from "jwt-decode"; // Để decode JWT
+// import Navbar from "../Navbar/Navbar";
+// import Footer from "../Footer/Footer";
 
 const Tour = () => {
   const [tours, setTours] = useState([]); // State to store tour data
@@ -14,6 +16,12 @@ const Tour = () => {
     beachfront: false,
     parking: false,
   });
+  const [currentPage, setCurrentPage] = useState(0); // Trang hiện tại (bắt đầu từ 0)
+  const [totalPage, setTotalPage] = useState(1); // Tổng số trang (giả sử mặc định là 1)
+  const [cookies] = useCookies(["token"]);
+  const token = cookies.token;
+  const decodedToken = jwtDecode(token);
+  const role = decodedToken.role;
 
   const hardcodedTours = [
     {
@@ -64,15 +72,18 @@ const Tour = () => {
 
   const handleBooking = (tour) => {
     // Điều hướng sang trang booking và truyền tour object qua state
-    navigate('/bookings', { state: { tour } });
+    navigate("/bookings", { state: { tour } });
   };
 
-  const fetchTourData = async (values) => {
+  const fetchTourData = async (page = 0) => {
     try {
       // const response = await axios.get("http://localhost:8080/tour/listTourResponseActive");
-      const response = await axios.get("http://localhost:8080/tour/showAllPageable");
+      const response = await axios.get(
+        `http://localhost:8080/tour/showAllPageable?page=${page}`
+      );
       if (Array.isArray(response.data.content)) {
         setTours(response.data.content);
+        setTotalPage(response.data.totalPage);
       } else {
         setTours(hardcodedTours);
       }
@@ -83,6 +94,10 @@ const Tour = () => {
       setTours(hardcodedTours); // Display hardcoded data on API failure
     }
   };
+
+  useEffect(() => {
+    fetchTourData(currentPage); // Gọi API mỗi khi `currentPage` thay đổi
+  }, [currentPage]);
 
   const handleFilterChange = (e) => {
     const { name, checked } = e.target;
@@ -103,10 +118,24 @@ const Tour = () => {
     fetchTourData();
   }, []);
 
+  const handleNextPage = () => {
+    if (currentPage < totalPage - 1) {
+      setCurrentPage((prevPage) => prevPage + 1); // Tăng trang nếu chưa đến trang cuối
+      window.scrollTo({ top: 0, behavior: "smooth" }); // Cuộn về đầu trang
+    }
+  };
+
+  const handlePreviousPage = () => {
+    if (currentPage > 0) {
+      setCurrentPage((prevPage) => prevPage - 1); // Giảm trang nếu chưa đến trang đầu
+      window.scrollTo({ top: 0, behavior: "smooth" }); // Cuộn về đầu trang
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <div className="flex-grow">
-        <div className="container mx-auto p-4">
+        <div className="container mx-auto p-40">
           <div className="flex">
             {/* Sidebar Filters */}
             <div className="w-1/4 p-4  rounded-lg bg-[#c5bd92] shadow-md">
@@ -174,7 +203,23 @@ const Tour = () => {
 
             {/* Tour List */}
             <div className="w-3/4 ml-4">
-              <h1 className="text-2xl font-bold mb-4 text-lime-950">Tour List</h1>
+              <div className="flex items-center mb-4">
+                <h1 className="text-2xl font-bold text-white mr-4">
+                  Tour List
+                </h1>
+                <input
+                  type="search"
+                  placeholder="Tìm kiếm..."
+                  aria-label="Search"
+                  className="border border-gray-300 rounded-l-lg px-4 py-2 focus:outline-none focus:ring focus:ring-blue-500"
+                />
+                <button
+                  type="submit"
+                  className="bg-blue-500 text-white rounded-r-lg px-4 py-2 hover:bg-blue-600"
+                >
+                  Search
+                </button>
+              </div>
               {error && <p className="text-red-500">{error}</p>}
               <div className="space-y-6">
                 {filteredTours.length === 0 ? (
@@ -183,12 +228,16 @@ const Tour = () => {
                   filteredTours.map((tour) => (
                     <div
                       key={tour.id}
-                      className="bg-white shadow-lg rounded-lg overflow-hidden flex flex-col justify-between"
+                      className="bg-slate-300 shadow-lg rounded-lg overflow-hidden flex flex-col justify-between"
                     >
                       <img
-                        src={tour.tourImg ? tour.tourImg : `https://via.placeholder.com/400x200?text=No+image`}
+                        src={
+                          tour.tourImg
+                            ? tour.tourImg
+                            : `https://via.placeholder.com/400x200?text=No+image`
+                        }
                         alt={tour.tourName}
-                        className="w-full h-64 object-none"
+                        className="w-full h-64 object-none shadow-2xl"
                       />
                       <div className="p-4 flex-grow">
                         <h3 className="text-xl font-bold mb-2 text-black">
@@ -202,6 +251,9 @@ const Tour = () => {
                           Max Participants: {tour.maxParticipants}
                         </p>
                         <p className="text-sm text-gray-500">
+                          Remaining: {tour.remaining}
+                        </p>
+                        <p className="text-sm text-gray-500">
                           Start Time:{" "}
                           {new Date(tour.startTime).toLocaleString()}
                         </p>
@@ -209,15 +261,60 @@ const Tour = () => {
                           End Time: {new Date(tour.endTime).toLocaleString()}
                         </p>
                       </div>
-                      <div className="p-4">
-                        <button className="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-                                onClick={() => handleBooking(tour)}>
-                          Book Now
-                        </button>
-                      </div>
+                      {role === "CUSTOMER" && (
+                        <div className="p-4">
+                          <button
+                            className="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+                            onClick={() => handleBooking(tour)}
+                          >
+                            Book Now
+                          </button>
+                        </div>
+                      )}
+                      {role === "MANAGER" && (
+                        <div className="flex p-4 gap-2">
+                          <button
+                            className="w-full bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-700"
+                            onClick={() => handleBooking(tour)}
+                          >
+                            Update Tour
+                          </button>
+                          <button
+                            className="w-full bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-700"
+                            onClick={() => handleBooking(tour)}
+                          >
+                            Delete Tour
+                          </button>
+                        </div>
+                      )}
                     </div>
                   ))
                 )}
+              </div>
+              {/* Pagination Buttons */}
+              <div className="flex justify-between mt-4">
+                <button
+                  className={`px-4 py-2 bg-gray-300 rounded-lg ${
+                    currentPage === 0
+                      ? "cursor-not-allowed"
+                      : "hover:bg-blue-400"
+                  }`}
+                  onClick={handlePreviousPage}
+                  disabled={currentPage === 0}
+                >
+                  Previous
+                </button>
+                <button
+                  className={`px-4 py-2 bg-gray-300 rounded-lg ${
+                    currentPage === totalPage - 1
+                      ? "cursor-not-allowed"
+                      : "hover:bg-blue-400"
+                  }`}
+                  onClick={handleNextPage}
+                  disabled={currentPage === totalPage - 1}
+                >
+                  Next
+                </button>
               </div>
             </div>
           </div>
