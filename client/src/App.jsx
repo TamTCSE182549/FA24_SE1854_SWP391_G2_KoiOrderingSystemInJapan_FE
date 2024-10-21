@@ -16,19 +16,20 @@ import PrivateRoute from "./components/PrivateRouter/PrivateRouter";
 import Tour from "./components/Hero/TourList";
 import BookingList from "./components/Customer/BookingList";
 import AdminRoutes from "./components/Admin/AdminRoutes";
-
 import KoiDetail from "./components/KoiDetail";
-
 import FarmDetail from "./components/Hero/FarmDetail";
-
 import TourDetail from "./components/Hero/TourDetail";
 
+
 import ViewBooking from "./components/Customer/ViewBooking";
+
 
 import Delivery from "./components/Customer/Delivery";
 import ResetPassword from "./components/LoginAndSignIn/ResetPassword";
 import ForgotPassword from "./components/LoginAndSignIn/ForgotPassword";
-
+import BookingKoiDetail from "./components/Hero/BookingKoiDetail";
+import CreateBooking from "./components/Hero/CreateBooking";
+import Quotation from "./components/Admin/Quotation";
 const App = () => {
   return (
     // <AuthProvider>
@@ -43,6 +44,7 @@ const App = () => {
         <Navbar />
         <div className="flex-grow text-white">
           <Routes>
+            <Route path="/quotation" element={<Quotation />} />
             <Route path="/" element={<Hero />} />
             <Route path="/koiforsale" element={<KoiForSale />} />
             <Route path="/farm" element={<Farm />} />
@@ -60,10 +62,18 @@ const App = () => {
 
             <Route path="/koi/:id" element={<KoiDetail />} />
 
+            <Route path="/farmdetail" element={<FarmDetail />} />
+            <Route path="/tourdetail" element={<TourDetail />} />
+            <Route path="/*" element={<AdminRoutes />} />
+            <Route path="/ViewBooking" element={<ViewBooking />} />
+            <Route path="/bookingkoidetail" element={<BookingKoiDetail />} />
+            <Route path="/createbooking" element={<CreateBooking />} />
+
             <Route path="/farmdetail/:id" element={<FarmDetail />} />
             <Route path="/tourdetail/:id" element={<TourDetail />} />
             <Route path="/*" element={<AdminRoutes />} />
             <Route path="/ViewBooking" element={<ViewBooking />} />
+
             <Route
               element={<PrivateRoute allowedRoles={["MANAGER"]} />}
             ></Route>

@@ -61,7 +61,7 @@ const BookingInformation = () => {
         >
           <div className="md:w-2/4 text-center">
             <img
-              src="https://pics.craiyon.com/2023-11-06/0bf2f94c7ce64f9688d24f54e24b034f.webp"
+              src=".\src\assets\koicart.jpg"
               alt="Koi Fish"
               className="rounded-lg object-cover w-full h-60"
             />
