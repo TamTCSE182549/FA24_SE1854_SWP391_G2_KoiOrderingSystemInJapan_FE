@@ -23,11 +23,9 @@ import FarmDetail from "./components/Hero/FarmDetail";
 
 import TourDetail from "./components/Hero/TourDetail";
 
-
 import Delivery from "./components/Customer/Delivery";
 import ResetPassword from "./components/LoginAndSignIn/ResetPassword";
 import ForgotPassword from "./components/LoginAndSignIn/ForgotPassword";
-
 
 const App = () => {
   return (
@@ -60,8 +58,8 @@ const App = () => {
 
             <Route path="/koi/:id" element={<KoiDetail />} />
 
-            <Route path="/farmdetail" element={<FarmDetail />} />
-            <Route path="/tourdetail" element={<TourDetail />} />
+            <Route path="/farmdetail/:id" element={<FarmDetail />} />
+            <Route path="/tourdetail/:id" element={<TourDetail />} />
             <Route path="/*" element={<AdminRoutes />} />
 
             <Route

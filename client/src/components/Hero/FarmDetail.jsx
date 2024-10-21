@@ -1,63 +1,20 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useParams } from "react-router-dom";
-import { useCookies } from "react-cookie";
-import { Spin, Alert, Carousel, Card } from "antd"; // Added Carousel and Card components
+import { useParams, useNavigate } from "react-router-dom"; // Import useNavigate
+import { Spin, Alert, Carousel, Card, Button } from "antd"; // Import Button
 
 const FarmDetail = () => {
   const { id } = useParams(); // Get the farm ID from URL parameters
   const [farmDetail, setFarmDetail] = useState(null); // Initialize as null
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [cookies] = useCookies(["token"]);
-  const token = cookies.token;
-
-  // Hardcoded Data for Testing
-  const mockFarmDetail = {
-    farmName: "Sakura Koi Farm",
-    farmAddress: "123 Sakura Street, Kyoto, Japan",
-    farmPhoneNumber: "+81-123-456-789",
-    farmEmail: "contact@sakurakoifarm.jp",
-    description:
-      "Sakura Koi Farm is one of the top koi farms in Japan, known for its high-quality koi breeding and beautiful facilities. Visitors can enjoy guided tours and learn about the art of koi breeding.",
-    farmImage: "https://via.placeholder.com/400x300?text=Sakura+Koi+Farm",
-    koiFish: [
-      {
-        id: 1,
-        name: "Koi Fish A",
-        size: "25 cm",
-        age: "2 years",
-        image: "https://via.placeholder.com/200x150?text=Koi+Fish+A",
-      },
-      {
-        id: 2,
-        name: "Koi Fish B",
-        size: "30 cm",
-        age: "3 years",
-        image: "https://via.placeholder.com/200x150?text=Koi+Fish+B",
-      },
-      {
-        id: 3,
-        name: "Koi Fish C",
-        size: "20 cm",
-        age: "1 year",
-        image: "https://via.placeholder.com/200x150?text=Koi+Fish+C",
-      },
-    ],
-  };
-
-  const useMockData = true; // Change this to false to switch back to API
+  const navigate = useNavigate(); // Initialize navigate for redirection
 
   useEffect(() => {
     const fetchFarmDetail = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:8080/koi-farm/list-farm/${id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
+          `http://localhost:8080/koi-farm/get/${id}`
         );
         setFarmDetail(response.data);
         setLoading(false);
@@ -68,17 +25,8 @@ const FarmDetail = () => {
       }
     };
 
-    if (useMockData) {
-      // Use the mock data if toggle is set to true
-      setFarmDetail(mockFarmDetail);
-      setLoading(false);
-    } else if (token) {
-      fetchFarmDetail();
-    } else {
-      setError("No token available. Please log in.");
-      setLoading(false);
-    }
-  }, [id, token, useMockData]);
+    fetchFarmDetail();
+  }, [id]);
 
   if (loading) {
     return (
@@ -101,36 +49,56 @@ const FarmDetail = () => {
       {farmDetail ? (
         <>
           <div className="bg-white shadow-lg rounded-lg p-8 flex flex-col md:flex-row">
-            {/* Farm Image */}
+            {/* Farm Image Carousel */}
             <div className="md:w-1/2 mb-6 md:mb-0">
-              <img
-                src={
-                  farmDetail.farmImage ||
-                  "https://via.placeholder.com/400x300?text=Farm+Image"
-                }
-                alt={farmDetail.farmName}
-                className="w-full h-full object-cover rounded-lg"
-              />
+              <Carousel autoplay autoplaySpeed={3000}>
+                {farmDetail.koiFarmImages.map((image, index) => (
+                  <div key={index}>
+                    <img
+                      src={image.imageUrl}
+                      alt={`Image ${index + 1}`}
+                      className="w-full h-full object-cover rounded-lg"
+                    />
+                  </div>
+                ))}
+              </Carousel>
             </div>
 
             {/* Farm Information */}
-            <div className="md:w-1/2 md:pl-8">
-              <h1 className="text-3xl font-bold mb-4 text-gray-700">
+            <div className="md:w-1/2 md:pl-8 bg-white p-6 rounded-lg shadow-md">
+              <h1 className="text-4xl font-bold mb-4 text-gray-800">
                 {farmDetail.farmName}
               </h1>
-              <p className="text-gray-700 text-lg mb-2">
-                <strong>Address:</strong> {farmDetail.farmAddress}
-              </p>
-              <p className="text-gray-700 text-lg mb-2">
-                <strong>Phone:</strong> 📞 {farmDetail.farmPhoneNumber}
-              </p>
-              <p className="text-gray-700 text-lg mb-2">
-                <strong>Email:</strong> 📧 {farmDetail.farmEmail}
-              </p>
-              <p className="text-gray-700 text-lg mb-2">
-                <strong>Description:</strong>{" "}
-                {farmDetail.description || "No description available."}
-              </p>
+              <div className="mb-4">
+                <p className="flex items-center text-gray-700 text-lg mb-2">
+                  <strong>Address:</strong> {farmDetail.farmAddress}
+                </p>
+                <p className="flex items-center text-gray-700 text-lg mb-2">
+                  <strong>Phone:</strong> 📞 {farmDetail.farmPhoneNumber}
+                </p>
+                <p className="flex items-center text-gray-700 text-lg mb-2">
+                  <strong>Email:</strong> 📧 {farmDetail.farmEmail}
+                </p>
+                <a
+                  href={farmDetail.website}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center text-blue-600 text-lg mb-2 hover:underline"
+                >
+                  <strong>Website:</strong> 🌐 {farmDetail.website}
+                </a>
+                <p className="text-gray-700 text-lg mb-2">
+                  <strong>Description:</strong>{" "}
+                  {farmDetail.description || "No description available."}
+                </p>
+              </div>
+              <Button
+                type="primary"
+                className="mt-4"
+                onClick={() => navigate("/tour")} // Navigate to the tour page
+              >
+                Book Tour
+              </Button>
             </div>
           </div>
 
@@ -165,27 +133,31 @@ const FarmDetail = () => {
                 },
               ]}
             >
-              {farmDetail.koiFish.map((fish) => (
+              {farmDetail.koiResponses.map((fish) => (
                 <div key={fish.id} className="p-4">
                   <Card
                     hoverable
                     className="mx-2 rounded-lg overflow-hidden shadow-lg"
                     cover={
                       <img
-                        src={fish.image}
+                        src={fish.koiImageList[0].imageUrl}
                         alt={fish.name}
-                        className="object-cover h-100 w-full rounded-t-lg"
+                        style={{ height: "500px" }} // Set specific width and height
+                        className="object-cover rounded-t-lg w-full"
                       />
                     }
+                    onClick={() => navigate(`/koi/${fish.id}`)} // Navigate to KoiDetail with koiId
                   >
                     <Card.Meta
                       title={
-                        <span className="text-lg font-bold">{fish.name}</span>
+                        <span className="text-lg font-bold">
+                          {fish.koiName}
+                        </span>
                       }
                       description={
                         <div className="text-gray-600">
-                          <p>Size: {fish.size}</p>
-                          <p>Age: {fish.age}</p>
+                          {/* <p>Size: {fish.koiId}</p>
+                          <p>Age: {fish.age}</p> */}
                         </div>
                       }
                     />
