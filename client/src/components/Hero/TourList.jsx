@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 import Navbar from "../Navbar/Navbar";
 import Footer from "../Footer/Footer";
 
@@ -64,13 +64,15 @@ const Tour = () => {
 
   const handleBooking = (tour) => {
     // Điều hướng sang trang booking và truyền tour object qua state
-    navigate('/bookings', { state: { tour } });
+    navigate(`/tourdetail/${tour.id}`);
   };
 
   const fetchTourData = async (values) => {
     try {
       // const response = await axios.get("http://localhost:8080/tour/listTourResponseActive");
-      const response = await axios.get("http://localhost:8080/tour/showAllPageable");
+      const response = await axios.get(
+        "http://localhost:8080/tour/showAllPageable"
+      );
       if (Array.isArray(response.data.content)) {
         setTours(response.data.content);
       } else {
@@ -104,7 +106,7 @@ const Tour = () => {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col mt-40">
       <div className="flex-grow">
         <div className="container mx-auto p-4">
           <div className="flex">
@@ -174,7 +176,9 @@ const Tour = () => {
 
             {/* Tour List */}
             <div className="w-3/4 ml-4">
-              <h1 className="text-2xl font-bold mb-4 text-lime-950">Tour List</h1>
+              <h1 className="text-2xl font-bold mb-4 text-lime-950">
+                Tour List
+              </h1>
               {error && <p className="text-red-500">{error}</p>}
               <div className="space-y-6">
                 {filteredTours.length === 0 ? (
@@ -186,7 +190,11 @@ const Tour = () => {
                       className="bg-white shadow-lg rounded-lg overflow-hidden flex flex-col justify-between"
                     >
                       <img
-                        src={tour.tourImg ? tour.tourImg : `https://via.placeholder.com/400x200?text=No+image`}
+                        src={
+                          tour.tourImg
+                            ? tour.tourImg
+                            : `https://via.placeholder.com/400x200?text=No+image`
+                        }
                         alt={tour.tourName}
                         className="w-full h-64 object-none"
                       />
@@ -210,9 +218,11 @@ const Tour = () => {
                         </p>
                       </div>
                       <div className="p-4">
-                        <button className="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-                                onClick={() => handleBooking(tour)}>
-                          Book Now
+                        <button
+                          className="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+                          onClick={() => handleBooking(tour)}
+                        >
+                          View more
                         </button>
                       </div>
                     </div>

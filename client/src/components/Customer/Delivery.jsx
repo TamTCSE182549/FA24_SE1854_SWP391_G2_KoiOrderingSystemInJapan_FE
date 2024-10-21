@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import {
   Divider,
   Steps,
@@ -16,9 +15,17 @@ import {
 } from "antd";
 import { useParams } from "react-router-dom";
 import { useCookies } from "react-cookie";
-import { format } from "date-fns"; // Import date-fns
+import { format } from "date-fns";
 import { jwtDecode } from "jwt-decode";
 import moment from "moment";
+import {
+  getDeliveryList,
+  getCheckoutInfo,
+  updateDelivery,
+  deleteDelivery,
+  addDelivery,
+  checkoutDelivery,
+} from "../../services/deliveryService"; // Import the service functions
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -53,18 +60,8 @@ const Delivery = () => {
   const deliveryList = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(
-        `http://localhost:8080/api/delivery-history/${bookingId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (response.status === 200) {
-        setDeliveries(response.data);
-      }
+      const data = await getDeliveryList(bookingId, token);
+      setDeliveries(data);
     } catch (error) {
       console.error("Error fetching delivery data:", error);
       setError("Failed to fetch delivery data.");
@@ -75,18 +72,8 @@ const Delivery = () => {
 
   const fetchCheckoutInfo = async () => {
     try {
-      const response = await axios.get(
-        `http://localhost:8080/api/delivery/${bookingId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (response.status === 200) {
-        setCheckoutInfo(response.data);
-      }
+      const data = await getCheckoutInfo(bookingId, token);
+      setCheckoutInfo(data);
     } catch (error) {
       console.error("Error fetching checkout info:", error);
       message.error("Failed to fetch checkout information");
@@ -94,9 +81,13 @@ const Delivery = () => {
   };
 
   useEffect(() => {
-    deliveryList();
-    fetchCheckoutInfo();
-  }, []);
+    const fetchData = async () => {
+      await deliveryList();
+      await fetchCheckoutInfo();
+    };
+
+    fetchData();
+  }, []); // Ensure the dependency array is empty to run only once on mount
 
   const formatDateTime = (dateTimeString) => {
     try {
@@ -117,34 +108,24 @@ const Delivery = () => {
 
   const handleUpdate = async () => {
     try {
-      const response = await axios.put(
-        `http://localhost:8080/api/delivery-history/${selectedDelivery.deliveryId}`,
-        {
-          route: newRoute,
-          healthKoiDescription: newDescription,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+      await updateDelivery(
+        selectedDelivery.deliveryId,
+        { route: newRoute, healthKoiDescription: newDescription },
+        token
       );
-
-      if (response.status === 200) {
-        setDeliveries((prevDeliveries) =>
-          prevDeliveries.map((delivery) =>
-            delivery.deliveryId === selectedDelivery.deliveryId
-              ? {
-                  ...delivery,
-                  route: newRoute,
-                  healthKoiDescription: newDescription,
-                }
-              : delivery
-          )
-        );
-        message.success("Delivery updated successfully");
-        setIsModalVisible(false);
-      }
+      setDeliveries((prevDeliveries) =>
+        prevDeliveries.map((delivery) =>
+          delivery.deliveryId === selectedDelivery.deliveryId
+            ? {
+                ...delivery,
+                route: newRoute,
+                healthKoiDescription: newDescription,
+              }
+            : delivery
+        )
+      );
+      message.success("Delivery updated successfully");
+      setIsModalVisible(false);
     } catch (error) {
       console.error("Error updating delivery:", error);
       setError("Failed to update delivery data.");
@@ -156,79 +137,43 @@ const Delivery = () => {
     Modal.confirm({
       title: "Are you sure you want to delete this delivery?",
       content: "This action cannot be undone.",
-      onOk: () => deleteDelivery(deliveryId),
+      onOk: async () => {
+        try {
+          await deleteDelivery(deliveryId, token);
+          setDeliveries((prevDeliveries) =>
+            prevDeliveries.filter(
+              (delivery) => delivery.deliveryId !== deliveryId
+            )
+          );
+          message.success("Delivery deleted successfully");
+        } catch (error) {
+          console.error("Error deleting delivery:", error);
+          setError("Failed to delete delivery.");
+          message.error("Failed to delete delivery");
+        }
+      },
       onCancel() {},
     });
   };
 
-  const deleteDelivery = async (deliveryId) => {
-    try {
-      const response = await axios.delete(
-        `http://localhost:8080/api/delivery-history/${deliveryId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (response.status === 200) {
-        // Remove the deleted delivery from the state
-        setDeliveries((prevDeliveries) =>
-          prevDeliveries.filter(
-            (delivery) => delivery.deliveryId !== deliveryId
-          )
-        );
-        message.success("Delivery deleted successfully");
-      }
-    } catch (error) {
-      console.error("Error deleting delivery:", error);
-      setError("Failed to delete delivery.");
-      message.error("Failed to delete delivery");
-    }
-  };
-
-  const showAddModal = () => {
-    setNewDeliveryRoute("");
-    setNewDeliveryDescription("");
-    setIsAddModalVisible(true);
-  };
-
   const handleAdd = async () => {
     try {
-      const response = await axios.post(
-        `http://localhost:8080/api/delivery-history/${bookingId}`,
+      await addDelivery(
+        bookingId,
         {
           route: newDeliveryRoute,
           healthKoiDescription: newDeliveryDescription,
         },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        token
       );
-
-      if (response.status === 200) {
-        message.success("Delivery added successfully");
-        setIsAddModalVisible(false);
-        // Gọi lại hàm deliveryList để cập nhật danh sách
-        await deliveryList();
-      }
+      message.success("Delivery added successfully");
+      setIsAddModalVisible(false);
+      await deliveryList();
     } catch (error) {
       console.error("Error adding delivery:", error);
       setError("Failed to add delivery data.");
       message.error("Failed to add delivery");
     }
-  };
-
-  const showCheckoutModal = () => {
-    setCheckoutCustomerName("");
-    setCheckoutReceiveDate(null);
-    setCheckoutHealthDescription("");
-    setCheckoutStatus("");
-    setCheckoutReason("");
-    setIsCheckoutModalVisible(true);
   };
 
   const handleCheckout = async () => {
@@ -249,22 +194,11 @@ const Delivery = () => {
         payload.reason = checkoutReason;
       }
 
-      const response = await axios.post(
-        `http://localhost:8080/api/delivery/${bookingId}`,
-        payload,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (response.status === 200) {
-        message.success("Delivery checked out successfully");
-        setIsCheckoutModalVisible(false);
-        await fetchCheckoutInfo();
-        setCheckoutReason(""); // Reset reason after successful checkout
-      }
+      await checkoutDelivery(bookingId, payload, token);
+      message.success("Delivery checked out successfully");
+      setIsCheckoutModalVisible(false);
+      await fetchCheckoutInfo();
+      setCheckoutReason(""); // Reset reason after successful checkout
     } catch (error) {
       console.error("Error checking out delivery:", error);
       message.error("Failed to checkout delivery");
@@ -284,47 +218,19 @@ const Delivery = () => {
     setIsUpdateCheckoutModalVisible(true);
   };
 
-  const handleUpdateCheckout = async () => {
-    if (checkoutStatus === "CANCELLED" && !checkoutReason.trim()) {
-      message.error("Please provide a reason for cancellation");
-      return;
-    }
+  const showCheckoutModal = () => {
+    setIsCheckoutModalVisible(true);
+  };
 
-    try {
-      const payload = {
-        customerName: checkoutCustomerName,
-        receiveDate: checkoutReceiveDate,
-        healthKoiDescription: checkoutHealthDescription,
-        status: checkoutStatus,
-      };
-
-      if (checkoutStatus === "CANCELLED") {
-        payload.reason = checkoutReason;
-      }
-
-      const response = await axios.put(
-        `http://localhost:8080/api/delivery/${bookingId}`,
-        payload,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (response.status === 200) {
-        message.success("Checkout information updated successfully");
-        setIsUpdateCheckoutModalVisible(false);
-        await fetchCheckoutInfo();
-      }
-    } catch (error) {
-      console.error("Error updating checkout information:", error);
-      message.error("Failed to update checkout information");
-    }
+  const showAddModal = () => {
+    setNewDeliveryRoute("");
+    setNewDeliveryDescription("");
+    setIsAddModalVisible(true);
   };
 
   return (
     <div
+      className="mt-40"
       style={{
         padding: "20px",
         maxWidth: "800px",
@@ -342,29 +248,19 @@ const Delivery = () => {
       {role === "DELIVERING_STAFF" && (
         <Button
           type="primary"
+          style={{ position: "absolute", top: "20px", right: "20px" }}
           onClick={showAddModal}
-          style={{
-            position: "absolute",
-            top: "20px",
-            right: "20px",
-          }}
         >
-          Add New Delivery
+          Add Delivery
         </Button>
       )}
 
       {loading ? (
-        <Spin
-          tip="Loading..."
-          style={{ display: "block", margin: "20px auto" }}
-        />
+        <Spin size="large" style={{ display: "block", margin: "0 auto" }} />
       ) : error ? (
-        <Alert
-          message={error}
-          type="error"
-          showIcon
-          style={{ marginBottom: "20px" }}
-        />
+        <Alert message={error} type="error" showIcon />
+      ) : deliveries.length === 0 ? (
+        <Alert message="No deliveries found" type="info" showIcon />
       ) : (
         <>
           <Steps
@@ -428,8 +324,9 @@ const Delivery = () => {
           ))}
         </>
       )}
+
       <Modal
-        title="Add New Delivery"
+        title="Add Delivery"
         visible={isAddModalVisible}
         onOk={handleAdd}
         onCancel={() => setIsAddModalVisible(false)}
@@ -437,7 +334,7 @@ const Delivery = () => {
         <Input
           value={newDeliveryRoute}
           onChange={(e) => setNewDeliveryRoute(e.target.value)}
-          placeholder="New Route"
+          placeholder="Route"
           style={{ marginBottom: 16 }}
         />
         <Input.TextArea
@@ -445,8 +342,10 @@ const Delivery = () => {
           onChange={(e) => setNewDeliveryDescription(e.target.value)}
           placeholder="Health Koi Description"
           rows={4}
+          style={{ marginBottom: 16 }}
         />
       </Modal>
+
       <Modal
         title="Update Delivery"
         visible={isModalVisible}
@@ -456,16 +355,18 @@ const Delivery = () => {
         <Input
           value={newRoute}
           onChange={(e) => setNewRoute(e.target.value)}
-          placeholder="New Route"
+          placeholder="Route"
           style={{ marginBottom: 16 }}
         />
         <Input.TextArea
           value={newDescription}
           onChange={(e) => setNewDescription(e.target.value)}
-          placeholder="New Health Koi Description"
+          placeholder="Health Koi Description"
           rows={4}
+          style={{ marginBottom: 16 }}
         />
       </Modal>
+
       <Modal
         title="Checkout Delivery"
         visible={isCheckoutModalVisible}
@@ -578,7 +479,7 @@ const Delivery = () => {
       <Modal
         title="Update Checkout Information"
         visible={isUpdateCheckoutModalVisible}
-        onOk={handleUpdateCheckout}
+        onOk={handleCheckout}
         onCancel={() => setIsUpdateCheckoutModalVisible(false)}
       >
         <Input

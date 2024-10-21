@@ -23,8 +23,7 @@ import FarmDetail from "./components/Hero/FarmDetail";
 
 import TourDetail from "./components/Hero/TourDetail";
 
-import ViewBooking from "./components/Customer/ViewBooking"
-
+import ViewBooking from "./components/Customer/ViewBooking";
 
 import Delivery from "./components/Customer/Delivery";
 import ResetPassword from "./components/LoginAndSignIn/ResetPassword";
@@ -42,7 +41,7 @@ const App = () => {
         }}
       >
         <Navbar />
-        <div className="flex-grow text-white ">
+        <div className="flex-grow text-white">
           <Routes>
             <Route path="/" element={<Hero />} />
             <Route path="/koiforsale" element={<KoiForSale />} />
@@ -73,7 +72,7 @@ const App = () => {
             <Route path="/paymentsuccess" element={<PaymentSuccess />} />
           </Routes>
         </div>
-        <div>
+        <div className="mt-20">
           <Footer />
         </div>
       </div>
