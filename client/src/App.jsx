@@ -25,6 +25,7 @@ import ResetPassword from "./components/LoginAndSignIn/ResetPassword";
 import ForgotPassword from "./components/LoginAndSignIn/ForgotPassword";
 import BookingKoiDetail from "./components/Hero/BookingKoiDetail";
 import CreateBooking from "./components/Hero/CreateBooking";
+import Quotation from "./components/Admin/Quotation";
 const App = () => {
   return (
     // <AuthProvider>
@@ -39,6 +40,7 @@ const App = () => {
         <Navbar />
         <div className="flex-grow text-white ">
           <Routes>
+            <Route path="/quotation" element={<Quotation />} />
             <Route path="/" element={<Hero />} />
             <Route path="/koiforsale" element={<KoiForSale />} />
             <Route path="/farm" element={<Farm />} />
