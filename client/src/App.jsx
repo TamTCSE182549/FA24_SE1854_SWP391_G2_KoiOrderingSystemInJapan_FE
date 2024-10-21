@@ -16,28 +16,10 @@ import PrivateRoute from "./components/PrivateRouter/PrivateRouter";
 import Tour from "./components/Hero/TourList";
 import BookingList from "./components/Customer/BookingList";
 import AdminRoutes from "./components/Admin/AdminRoutes";
-
-
 import KoiDetail from "./components/KoiDetail";
-
 import FarmDetail from "./components/Hero/FarmDetail";
-
-import TourDetail from "./components/Hero/TourDetail";
-
-import ViewBooking from "./components/Customer/ViewBooking"
-
-
-import Delivery from "./components/Customer/Delivery";
-import ResetPassword from "./components/LoginAndSignIn/ResetPassword";
-import ForgotPassword from "./components/LoginAndSignIn/ForgotPassword";
-
-import KoiDetail from "./components/KoiDetail";
-
-import FarmDetail from "./components/Hero/FarmDetail";
-
 import TourDetail from "./components/Hero/TourDetail";
 import ViewBooking from "./components/Customer/ViewBooking";
-
 import Delivery from "./components/Customer/Delivery";
 import ResetPassword from "./components/LoginAndSignIn/ResetPassword";
 import ForgotPassword from "./components/LoginAndSignIn/ForgotPassword";
@@ -73,7 +55,6 @@ const App = () => {
             <Route path="/tour" element={<Tour />} />
 
             <Route path="/koi/:id" element={<KoiDetail />} />
-
 
             <Route path="/farmdetail" element={<FarmDetail />} />
             <Route path="/tourdetail" element={<TourDetail />} />
