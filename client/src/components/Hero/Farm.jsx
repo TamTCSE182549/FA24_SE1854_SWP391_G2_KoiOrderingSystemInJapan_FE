@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+
+import { useCookies } from "react-cookie";
+import { jwtDecode } from "jwt-decode"; // Correct import
+
 import { Pagination, Button } from "antd"; // Import Button from Ant Design
 import { useNavigate } from "react-router-dom"; // Use navigate to go to the detailed page
 
 const Farm = () => {
   const [farm, setFarm] = useState([]);
   const [error, setError] = useState(null);
+
   const navigate = useNavigate(); // Initialize navigate for redirection
 
   useEffect(() => {
@@ -16,6 +21,7 @@ const Farm = () => {
         );
         setFarm(response.data);
         console.log(response.data);
+
       } catch (error) {
         console.error(
           "Error fetching farm data:",
@@ -35,6 +41,7 @@ const Farm = () => {
 
   return (
     <div className="flex flex-col min-h-screen backdrop-filter backdrop-blur-3xl container mx-auto mb-10 mt-40">
+
       <div className="flex-grow">
         <div className="container mx-auto p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-1 gap-6">
           {error && <p className="text-red-500">{error}</p>}

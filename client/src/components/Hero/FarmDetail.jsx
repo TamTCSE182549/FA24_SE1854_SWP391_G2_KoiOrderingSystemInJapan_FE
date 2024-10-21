@@ -8,6 +8,7 @@ const FarmDetail = () => {
   const [farmDetail, setFarmDetail] = useState(null); // Initialize as null
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
   const navigate = useNavigate(); // Initialize navigate for redirection
 
   useEffect(() => {
@@ -24,9 +25,9 @@ const FarmDetail = () => {
         setLoading(false);
       }
     };
-
     fetchFarmDetail();
   }, [id]);
+
 
   if (loading) {
     return (
