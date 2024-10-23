@@ -19,10 +19,10 @@ const AdminDashboard = () => {
 
       {/* Main Content */}
       <Layout>
-        <Header className="bg-[#c5bd92] shadow-md p-4">
+        <Header className="bg-[#c5bd92] shadow-md p-4 ">
           <h2 className="text-xl font-semibold">Welcome, Admin</h2>
         </Header>
-        <Content className="p-6 bg-[#f4eace]">
+        <Content className="p-6 bg-[#e7ede0] ">
           {/* Định nghĩa các route con của Admin */}
           <Routes>
             <Route path="dashboard" element={<Dashboard />} />

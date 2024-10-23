@@ -11,8 +11,8 @@ import {
 
 const Footer = () => {
   return (
-    <footer className="backdrop-filter backdrop-blur-3xl mt-20">
-      <div className="shadow-lg text-white py-10">
+    <footer className="backdrop-filter backdrop-blur-3xl">
+      <div className="shadow-lg text-white py-9">
         <div className="container mx-auto px-4">
           <Row gutter={[16, 16]}>
             {/* Logo và Mạng Xã Hội */}

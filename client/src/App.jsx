@@ -72,7 +72,7 @@ const App = () => {
             <Route path="/paymentsuccess" element={<PaymentSuccess />} />
           </Routes>
         </div>
-        <div className="mt-20">
+        <div className="">
           <Footer />
         </div>
       </div>
