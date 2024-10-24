@@ -1,19 +1,21 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import Navbar from "../Navbar/Navbar";
-import Footer from "../Footer/Footer";
+// import Navbar from "../Navbar/Navbar";
+// import Footer from "../Footer/Footer";
 import { ToastContainer, toast } from "react-toastify";
 import { useCookies } from "react-cookie";
+// import {Select} from 'react-select';
 import { jwtDecode } from "jwt-decode"; // Để decode JWT
-import { q } from "framer-motion/client";
+// import { q } from "framer-motion/client";
 // import Navbar from "../Navbar/Navbar";
 // import Footer from "../Footer/Footer";
 
-
 const Tour = () => {
+  window.scrollTo({ top: 0, behavior: "smooth" });
   const [tours, setTours] = useState([]); // State to store tour data
-  const [error, setError] = useState(null); // State to store any errors
+  const [farms, setFarms] = useState([]);
+  const [kois, setKois] = useState([]);
   const [filters, setFilters] = useState({
     privatePool: false,
     villas: false,
@@ -25,15 +27,72 @@ const Tour = () => {
   const [totalPage, setTotalPage] = useState(1); // Tổng số trang (giả sử mặc định là 1)
   const [cookies] = useCookies(["token"]);
   const token = cookies.token;
+  const [farm, setFarm] = useState("");
+  const [koi, setKoi] = useState("");
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const navigate = useNavigate();
+  const [selectedValue, setSelectedValue] = useState("all");
+
+  const handleSubmit = async (e, page = 0) => {
+    e.preventDefault();
+    const findTourRequest = {
+      farmId: farm || null,
+      koiId: koi || null,
+      minPrice: minPrice > 0 ? minPrice : null,
+      maxPrice: maxPrice > 0 ? maxPrice : null,
+      startDate: startDate || null,
+      endDate: endDate || null,
+    };
+
+    // Điều kiện hợp lệ cho giá và ngày tháng
+    const isPriceValid = minPrice == 0 || (minPrice > 0 && maxPrice > minPrice);
+    const isDateValid = (startDate && endDate) || (!startDate && !endDate);
+
+    // Kiểm tra điều kiện
+    if (!isPriceValid) {
+      toast.warn("Please input MAX UNIT PRICE larger than MIN UNIT PRICE");
+      return;
+    }
+
+    if (!isDateValid) {
+      toast.warn("Please choose both START DATE and END DATE.");
+      return;
+    }
+
+    // Nếu qua tất cả điều kiện, gửi yêu cầu
+    try {
+      const response = await axios.post(
+        "http://localhost:8080/tour/findTourByFarmNameAndKoiName",
+        findTourRequest,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (Array.isArray(response.data.content)) {
+        setTours(response.data.content);
+        setTotalPage(response.data.totalPage);
+      } else {
+        setTours(hardcodedTours); // Dữ liệu tạm thời khi phản hồi không hợp lệ
+      }
+
+      console.log("Kết quả từ server:", response.data.content);
+    } catch (error) {
+      console.error("Lỗi khi gửi yêu cầu:", error);
+    }
+  };
+
   let role;
   if (token) {
     const decodedToken = jwtDecode(token);
     role = decodedToken.role;
   }
-  const [searchKeyword, setSearchKeyword] = useState("");
-
-  // Khai báo state để lưu giá trị được chọn
-  const [selectedValue, setSelectedValue] = useState("all");
 
   // Hàm xử lý khi người dùng chọn một giá trị
   const handleChange = (event) => {
@@ -42,6 +101,8 @@ const Tour = () => {
     if (event.target.value === "all") {
       setSearchKeyword("");
       fetchTourData(0); // Gọi lại dữ liệu khi chọn "All"
+    } else {
+      return;
     }
   };
 
@@ -56,6 +117,12 @@ const Tour = () => {
       // Gọi API tìm kiếm với từ khóa searchKeyword
       fetchTourData(0, searchKeyword); // Reset lại trang về 0 và gọi API với từ khóa
     }
+
+    // if(farm != "" && koi != "" && minPrice != "" && maxPrice != "" && startDate != "" && endDate != ""){
+    //   if(minPrice < maxPrice) {
+
+    //   }
+    // }
   };
 
   const hardcodedTours = [
@@ -103,15 +170,36 @@ const Tour = () => {
     // },
   ];
 
-  const navigate = useNavigate();
-
   const handleBooking = (tour) => {
     // Điều hướng sang trang booking và truyền tour object qua state
     if (!token) {
-      toast.warning("You not login to Booking");
+      toast.warn("You not login to Booking");
       navigate(`/login`);
+    } else {
+      // navigate(`/tourdetail/${tour.id}`);
+      navigate("/bookings", { state: { tour } });
     }
-    navigate(`/tourdetail/${tour.id}`);
+  };
+
+  // Lấy ngày hiện tại
+  const today = new Date();
+
+  // Tính toán ngày bắt đầu hợp lệ (5 ngày sau ngày hiện tại)
+  const futureDate = new Date(today);
+  futureDate.setDate(today.getDate() + 7);
+  const minStartDate = futureDate.toISOString().split("T")[0]; // Định dạng YYYY-MM-DD
+
+  // Đảm bảo End Date chỉ sau Start Date
+  const handleStartDateChange = (e) => {
+    setStartDate(e.target.value);
+    // Nếu ngày kết thúc nhỏ hơn ngày bắt đầu, reset endDate
+    if (endDate && e.target.value > endDate) {
+      setEndDate("");
+    }
+  };
+
+  const handleEndDateChange = (e) => {
+    setEndDate(e.target.value);
   };
 
   let response = "";
@@ -119,17 +207,17 @@ const Tour = () => {
     try {
       // const response = await axios.get("http://localhost:8080/tour/listTourResponseActive");
       if (selectedValue === "tour name") {
-        toast.success("Search by Tour Name success")
+        // toast.success("Search by Tour Name success");
         response = await axios.get(
           `http://localhost:8080/tour/showTourByName/${keyword}?page=${page}`
         );
       } else if (selectedValue === "koi name") {
-        toast.success("Search by Koi Name success")
+        // toast.success("Search by Koi Name success");
         response = await axios.get(
           `http://localhost:8080/tour/findTourByKoiName/${keyword}?page=${page}`
         );
       } else {
-        toast.success("Show all tour success")
+        // toast.success("Show all tour success");
         response = await axios.get(
           `http://localhost:8080/tour/showAllPageable?page=${page}`
         );
@@ -153,6 +241,44 @@ const Tour = () => {
     fetchTourData(currentPage, searchKeyword); // Gọi API mỗi khi `currentPage` thay đổi
   }, [currentPage, selectedValue]);
 
+  useEffect(() => {
+    const fetchFarms = async () => {
+      try {
+        response = await axios.get(
+          "http://localhost:8080/koi-farm/list-farm-active"
+        );
+        if (Array.isArray(response.data)) {
+          console.log(response.data);
+          setFarms(response.data); // Lưu danh sách farm vào state
+        } else {
+          console.error("Failed to fetch farms");
+        }
+      } catch (error) {
+        console.error("Error fetching farms:", error);
+      }
+    };
+
+    fetchFarms();
+  }, []);
+
+  useEffect(() => {
+    const fetchKois = async () => {
+      try {
+        response = await axios.get("http://localhost:8080/kois/all");
+        if (Array.isArray(response.data)) {
+          console.log(response.data);
+          setKois(response.data); // Lưu danh sách farm vào state
+        } else {
+          console.error("Failed to fetch farms");
+        }
+      } catch (error) {
+        console.error("Error fetching farms:", error);
+      }
+    };
+
+    fetchKois();
+  }, []);
+
   const handleFilterChange = (e) => {
     const { name, checked } = e.target;
     setFilters((prevFilters) => ({
@@ -170,10 +296,6 @@ const Tour = () => {
     return true; // Return all tours that match the filters
   });
 
-  useEffect(() => {
-    fetchTourData();
-  }, []);
-
   const handleNextPage = () => {
     if (currentPage < totalPage - 1) {
       setCurrentPage((prevPage) => prevPage + 1); // Tăng trang nếu chưa đến trang cuối
@@ -189,80 +311,108 @@ const Tour = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col mt-40 ml-40 mr-40">
+    <div className="min-h-screen flex flex-col mt-10 ml-40 mr-40">
       <div className="flex-grow">
         <div className="container mx-auto">
           <div className="">
-            {/* Sidebar Filters
-            <div className="w-1/4 p-4  rounded-lg bg-[#c5bd92] shadow-md">
-              <h2 className="text-xl text-gray-800 font-bold mb-4">
-                Filter by:
-              </h2>
-              Popular Filters
-              <div className="mb-6">
-                <h3 className="text-lg font-bold mb-2">Popular Filters</h3>
-                <div className="mb-2">
-                  <input
-                    type="checkbox"
-                    name="privatePool"
-                    checked={filters.privatePool}
-                    onChange={handleFilterChange}
-                  />
-                  <label className="ml-2">Private pool</label>
-                </div>
-                <div className="mb-2">
-                  <input
-                    type="checkbox"
-                    name="villas"
-                    checked={filters.villas}
-                    onChange={handleFilterChange}
-                  />
-                  <label className="ml-2">Villas</label>
-                </div>
-                <div className="mb-2">
-                  <input
-                    type="checkbox"
-                    name="swimmingPool"
-                    checked={filters.swimmingPool}
-                    onChange={handleFilterChange}
-                  />
-                  <label className="ml-2">Swimming Pool</label>
-                </div>
-              </div>
-              Beach Access
-              <div className="mb-6">
-                <h3 className="text-lg font-bold mb-2">Beach Access</h3>
-                <div className="mb-2">
-                  <input
-                    type="checkbox"
-                    name="beachfront"
-                    checked={filters.beachfront}
-                    onChange={handleFilterChange}
-                  />
-                  <label className="ml-2">Beachfront</label>
-                </div>
-              </div>
-              Facilities
-              <div className="mb-6">
-                <h3 className="text-lg font-bold mb-2">Facilities</h3>
-                <div className="mb-2">
-                  <input
-                    type="checkbox"
-                    name="parking"
-                    checked={filters.parking}
-                    onChange={handleFilterChange}
-                  />
-                  <label className="ml-2">Parking</label>
-                </div>
-              </div>
-            </div> */}
-
             {/* Tour List */}
             <div className="ml-4 backdrop-blur-2xl p-20">
-              <div className="flex items-center mb-4">
+              {/* ------------------------------ */}
+              <form
+                onSubmit={handleSubmit}
+                className="bg-white p-6 mb-20 rounded-xl shadow-lg border border-gray-200"
+              >
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-gray-700">Farm</label>
+                    <select
+                      value={farm}
+                      onChange={(e) => setFarm(e.target.value)}
+                      // onChange={handleChangeTour}
+                      className="w-full p-2 border border-gray-300 rounded text-black"
+                    >
+                      <option value="">Choose Farm</option>
+                      {farms.map((farm) => (
+                        <option key={farm.id} value={farm.id}>
+                          {farm.farmName}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-gray-700">Koi</label>
+                    <select
+                      value={koi}
+                      onChange={(e) => setKoi(e.target.value)}
+                      className="w-full p-2 border border-gray-300 rounded text-black"
+                    >
+                      <option value="">Koi Name</option>
+                      {kois.map((koi) => (
+                        <option key={koi.id} value={koi.id}>
+                          {koi.koiName}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-gray-700">
+                      Unit Price Domain (USD)
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        type="number"
+                        placeholder="Min Unit Price"
+                        value={minPrice}
+                        onChange={(e) => setMinPrice(e.target.value)}
+                        className="w-full p-2 border border-gray-300 rounded text-black"
+                      />
+                      <input
+                        type="number"
+                        placeholder="Max Unit Price"
+                        value={maxPrice}
+                        onChange={(e) => setMaxPrice(e.target.value)}
+                        className="w-full p-2 border border-gray-300 rounded text-black"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-gray-700">
+                      Start Date - End Date
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        type="date"
+                        value={startDate}
+                        onChange={handleStartDateChange}
+                        min={minStartDate} // Giới hạn ngày bắt đầu
+                        className="w-full p-2 border border-gray-300 rounded text-black"
+                      />
+                      <input
+                        type="date"
+                        value={endDate}
+                        onChange={handleEndDateChange}
+                        min={startDate} // Giới hạn ngày kết thúc phải sau ngày bắt đầu
+                        className="w-full p-2 border border-gray-300 rounded text-black"
+                        disabled={!startDate} // Vô hiệu hóa nếu chưa chọn start date
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  className="mt-4 w-full bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600 transition"
+                >
+                  Search
+                </button>
+              </form>
+              {/* ------------------- */}
+              {/* <div className="flex items-center mb-4">
                 <h1 className="text-2xl font-bold text-blac mr-4">Tour List</h1>
                 <input
-                  
                   type="search"
                   placeholder="Search..."
                   aria-label="Search"
@@ -279,15 +429,18 @@ const Tour = () => {
                   Search
                 </button>
                 <div>
-                  <select className="text-black ml-20" value={selectedValue} onChange={handleChange}>
+                  <select
+                    className="text-black ml-20"
+                    value={selectedValue}
+                    onChange={handleChange}
+                  >
                     <option value="all">All</option>
                     <option value="tour name">Find by Tour Name</option>
                     <option value="koi name">Find by Koi Name</option>
                   </select>
                 </div>
-              </div>
+              </div> */}
 
-              {error && <p className="text-red-500">{error}</p>}
               <div className="space-y-6">
                 {filteredTours.length === 0 ? (
                   <p>No tours found.</p>
@@ -329,25 +482,24 @@ const Tour = () => {
                         </p>
                       </div>
 
-                      {role === "CUSTOMER" ||
-                        (!token && (
-                          <div className="p-4 flex">
+                      {(role === "CUSTOMER" || !token) && (
+                        <div className="p-4 flex">
+                          <button
+                            className="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+                            onClick={() => handleBooking(tour)}
+                          >
+                            Book Now
+                          </button>
+                          {tour.paymentStatus === "pending" && (
                             <button
-                              className="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-                              onClick={() => handleBooking(tour)}
+                              className="w-full bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-900"
+                              onClick={() => handleDeleteBooking(tour.id)}
                             >
-                              Book Now
+                              Delete
                             </button>
-                            {tour.paymentStatus === "pending" && (
-                              <button
-                                className="w-full bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-900"
-                                onClick={() => handleDeleteBooking(tour.id)}
-                              >
-                                Delete
-                              </button>
-                            )}
-                          </div>
-                        ))}
+                          )}
+                        </div>
+                      )}
                       {role === "MANAGER" && (
                         <div className="flex p-4 gap-2">
                           <button

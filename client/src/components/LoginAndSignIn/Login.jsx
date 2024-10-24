@@ -9,6 +9,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const Login = () => {
+  window.scrollTo({ top: 0, behavior: "smooth" });
   const navigate = useNavigate();
   const cookies = new Cookies();
   const [user, setUser] = useState(null);

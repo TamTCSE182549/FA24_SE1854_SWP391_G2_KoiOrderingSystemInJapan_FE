@@ -171,6 +171,7 @@ const Navbar = () => {
       <Sidebar />
     </>
   ) : (
+
     <div className="fixed top-0 left-0 w-full z-20 ">
       <div className="backdrop-filter bg-gradient-to-r from-emerald-700 via-green-800 to-teal-600 w-full shadow-lg fixed z-10">
         {/* upper Navbar */}
