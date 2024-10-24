@@ -19,8 +19,7 @@ const MenuItems = [
   { id: 2, name: "Tour", link: "/tour" },
   { id: 3, name: "Koi Products", link: "/koiforsale" },
   { id: 4, name: "Farm", link: "/farm" },
-  { id: 5, name: "All About Koi", link: "/allaboutkoi" },
-  { id: 6, name: "About us", link: "/aboutus" },
+  { id: 5, name: "About us", link: "/aboutus" },
 ];
 
 const Navbar = () => {
@@ -156,6 +155,7 @@ const Navbar = () => {
         </div>
       </div>
 
+
       {login && (
         <div className="p-6 border-t border-gray-700">
           <button
@@ -168,7 +168,6 @@ const Navbar = () => {
       )}
     </Drawer>
   );
-
   return location.pathname === "/" ? (
     <>
       <MenuOutlined
@@ -178,7 +177,6 @@ const Navbar = () => {
       <Sidebar />
     </>
   ) : (
-
     <div className="sticky z-20">
       <div className="backdrop-filter backdrop-blur-3xl w-full shadow-lg fixed z-10">
         {/* upper Navbar */}
@@ -196,7 +194,6 @@ const Navbar = () => {
               KOIBOOKING
             </div>
           </div>
-
 
           {/* Navigation menu */}
           <div className="hidden md:flex flex-grow justify-center rounded-3xl">
@@ -218,7 +215,6 @@ const Navbar = () => {
               ))}
             </ul>
           </div>
-
 
           {/* Search bar and Icons */}
           <div className="flex items-center space-x-6">

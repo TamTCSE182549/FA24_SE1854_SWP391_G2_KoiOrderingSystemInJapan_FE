@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import axios from "axios";
+import { useNavigate } from 'react-router-dom';
+import { toast } from "react-toastify";
 import { useCookies } from "react-cookie"; // Thêm useCookies để lấy token từ cookie
 
 const BookingInformation = () => {
     const [cookies] = useCookies(["token"]);
     const token = cookies.token;
     const [bookingList, setBookingList] = useState([]);
+    const navigate = useNavigate();
 
 //   useEffect(() => {
 //     if (token) {
@@ -44,6 +47,15 @@ const BookingInformation = () => {
     }
   };
 
+  const handleCreateQuotation = (booking) => {
+    if(!token) {
+      toast.warning("You are not logged in. Please login.");
+      navigate(`/login`);
+    } else {
+      navigate(`/createQuotation/${booking.id}`, { state: { bookingData: booking } });
+    }
+  };
+
   useEffect(() => {
     bookingListResponse();
   }, []);
@@ -61,7 +73,7 @@ const BookingInformation = () => {
         >
           <div className="md:w-2/4 text-center">
             <img
-              src="https://pics.craiyon.com/2023-11-06/0bf2f94c7ce64f9688d24f54e24b034f.webp"
+              src=".\src\assets\koicart.jpg"
               alt="Koi Fish"
               className="rounded-lg object-cover w-full h-60"
             />
@@ -96,6 +108,13 @@ const BookingInformation = () => {
             </div>
             <button className="mt-4 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
               View Detail
+            </button>
+            <span className="px-2"></span>
+            <button 
+            className="mt-4 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
+            onClick={() => handleCreateQuotation(booking)}
+            >
+              Create Quotation
             </button>
           </div>
         </div>

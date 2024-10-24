@@ -65,17 +65,20 @@ const Login = () => {
   };
 
   const handleGoogleLoginSuccess = async (credentialResponse) => {
-    console.log(credentialResponse);
     try {
       const response = await axios.post("http://localhost:8080/api/google", {
         token: credentialResponse.credential,
       });
 
-      if (response.data && response.data.token) {
-        console.log(decoded.exp);
+      if (response.status === 200) {
+        console.log(credentialResponse);
         const decoded = jwtDecode(response.data.token);
+        console.log(decoded);
         cookies.set("token", response.data.token, {
-          expires: new Date(decoded.exp),
+          expires: new Date(decoded.exp * 1000), // Ensure the expiry is set correctly
+          path: "/", // Ensure the cookie is available to all pages
+          secure: true, // Use secure cookies if your site is HTTPS
+          sameSite: "None", // Adjust SameSite attribute if needed
         });
         toast.success("Google login successful!");
         navigate("/");
