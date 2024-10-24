@@ -27,7 +27,8 @@ import ViewBooking from "./components/Customer/ViewBooking"
 import Delivery from "./components/Customer/Delivery";
 import ResetPassword from "./components/LoginAndSignIn/ResetPassword";
 import ForgotPassword from "./components/LoginAndSignIn/ForgotPassword";
-
+import BookingKoi from './components/SaleStaff/BookingKoi';
+import CreateCheckin from './components/SaleStaff/CreateCheckin';
 
 const App = () => {
   return (
@@ -70,6 +71,9 @@ const App = () => {
             <Route path="/forgotpassword" element={<ForgotPassword />} />
 
             <Route path="/paymentsuccess" element={<PaymentSuccess />} />
+            <Route path="/booking-koi" element={<BookingKoi />} />
+            <Route path="/create-checkin/:bookingId" element={<CreateCheckin />} />
+
           </Routes>
         </div>
         <div>

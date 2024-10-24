@@ -11,29 +11,6 @@ import { useCookies } from "react-cookie";
 const { CheckableTag } = Tag;
 const { Meta } = Card;
 
-const getFishesByCategory = async (categoryId) => {
-  try {
-    // Lấy thông tin danh mục từ API ban đầu
-    const categoryResponse = await axios.get(
-      `https://example.com/api/categories/${categoryId}`
-    );
-    const categoryData = categoryResponse.data;
-
-    // Dùng categoryId để lấy danh sách cá từ API khác
-    const fishesResponse = await axios.get(`https://example.com/api/fishes`, {
-      params: {
-        categoryId: categoryId,
-      },
-    });
-    const fishesData = fishesResponse.data;
-
-    console.log(fishesData); // Hiển thị danh sách cá
-  } catch (error) {
-    console.error("Error:", error);
-  }
-};
-
-getFishesByCategory("123");
 const Filters = () => {
   return (
     <>
