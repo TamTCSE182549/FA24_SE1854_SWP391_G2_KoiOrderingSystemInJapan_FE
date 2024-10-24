@@ -70,11 +70,13 @@ const menuItems = [
 
 const SiderBoard = () => {
   return (
+
     <Sider className="bg-[#98b7a1]">
       <div className="text-gray-900 text-center my-4 ">
         <h1 className="text-2xl font-bold text-black-900">Admin Dashboard</h1>
       </div>
       <Menu theme="light bg-[#98b7a1] " mode="inline" items={menuItems} />
+
     </Sider>
   );
 };

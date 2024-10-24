@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useCookies } from "react-cookie";
@@ -9,17 +10,20 @@ import uploadFile from "../../utils/upload";
 
 const { TextArea } = Input;
 
+
 const FarmManagement = () => {
   const [cookies] = useCookies(["token"]);
   const token = cookies.token;
   const [decodedToken, setDecodedToken] = useState(null);
   const [farms, setFarms] = useState([]);
+
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [form] = Form.useForm();
   const navigate = useNavigate();
   const [fileList, setFileList] = useState([]);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const [farmToDelete, setFarmToDelete] = useState(null);
+
 
   useEffect(() => {
     if (token) {
@@ -32,16 +36,19 @@ const FarmManagement = () => {
     }
   }, [token]);
 
+
   useEffect(() => {
     fetchFarms();
   }, [token]);
 
   const fetchFarms = async () => {
     try {
+
       const response = await axios.get(
         "http://localhost:8080/koi-farm/list-farm-active",
         {
           headers: {
+
             Authorization: `Bearer ${token}`,
           },
         }
@@ -49,11 +56,13 @@ const FarmManagement = () => {
       setFarms(response.data);
     } catch (error) {
       console.error("Error fetching farms:", error);
+
       message.error("Failed to fetch farms");
     }
   };
 
   const createFarm = async (values) => {
+
     try {
       const uploadedImages = await Promise.all(
         fileList.map(async (file) => {
@@ -73,6 +82,7 @@ const FarmManagement = () => {
           Authorization: `Bearer ${token}`,
         },
       });
+
       message.success("Farm created successfully");
       setIsModalVisible(false);
       form.resetFields();
@@ -189,10 +199,12 @@ const FarmManagement = () => {
     } else {
       message.error("Invalid farm ID");
     }
+
   };
 
   return (
     <div className="p-4">
+
       <h2 className="text-2xl font-bold mb-4">Farm Management</h2>
       <Button
         onClick={() => setIsModalVisible(true)}
@@ -287,8 +299,12 @@ const FarmManagement = () => {
       >
         <p>Are you sure you want to delete this farm?</p>
       </Modal>
+
     </div>
   );
 };
+export default FarmManagement;
+
 
 export default FarmManagement;
+

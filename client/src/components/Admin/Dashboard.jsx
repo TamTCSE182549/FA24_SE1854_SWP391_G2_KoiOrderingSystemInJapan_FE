@@ -180,9 +180,11 @@ const Dashboard = () => {
   ];
 
   return (
+
     <div className="bg-white p-6 rounded-lg shadow-md">
       <h3 className="text-xl font-bold mb-4">Overview</h3>
       <div className="grid grid-cols-3 gap-6 mb-6">
+
         <div className="p-4 bg-blue-500 text-white rounded-lg">
           <h4 className="text-2xl font-semibold">150</h4>
           <p>Total Users</p>

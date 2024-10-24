@@ -16,18 +16,29 @@ import PrivateRoute from "./components/PrivateRouter/PrivateRouter";
 import Tour from "./components/Hero/TourList";
 import BookingList from "./components/Customer/BookingList";
 import AdminRoutes from "./components/Admin/AdminRoutes";
-
 import KoiDetail from "./components/KoiDetail";
-
 import FarmDetail from "./components/Hero/FarmDetail";
-
 import TourDetail from "./components/Hero/TourDetail";
 
+
 import ViewBooking from "./components/Customer/ViewBooking";
+
 
 import Delivery from "./components/Customer/Delivery";
 import ResetPassword from "./components/LoginAndSignIn/ResetPassword";
 import ForgotPassword from "./components/LoginAndSignIn/ForgotPassword";
+
+import BookingKoi from './components/SaleStaff/BookingKoi';
+import CreateCheckin from './components/SaleStaff/CreateCheckin';
+
+
+import BookingKoiDetail from "./components/Hero/BookingKoiDetail";
+import CreateBooking from "./components/Hero/CreateBooking";
+
+//for manager and staff
+import Quotation from "./components/Admin/Quotation";
+import CreateQuotation from "./components/Admin/CreateQuotation";
+import UpdateQuotation from "./components/Admin/UpdateQuotation";
 
 const App = () => {
   return (
@@ -43,6 +54,9 @@ const App = () => {
         <Navbar />
         <div className="flex-grow text-white">
           <Routes>
+            <Route path="/update-quotation/:quotationId" element={<UpdateQuotation />} />
+            <Route path="/createQuotation/:bookingId" element={<CreateQuotation />} />
+            <Route path="/quotation" element={<Quotation />} />
             <Route path="/" element={<Hero />} />
             <Route path="/koiforsale" element={<KoiForSale />} />
             <Route path="/farm" element={<Farm />} />
@@ -60,16 +74,27 @@ const App = () => {
 
             <Route path="/koi/:id" element={<KoiDetail />} />
 
+            <Route path="/farmdetail" element={<FarmDetail />} />
+            <Route path="/tourdetail" element={<TourDetail />} />
+            <Route path="/*" element={<AdminRoutes />} />
+            <Route path="/ViewBooking" element={<ViewBooking />} />
+            <Route path="/bookingkoidetail" element={<BookingKoiDetail />} />
+            <Route path="/createbooking" element={<CreateBooking />} />
+
             <Route path="/farmdetail/:id" element={<FarmDetail />} />
             <Route path="/tourdetail/:id" element={<TourDetail />} />
             <Route path="/*" element={<AdminRoutes />} />
             <Route path="/ViewBooking" element={<ViewBooking />} />
+
             <Route
               element={<PrivateRoute allowedRoles={["MANAGER"]} />}
             ></Route>
             <Route path="/forgotpassword" element={<ForgotPassword />} />
 
             <Route path="/paymentsuccess" element={<PaymentSuccess />} />
+            <Route path="/booking-koi" element={<BookingKoi />} />
+            <Route path="/create-checkin/:bookingId" element={<CreateCheckin />} />
+
           </Routes>
         </div>
         <div className="">

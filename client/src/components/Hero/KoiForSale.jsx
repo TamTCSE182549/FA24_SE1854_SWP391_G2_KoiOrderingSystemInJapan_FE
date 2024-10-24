@@ -6,9 +6,10 @@ import Footer from "../Footer/Footer";
 import axios from "axios"; // Import axios for API calls
 import { useNavigate } from "react-router-dom";
 import { useCookies } from "react-cookie";
-
 const { CheckableTag } = Tag;
 const { Meta } = Card;
+
+
 
 // const getFishesByCategory = async (categoryId) => {
 //   try {
@@ -33,6 +34,7 @@ const { Meta } = Card;
 // };
 
 // getFishesByCategory("123");
+
 const Filters = () => {
   return (
     <>
