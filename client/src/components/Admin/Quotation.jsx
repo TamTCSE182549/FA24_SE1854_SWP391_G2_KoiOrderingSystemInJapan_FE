@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Card, Button, Tag, Space, DatePicker, Select, Row, Col, Pagination } from "antd";
+import { Card, Button, Tag, Space, DatePicker, Select, Row, Col, Pagination, Modal } from "antd";
 import { useLocation } from 'react-router-dom';
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -16,6 +16,8 @@ const Quotation = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 6;
   const navigate = useNavigate();
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [selectedQuotation, setSelectedQuotation] = useState(null);
 
   const fetchQuotations = async () => {
     setLoading(true);
@@ -34,7 +36,7 @@ const Quotation = () => {
     fetchQuotations();
   }, [newQuotationId]);
 
-  const handleViewDetails = (id) => {
+  const handleUpdateStatus = (id) => {
     navigate(`/update-quotation/${id}`);
   };
 
@@ -48,6 +50,22 @@ const Quotation = () => {
     (currentPage - 1) * pageSize,
     currentPage * pageSize
   );
+
+  const handleViewDetails = async (id) => {
+    try {
+      const response = await axios.get(`http://localhost:8080/quotations/${id}`);
+      console.log("Quotation data:", response.data); // Log dữ liệu nhận được
+      setSelectedQuotation(response.data);
+      setIsModalVisible(true);
+    } catch (error) {
+      console.error("Error fetching quotation details:", error);
+    }
+  };
+
+  const handleModalClose = () => {
+    setIsModalVisible(false);
+    setSelectedQuotation(null);
+  };
 
   return (
     <div className="container mx-auto py-4" style={{ paddingLeft: '100px', paddingRight: '100px', paddingTop: '100px' }}>
@@ -89,7 +107,7 @@ const Quotation = () => {
               <p><strong>Staff:</strong> {quotation.staffName}</p>
               <Space className="mt-2">
                 {quotation.isApprove === "PROCESS" ? (
-                  <Button type="primary" onClick={() => handleViewDetails(quotation.id)}>
+                  <Button type="primary" onClick={() => handleUpdateStatus(quotation.id)}>
                     Update Quotation
                   </Button>
                 ) : (
@@ -132,6 +150,29 @@ const Quotation = () => {
           return originalElement;
         }}
       />
+
+      <Modal
+        title="Quotation Details"
+        visible={isModalVisible}
+        onCancel={handleModalClose}
+        footer={[
+          <Button key="close" onClick={handleModalClose}>
+            Close
+          </Button>
+        ]}
+      >
+        {selectedQuotation && (
+          <div>
+            <p><strong>Booking ID:</strong> {selectedQuotation.bookingId}</p>
+            <p><strong>Amount:</strong> ${selectedQuotation.amount}</p>
+            <p><strong>Description:</strong> {selectedQuotation.description}</p>
+            <p><strong>Staff Name:</strong> {selectedQuotation.staffName}</p>
+            <p><strong>Manager Name:</strong> {selectedQuotation.managerName}</p>
+            <p><strong>Status:</strong> {selectedQuotation.isApprove}</p>
+            <p><strong>Approve Time:</strong> {selectedQuotation.approveTime}</p>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 };
