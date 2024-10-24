@@ -8,7 +8,8 @@ import TourManagement from "./TourManagement";
 import Settings from "./Settings";
 import SiderBoard from "./SiderBoard"; // Import SiderBoard
 import FarmManagement from "./FarmManagement";
-
+import KoiManagement from "./KoiManagement";
+import FarmDetail from "./Farmdetail";
 const { Header, Content } = Layout;
 
 const AdminDashboard = () => {
@@ -30,6 +31,8 @@ const AdminDashboard = () => {
             <Route path="tour-management" element={<TourManagement />} />
             <Route path="farm-management" element={<FarmManagement />} />
             <Route path="settings" element={<Settings />} />
+            <Route path="koi-management" element={<KoiManagement />} />
+            <Route path="farm/:id" element={<FarmDetail />} />
           </Routes>
         </Content>
       </Layout>

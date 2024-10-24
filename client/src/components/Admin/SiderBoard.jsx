@@ -57,6 +57,15 @@ const menuItems = [
       </Link>
     ), // Đảm bảo route đúng
   },
+  {
+    key: "6",
+    icon: <SettingOutlined style={{ color: "black" }} />,
+    label: (
+      <Link style={{ color: "black" }} to="/admin/koi-management">
+        Koi Management
+      </Link>
+    ), // Đảm bảo route đúng
+  },
 ];
 
 const SiderBoard = () => {
