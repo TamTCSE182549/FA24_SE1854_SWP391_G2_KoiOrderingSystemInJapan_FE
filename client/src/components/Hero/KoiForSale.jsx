@@ -182,7 +182,7 @@ const KoiForSale = () => {
     const token = cookies.token;
 
     axios
-      .get("http://localhost:8080/kois/all", {})
+      .get("http://localhost:8080/kois/all/active", {})
       .then((response) => {
         setProducts(response.data); // Ensure response.data is an array of products with 'name' and 'img'
       })

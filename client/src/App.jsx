@@ -97,7 +97,7 @@ const App = () => {
 
           </Routes>
         </div>
-        <div className="mt-20">
+        <div className="">
           <Footer />
         </div>
       </div>
