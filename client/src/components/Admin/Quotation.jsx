@@ -1,150 +1,137 @@
 import React, { useState, useEffect } from "react";
-import { Table, Button, Input, Tag, Space, notification, Pagination } from "antd";
+import { Card, Button, Tag, Space, DatePicker, Select, Row, Col, Pagination } from "antd";
+import { useLocation } from 'react-router-dom';
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
+const { Option } = Select;
+
 const Quotation = () => {
+  const location = useLocation();
+  const newQuotationId = location.state?.newQuotationId;
   const [quotations, setQuotations] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [searchText, setSearchText] = useState("");
+  const [statusFilter, setStatusFilter] = useState("ALL");
+  const [dateFilter, setDateFilter] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 6;
   const navigate = useNavigate();
 
   const fetchQuotations = async () => {
+    setLoading(true);
     try {
       const response = await axios.get("http://localhost:8080/quotations/all");
-      const sortedQuotations = response.data.sort((a, b) => b.id - a.id);
-    setQuotations(sortedQuotations);
-    console.log("Quotation Data:", sortedQuotations);
-      console.log("Quotation Data:", response.data.content);
+      setQuotations(response.data);
     } catch (error) {
       console.error("Error when getting Quotation List:", error);
-      notification.error({
-            message: "Error",
-            description: "You don't have any quotation.",
-          });
-    } 
-  };
-
-  useEffect(() => {
-    fetchQuotations();
-  }, []);
-
-  // Hàm xử lý khi nhấn nút xem chi tiết
-  const handleViewDetails = (id) => {
-    navigate(`/quotation/${id}`);
-  };
-
-  // Hàm xử lý khi thay đổi trạng thái
-  const handleUpdateStatus = async (quotationId, newStatus) => {
-    try {
-      const response = await axios.put(`http://localhost:8080/quotations/updateStatus/${quotationId}`,null, {
-        params: {
-          approveStatus: newStatus,
-        },
-      });
-  
-      if (response.status === 200) {
-        notification.success({
-          message: "Status Updated",
-          description: "The quotation status has been updated successfully.",
-        });
-  
-        // Find and update the specific quotation in the state
-        setQuotations((prevQuotations) =>
-          prevQuotations.map((quotation) =>
-            quotation.id === id ? { ...quotation, isApprove: newStatus } : quotation
-          )
-        );
-      }
-    } catch (error) {
-      console.error("Error updating quotation status:", error);
-      notification.error({
-        message: "Error",
-        description: "Failed to update the quotation status.",
-      });
+    } finally {
+      setLoading(false);
     }
   };
 
   
+  useEffect(() => {
+    fetchQuotations();
+  }, [newQuotationId]);
+
+  const handleViewDetails = (id) => {
+    navigate(`/update-quotation/${id}`);
+  };
+
+  const filteredQuotations = quotations.filter(quotation => {
+    if (statusFilter !== "ALL" && quotation.isApprove !== statusFilter) return false;
+    if (dateFilter && !quotation.approveTime.startsWith(dateFilter.format("YYYY-MM-DD"))) return false;
+    return true;
+  });
+
+  const paginatedQuotations = filteredQuotations.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
+
   return (
-    <div style={{ padding: "5px" }}>
-    
-    <div className="flex flex-col min-h-screen backdrop-filter backdrop-blur-3xl container mx-auto mb-10 mt-40">
-      <div className="flex-grow">
-        <div className="container mx-auto p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-1 gap-6">
-        <div style={{ marginTop: "20px" }}>
-        <Space style={{ marginBottom: "20px" }}>
+    <div className="container mx-auto py-4" style={{ paddingLeft: '100px', paddingRight: '100px', paddingTop: '100px' }}>
+      <h1 className="text-2xl font-bold mb-4">Quotations List</h1>
+      <Space className="mb-4">
+        <Select
+          defaultValue="ALL"
+          style={{ width: 120 }}
+          onChange={(value) => setStatusFilter(value)}
+        >
+          <Option value="ALL">All Status</Option>
+          <Option value="PROCESS">In Process</Option>
+          <Option value="FINISH">Accept</Option>
+          <Option value="REJECTED">Reject</Option>
+        </Select>
+        {/* <DatePicker
+          onChange={(date) => setDateFilter(date)}
+        /> */}
         <Button type="primary" onClick={fetchQuotations}>
-          Reload Quotations List
+          Reload Quotations
         </Button>
       </Space>
-        {loading ? (
-          <p>Loading...</p>
-        ) : quotations.length > 0 ? (
-          quotations.map((quotation) => (
-            <div
-              key={quotation.id}
-              style={{
-                border: "1px solid #ddd",
-                borderRadius: "5px",
-                padding: "10px",
-                marginBottom: "10px",
-                backgroundColor: "#fff",
-                color: "#000",
-              }}
-            >
-              <p><strong>ID:</strong> {quotation.id}</p>
-              <p><strong>Booking ID:</strong> {quotation.bookingId}</p>
-              <p><strong>Amount:</strong> {quotation.amount}</p>
-              <p>
-                <strong>Status:</strong> 
-                <Tag color={quotation.isApprove ? "green" : "red"}>
-                  {quotation.isApprove ? "Approved" : "Not Approved"}
+
+      <Row gutter={[16, 16]}>
+        {paginatedQuotations.map((quotation) => (
+          <Col key={quotation.id} xs={24} sm={12} md={8}>
+            <Card
+              title={`Booking ID: ${quotation.bookingId}`}
+              extra={
+                <Tag color={
+                  quotation.isApprove === "PROCESS" ? "blue" :
+                  quotation.isApprove === "FINISH" ? "green" : "red"
+                }>
+                  {quotation.isApprove}
                 </Tag>
-              </p>
-              <Space>
-                <Button type="primary" onClick={() => handleViewDetails(quotation.id)}>
-                  View Detail
-                </Button>
-                <Button
-                  style={{
-                  backgroundColor: "#FEEC37",
-                }}
-                  type="default"
-                  onClick={() => handleUpdateStatus(quotation.id, "PROCESS")}
-                >
-                  Process
-                </Button>
-                <Button
-                style={{
-                  backgroundColor: "#6EC207",
-                }}
-                  type="default"
-                  onClick={() => handleUpdateStatus(quotation.id, "FINISH")}
-                >
-                  Finish
-                </Button>
-                <Button
-                style={{
-                  backgroundColor: "#D91656",
-                }}
-                  type="default"
-                  onClick={() => handleUpdateStatus(quotation.id, "REJECTED")}
-                >
-                  Reject
-                </Button>
+              }
+            >
+              <p><strong>Amount:</strong> ${quotation.amount}</p>
+              <p><strong>Staff:</strong> {quotation.staffName}</p>
+              <Space className="mt-2">
+                {quotation.isApprove === "PROCESS" ? (
+                  <Button type="primary" onClick={() => handleViewDetails(quotation.id)}>
+                    Update Quotation
+                  </Button>
+                ) : (
+                  <Button onClick={() => handleViewDetails(quotation.id)}>
+                    View Detail
+                  </Button>
+                )}
               </Space>
-            </div>
-          ))
-        ) : (
-          <p>No quotations found.</p>
-        )}
-      </div>
-        </div>
-        
-      </div>
-    </div>
-      
+            </Card>
+          </Col>
+        ))}
+      </Row>
+
+      <Pagination
+        className="mt-4"
+        current={currentPage}
+        total={filteredQuotations.length}
+        pageSize={pageSize}
+        onChange={(page) => setCurrentPage(page)}
+        itemRender={(_, type, originalElement) => {
+          if (type === 'next' || type === 'prev') {
+            return (
+              <Button 
+                style={{ 
+                  color: 'white', 
+                  backgroundColor: '#1890ff', 
+                  border: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '32px',  // Đảm bảo kích thước đồng nhất
+                  height: '32px', // Đảm bảo kích thước đồng nhất
+                  fontSize: '14px' // Điều chỉnh kích thước chữ nếu cần
+                }}
+              >
+                {type === 'next' ? '>' : '<'}
+              </Button>
+            );
+          }
+          return originalElement;
+        }}
+      />
     </div>
   );
 };
