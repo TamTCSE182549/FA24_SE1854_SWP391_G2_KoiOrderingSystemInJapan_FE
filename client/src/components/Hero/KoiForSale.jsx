@@ -8,6 +8,9 @@ import { useNavigate } from "react-router-dom";
 import { useCookies } from "react-cookie";
 const { CheckableTag } = Tag;
 const { Meta } = Card;
+
+
+
 // const getFishesByCategory = async (categoryId) => {
 //   try {
 //     // Lấy thông tin danh mục từ API ban đầu
@@ -31,6 +34,7 @@ const { Meta } = Card;
 // };
 
 // getFishesByCategory("123");
+
 const Filters = () => {
   return (
     <>
