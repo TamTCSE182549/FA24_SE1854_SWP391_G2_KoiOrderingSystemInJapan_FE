@@ -9,7 +9,11 @@ import Settings from "./Settings";
 
 import SiderBoard from "./SiderBoard";
 import FarmManagement from "./FarmManagement";
-import CreateNewFarm from "./CreateNewFarm";
+
+import KoiManagement from "./KoiManagement";
+import FarmDetail from "./Farmdetail";
+
+
 
 const { Header, Content } = Layout;
 
@@ -19,10 +23,13 @@ const AdminDashboard = () => {
       <SiderBoard />
 
       <Layout>
-        <Header className="shadow-md p-4 bg-green-800">
-          <h2 className="text-xl font-serif text-white">Welcome, Admin</h2>
+
+        <Header className="bg-[#c5bd92] shadow-md p-4 ">
+          <h2 className="text-xl font-semibold">Welcome, Admin</h2>
         </Header>
-        <Content className="p-6 bg-green-800">
+        <Content className="p-6 bg-[#e7ede0] ">
+          {/* Định nghĩa các route con của Admin */}
+
           <Routes>
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="users" element={<Users />} />
@@ -30,7 +37,9 @@ const AdminDashboard = () => {
             <Route path="farm-management" element={<FarmManagement />} />
             <Route path="settings" element={<Settings />} />
 
-            <Route path="create-new-farm" element={<CreateNewFarm />} />
+            <Route path="koi-management" element={<KoiManagement />} />
+            <Route path="farm/:id" element={<FarmDetail />} />
+
           </Routes>
         </Content>
       </Layout>

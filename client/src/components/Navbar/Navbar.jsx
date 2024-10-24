@@ -86,15 +86,9 @@ const Navbar = () => {
         <Link to="/loyalty">Genius loyalty programme</Link>
       </Menu.Item>
       <Menu.Item key="4">
-        <Link to="/rewards">Rewards & Wallet</Link>
-      </Menu.Item>
-      <Menu.Item key="5">
         <Link to="/reviews">Reviews</Link>
       </Menu.Item>
-      <Menu.Item key="6">
-        <Link to="/saved">Saved</Link>
-      </Menu.Item>
-      <Menu.Item key="7" onClick={handleSignOut}>
+      <Menu.Item key="5" onClick={handleSignOut}>
         Sign out
       </Menu.Item>
     </Menu>
@@ -177,11 +171,12 @@ const Navbar = () => {
       <Sidebar />
     </>
   ) : (
-    <div className="sticky z-20 mb-20">
-      <div className="backdrop-filter backdrop-blur-3xl w-full shadow-lg fixed z-10 ">
+
+    <div className="fixed top-0 left-0 w-full z-20 ">
+      <div className="backdrop-filter bg-gradient-to-r from-emerald-700 via-green-800 to-teal-600 w-full shadow-lg fixed z-10">
         {/* upper Navbar */}
 
-        <div className="flex justify-between items-center w-full px-6 lg:px-12 py-0">
+        <div className="flex justify-between items-center w-full px-6 lg:px-12 py-1">
           {/* Logo and site name */}
           <div className="flex items-center">
             <img
@@ -232,8 +227,6 @@ const Navbar = () => {
                 onClick={onMenuClick}
               />
             )}
-
-            <ShoppingCartOutlined className="text-gray-300 text-2xl cursor-pointer" />
           </div>
         </div>
       </div>

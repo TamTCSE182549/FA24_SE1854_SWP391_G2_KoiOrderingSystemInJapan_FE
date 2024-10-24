@@ -1,176 +1,179 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { Table, Button, Modal, Form, Input, InputNumber, message } from "antd";
 
 const TourManagement = () => {
-  const [newTour, setNewTour] = useState({
-    tourName: "",
-    description: "",
-    price: "",
-    duration: "",
-  });
+  const [tours, setTours] = useState([]);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [editingTour, setEditingTour] = useState(null);
+  const [form] = Form.useForm();
 
-  const [editTour, setEditTour] = useState(null); // Để cập nhật tour hiện tại
+  useEffect(() => {
+    fetchTours();
+  }, []);
 
-  // Create new tour using the correct endpoint
-  const createTour = async () => {
+  const fetchTours = async () => {
     try {
-      await axios.post("http://localhost:8080/tour/createTourRes", newTour); // API từ backend
-      setNewTour({ tourName: "", description: "", price: "", duration: "" }); // Reset form
-      alert("Tour created successfully!");
+      const response = await axios.get("http://localhost:8080/tour/showAll");
+      setTours(response.data);
+    } catch (error) {
+      console.error("Error fetching tours:", error);
+      message.error("Failed to fetch tours");
+    }
+  };
+
+  const handleCreate = async (values) => {
+    try {
+      await axios.post("http://localhost:8080/tour/createTourRes", values);
+      message.success("Tour created successfully");
+      setIsModalVisible(false);
+      form.resetFields();
+      fetchTours();
     } catch (error) {
       console.error("Error creating tour:", error);
+      message.error("Failed to create tour");
     }
   };
 
-  // Update an existing tour using the correct endpoint
-  const updateTour = async (id) => {
+  const handleUpdate = async (values) => {
     try {
       await axios.put(
-        `http://localhost:8080/tour/updateTourRes/${id}`,
-        editTour
-      ); // API từ backend
-      setEditTour(null); // Reset edit state
-      alert("Tour updated successfully!");
+        `http://localhost:8080/tour/updateTourRes/${editingTour.id}`,
+        values
+      );
+      message.success("Tour updated successfully");
+      setIsModalVisible(false);
+      setEditingTour(null);
+      form.resetFields();
+      fetchTours();
     } catch (error) {
       console.error("Error updating tour:", error);
+      message.error("Failed to update tour");
     }
   };
 
-  // Delete a tour using the correct endpoint
-  const deleteTour = async (id) => {
+  const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://localhost:8080/tour/deleteTourRes/${id}`); // API từ backend
-      alert("Tour deleted successfully!");
+      await axios.delete(`http://localhost:8080/tour/deleteTourRes/${id}`);
+      message.success("Tour deleted successfully");
+      fetchTours();
     } catch (error) {
       console.error("Error deleting tour:", error);
+      message.error("Failed to delete tour");
     }
   };
 
-  // Handle input change for new tour
-  const handleInputChange = (e) => {
-    setNewTour({
-      ...newTour,
-      [e.target.name]: e.target.value,
-    });
+  const showModal = (tour = null) => {
+    setEditingTour(tour);
+    form.setFieldsValue(tour || {});
+    setIsModalVisible(true);
   };
 
-  // Handle input change for editing tour
-  const handleEditChange = (e) => {
-    setEditTour({
-      ...editTour,
-      [e.target.name]: e.target.value,
-    });
-  };
+  const columns = [
+    {
+      title: "Tour Name",
+      dataIndex: "tourName",
+      key: "tourName",
+    },
+    {
+      title: "Description",
+      dataIndex: "description",
+      key: "description",
+    },
+    {
+      title: "Price",
+      dataIndex: "price",
+      key: "price",
+    },
+    {
+      title: "Duration",
+      dataIndex: "duration",
+      key: "duration",
+    },
+    {
+      title: "Actions",
+      key: "actions",
+      render: (_, record) => (
+        <>
+          <Button
+            onClick={() => showModal(record)}
+            type="primary"
+            style={{ marginRight: 8 }}
+          >
+            Edit
+          </Button>
+          <Button onClick={() => handleDelete(record.id)} type="primary" danger>
+            Delete
+          </Button>
+        </>
+      ),
+    },
+  ];
 
   return (
     <div className="p-4">
       <h2 className="text-2xl font-bold mb-4">Tour Management</h2>
+      <Button
+        onClick={() => showModal()}
+        type="primary"
+        style={{ marginBottom: 16 }}
+      >
+        Add New Tour
+      </Button>
+      <Table columns={columns} dataSource={tours} rowKey="id" />
 
-      {/* Create new tour form */}
-      <div className="mb-4">
-        <h3 className="text-xl font-semibold">Create New Tour</h3>
-        <input
-          type="text"
-          name="tourName"
-          value={newTour.tourName}
-          onChange={handleInputChange}
-          placeholder="Tour Name"
-          className="border p-2 mb-2"
-        />
-        <input
-          type="text"
-          name="description"
-          value={newTour.description}
-          onChange={handleInputChange}
-          placeholder="Description"
-          className="border p-2 mb-2"
-        />
-        <input
-          type="text"
-          name="price"
-          value={newTour.price}
-          onChange={handleInputChange}
-          placeholder="Price"
-          className="border p-2 mb-2"
-        />
-        <input
-          type="text"
-          name="duration"
-          value={newTour.duration}
-          onChange={handleInputChange}
-          placeholder="Duration"
-          className="border p-2 mb-2"
-        />
-        <button
-          onClick={createTour}
-          className="bg-blue-500 text-white px-4 py-2"
+      <Modal
+        title={editingTour ? "Edit Tour" : "Create New Tour"}
+        visible={isModalVisible}
+        onCancel={() => {
+          setIsModalVisible(false);
+          setEditingTour(null);
+          form.resetFields();
+        }}
+        footer={null}
+      >
+        <Form
+          form={form}
+          onFinish={editingTour ? handleUpdate : handleCreate}
+          layout="vertical"
         >
-          Create Tour
-        </button>
-      </div>
-
-      {/* Edit tour form */}
-      {editTour && (
-        <div className="mb-4">
-          <h3 className="text-xl font-semibold">Edit Tour</h3>
-          <input
-            type="text"
+          <Form.Item
             name="tourName"
-            value={editTour.tourName}
-            onChange={handleEditChange}
-            placeholder="Tour Name"
-            className="border p-2 mb-2"
-          />
-          <input
-            type="text"
-            name="description"
-            value={editTour.description}
-            onChange={handleEditChange}
-            placeholder="Description"
-            className="border p-2 mb-2"
-          />
-          <input
-            type="text"
-            name="price"
-            value={editTour.price}
-            onChange={handleEditChange}
-            placeholder="Price"
-            className="border p-2 mb-2"
-          />
-          <input
-            type="text"
-            name="duration"
-            value={editTour.duration}
-            onChange={handleEditChange}
-            placeholder="Duration"
-            className="border p-2 mb-2"
-          />
-          <button
-            onClick={() => updateTour(editTour.id)}
-            className="bg-green-500 text-white px-4 py-2"
+            label="Tour Name"
+            rules={[{ required: true, message: "Please input the tour name!" }]}
           >
-            Save Changes
-          </button>
-        </div>
-      )}
-
-      {/* Delete tour form */}
-      <div className="mb-4">
-        <h3 className="text-xl font-semibold">Delete Tour</h3>
-        <input
-          type="text"
-          name="tourId"
-          placeholder="Tour ID"
-          onChange={(e) => setEditTour({ id: e.target.value })}
-          className="border p-2 mb-2"
-        />
-        <button
-          onClick={() => deleteTour(editTour.id)}
-          className="bg-red-500 text-white px-4 py-2"
-        >
-          Delete Tour
-        </button>
-      </div>
+            <Input />
+          </Form.Item>
+          <Form.Item
+            name="description"
+            label="Description"
+            rules={[
+              { required: true, message: "Please input the description!" },
+            ]}
+          >
+            <Input.TextArea />
+          </Form.Item>
+          <Form.Item
+            name="price"
+            label="Price"
+            rules={[{ required: true, message: "Please input the price!" }]}
+          >
+            <InputNumber min={0} style={{ width: "100%" }} />
+          </Form.Item>
+          <Form.Item
+            name="duration"
+            label="Duration"
+            rules={[{ required: true, message: "Please input the duration!" }]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item>
+            <Button type="primary" htmlType="submit">
+              {editingTour ? "Update Tour" : "Create Tour"}
+            </Button>
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 };

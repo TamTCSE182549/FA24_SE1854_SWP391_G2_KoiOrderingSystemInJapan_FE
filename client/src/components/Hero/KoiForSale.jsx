@@ -8,6 +8,9 @@ import { useNavigate } from "react-router-dom";
 import { useCookies } from "react-cookie";
 const { CheckableTag } = Tag;
 const { Meta } = Card;
+
+
+
 // const getFishesByCategory = async (categoryId) => {
 //   try {
 //     // Lấy thông tin danh mục từ API ban đầu
@@ -31,6 +34,7 @@ const { Meta } = Card;
 // };
 
 // getFishesByCategory("123");
+
 const Filters = () => {
   return (
     <>
@@ -178,7 +182,7 @@ const KoiForSale = () => {
     const token = cookies.token;
 
     axios
-      .get("http://localhost:8080/kois/all", {})
+      .get("http://localhost:8080/kois/all/active", {})
       .then((response) => {
         setProducts(response.data); // Ensure response.data is an array of products with 'name' and 'img'
       })
