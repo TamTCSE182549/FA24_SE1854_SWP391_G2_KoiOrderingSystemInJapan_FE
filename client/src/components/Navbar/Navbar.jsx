@@ -177,11 +177,11 @@ const Navbar = () => {
       <Sidebar />
     </>
   ) : (
-    <div className="sticky z-20">
-      <div className="backdrop-filter backdrop-blur-3xl w-full shadow-lg fixed z-10">
+    <div className="sticky z-20 mb-20">
+      <div className="backdrop-filter backdrop-blur-3xl w-full shadow-lg fixed z-10 ">
         {/* upper Navbar */}
 
-        <div className="flex justify-between items-center w-full px-6 lg:px-12 py-3">
+        <div className="flex justify-between items-center w-full px-6 lg:px-12 py-0">
           {/* Logo and site name */}
           <div className="flex items-center">
             <img
