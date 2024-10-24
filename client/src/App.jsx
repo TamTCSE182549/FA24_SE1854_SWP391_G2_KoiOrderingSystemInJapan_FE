@@ -38,6 +38,7 @@ import CreateBooking from "./components/Hero/CreateBooking";
 //for manager and staff
 import Quotation from "./components/Admin/Quotation";
 import CreateQuotation from "./components/Admin/CreateQuotation";
+import UpdateQuotation from "./components/Admin/UpdateQuotation";
 
 const App = () => {
   return (
@@ -53,6 +54,7 @@ const App = () => {
         <Navbar />
         <div className="flex-grow text-white">
           <Routes>
+            <Route path="/update-quotation/:quotationId" element={<UpdateQuotation />} />
             <Route path="/createQuotation/:bookingId" element={<CreateQuotation />} />
             <Route path="/quotation" element={<Quotation />} />
             <Route path="/" element={<Hero />} />
