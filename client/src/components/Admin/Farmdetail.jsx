@@ -185,7 +185,7 @@ function Farmdetail() {
       fetchFarm(); // Refresh farm data
     } catch (error) {
       console.error("Error adding koi to farm:", error);
-      message.error("Failed to add koi to farm");
+      message.error(error.response?.data);
     }
   };
 

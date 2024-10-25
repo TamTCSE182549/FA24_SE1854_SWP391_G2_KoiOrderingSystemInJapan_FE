@@ -11,10 +11,12 @@ import {
   Upload,
   InputNumber,
   Select,
+  Table,
 } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import uploadFile from "../../utils/upload";
 import { useCookies } from "react-cookie";
+import moment from "moment"; // Import moment for date manipulation
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -23,16 +25,22 @@ function TourDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [tour, setTour] = useState(null);
+  const [tableData, setTableData] = useState([]); // State for table data
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isAddFarmModalVisible, setIsAddFarmModalVisible] = useState(false); // State for add farm modal
   const [form] = Form.useForm();
+  const [addFarmForm] = Form.useForm(); // Form for adding farm
   const [fileList, setFileList] = useState([]);
   const [cookies] = useCookies(["token"]);
   const token = cookies.token;
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState("");
+  const [farms, setFarms] = useState([]); // State for farms data
 
   useEffect(() => {
     fetchTour();
+    fetchTableData(); // Fetch table data
+    fetchFarms(); // Fetch farms data
   }, [id]);
 
   const fetchTour = async () => {
@@ -61,6 +69,49 @@ function TourDetail() {
     }
   };
 
+  const fetchTableData = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:8080/TourDetail/tour/${id}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setTableData(response.data); // Set the fetched data to tableData
+    } catch (error) {
+      console.error("Error fetching table data:", error);
+      message.error("Failed to fetch table data");
+    }
+  };
+
+  const fetchFarms = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:8080/koi-farm/list-farm-active`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setFarms(response.data); // Set the fetched farms data
+    } catch (error) {
+      console.error("Error fetching farms:", error);
+      message.error("Failed to fetch farms");
+    }
+  };
+
+  const handleDelete = async (recordId) => {
+    try {
+      await axios.delete(`http://localhost:8080/TourDetail/${recordId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      message.success("Record deleted successfully");
+      fetchTableData(); // Refresh table data after deletion
+    } catch (error) {
+      console.error("Error deleting record:", error);
+      message.error("Failed to delete record");
+    }
+  };
+
   const handleUpdate = async () => {
     try {
       const values = await form.validateFields();
@@ -84,7 +135,13 @@ function TourDetail() {
 
       const updatedTour = {
         ...values,
-        tourImg: validImages[0],
+        startTime: moment(values.startTime)
+          .startOf("day")
+          .format("YYYY-MM-DDTHH:mm:ss"),
+        endTime: moment(values.endTime)
+          .endOf("day")
+          .format("YYYY-MM-DDTHH:mm:ss"),
+        tourImg: validImages[0], // Ensure the image is included in the update
       };
 
       await axios.put(
@@ -100,6 +157,39 @@ function TourDetail() {
     } catch (error) {
       console.error("Error updating tour:", error);
       message.error("Failed to update tour");
+    }
+  };
+
+  const handleAddFarm = async () => {
+    try {
+      // Validate form fields
+      const values = await addFarmForm.validateFields();
+
+      // Construct the payload
+      const newFarmInTour = {
+        tourID: parseInt(id), // Use the tourID from the URL parameters
+        farmID: values.farmName, // Assuming farmName is the ID of the farm
+        description: values.description, // Directly from the form
+      };
+
+      // Send the payload to the server
+      await axios.post(
+        `http://localhost:8080/TourDetail/create`,
+        newFarmInTour,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      // Success message and actions
+      message.success("Farm added to tour successfully");
+      setIsAddFarmModalVisible(false);
+      addFarmForm.resetFields(); // Reset form fields
+      fetchTableData(); // Refresh table data after adding a farm
+    } catch (error) {
+      // Error handling
+      console.error("Error adding farm to tour:", error);
+      message.error(error.response?.data || "Failed to add farm to tour");
     }
   };
 
@@ -124,6 +214,39 @@ function TourDetail() {
   if (!tour) {
     return <div>Loading...</div>;
   }
+
+  // Define columns for the table
+  const columns = [
+    {
+      title: "ID",
+      dataIndex: "id",
+      key: "id",
+    },
+    {
+      title: "Tour Name",
+      dataIndex: "tourName",
+      key: "tourName",
+    },
+    {
+      title: "Farm Name",
+      dataIndex: "farmName",
+      key: "farmName",
+    },
+    {
+      title: "Description",
+      dataIndex: "description",
+      key: "description",
+    },
+    {
+      title: "Action",
+      key: "action",
+      render: (_, record) => (
+        <Button type="primary" danger onClick={() => handleDelete(record.id)}>
+          Delete
+        </Button>
+      ),
+    },
+  ];
 
   return (
     <div className="p-4">
@@ -172,8 +295,14 @@ function TourDetail() {
           >
             Update Tour
           </Button>
+          <Button type="primary" onClick={() => setIsAddFarmModalVisible(true)}>
+            Add Farm to Tour
+          </Button>
         </div>
       </Card>
+
+      {/* Render the table */}
+      <Table columns={columns} dataSource={tableData} pagination={false} />
 
       <Modal
         title="Update Tour"
@@ -215,14 +344,57 @@ function TourDetail() {
           >
             <InputNumber min={1} style={{ width: "100%" }} />
           </Form.Item>
-          <Form.Item name="startTime" label="Start Time">
-            <Input type="datetime-local" />
-          </Form.Item>
-          <Form.Item name="endTime" label="End Time">
-            <Input type="datetime-local" />
+          <Form.Item
+            name="startTime"
+            label="Start Time"
+            rules={[
+              {
+                required: true,
+                message: "Please select the start date!",
+              },
+              {
+                validator: (_, value) =>
+                  value && moment(value).isAfter(moment().add(7, "days"))
+                    ? Promise.resolve()
+                    : Promise.reject(
+                        new Error(
+                          "Start date must be at least 7 days from today"
+                        )
+                      ),
+              },
+            ]}
+          >
+            <Input type="date" />
           </Form.Item>
           <Form.Item
-            name="status" // Ensure this matches the API response
+            name="endTime"
+            label="End Time"
+            rules={[
+              {
+                required: true,
+                message: "Please select the end date!",
+              },
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  if (
+                    !value ||
+                    moment(value).isSameOrAfter(getFieldValue("startTime"))
+                  ) {
+                    return Promise.resolve();
+                  }
+                  return Promise.reject(
+                    new Error(
+                      "End date must be the same as or after the start date"
+                    )
+                  );
+                },
+              }),
+            ]}
+          >
+            <Input type="date" />
+          </Form.Item>
+          <Form.Item
+            name="status"
             label="Status"
             rules={[{ required: true, message: "Please select the status!" }]}
           >
@@ -248,6 +420,45 @@ function TourDetail() {
                 </div>
               )}
             </Upload>
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      <Modal
+        title="Add Farm to Tour"
+        visible={isAddFarmModalVisible}
+        onCancel={() => setIsAddFarmModalVisible(false)}
+        footer={[
+          <Button key="cancel" onClick={() => setIsAddFarmModalVisible(false)}>
+            Cancel
+          </Button>,
+          <Button key="submit" type="primary" onClick={handleAddFarm}>
+            Add Farm
+          </Button>,
+        ]}
+      >
+        <Form form={addFarmForm} layout="vertical">
+          <Form.Item
+            name="farmName"
+            label="Farm Name"
+            rules={[{ required: true, message: "Please select a farm!" }]}
+          >
+            <Select placeholder="Select a farm">
+              {farms.map((farm) => (
+                <Option key={farm.id} value={farm.id}>
+                  {farm.farmName}
+                </Option>
+              ))}
+            </Select>
+          </Form.Item>
+          <Form.Item
+            name="description"
+            label="Description"
+            rules={[
+              { required: true, message: "Please input the description!" },
+            ]}
+          >
+            <TextArea rows={4} />
           </Form.Item>
         </Form>
       </Modal>
