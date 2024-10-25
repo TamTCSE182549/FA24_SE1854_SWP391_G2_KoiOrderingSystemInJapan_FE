@@ -23,8 +23,9 @@ const ForgotPassword = () => {
       }
     } catch (error) {
       console.error("Forgot password error:", error);
+
       message.error(
-        error.response?.data?.message ||
+        error.response?.data ||
           "Failed to process your request. Please try again."
       );
     }
