@@ -54,7 +54,7 @@ const CreateQuotation = () => {
                   });
             if (response.status === 201) {
                 toast.success('Quotation created successfully!');
-                navigate('/quotation', { state: { newQuotationId: response.data.id } });
+                navigate(-1);
             }
         } catch (err) {
             console.error("Error details:", err.response.data);

@@ -1,19 +1,42 @@
 import React from "react";
 import { Form, Input, Button, message } from "antd";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
+import { jwtDecode } from "jwt-decode";
 
 const ResetPassword = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Extract token from URL
+  const queryParams = new URLSearchParams(location.search);
+  const token = queryParams.get("token");
+
 
   const onFinish = async (values) => {
     try {
       const response = await axios.post(
         `http://localhost:8080/api/reset-password`,
-        values
+        { 
+          password: values.newPassword,  // Thay đổi từ newPassword thành password
+          confirmPassword: values.newPassword,
+          token: token
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+        }
       );
+      
 
       if (response.status === 200) {
+        if(response.data.token){
+          const decoded = jwtDecode(response.data.token);
+          setUser(decoded);
+          console.log(decoded);
+        }
         message.success("Password reset successful!");
         navigate("/login");
       } else {

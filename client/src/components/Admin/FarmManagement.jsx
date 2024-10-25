@@ -305,6 +305,3 @@ const FarmManagement = () => {
 };
 export default FarmManagement;
 
-
-export default FarmManagement;
-

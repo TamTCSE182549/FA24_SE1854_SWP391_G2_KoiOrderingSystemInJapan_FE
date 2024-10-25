@@ -67,6 +67,13 @@ const Quotation = () => {
     setSelectedQuotation(null);
   };
 
+  const formatDateTime = (dateTimeString) => {
+    const date = new Date(dateTimeString);
+    const formattedDate = date.toISOString().split('T')[0]; // Lấy phần ngày
+    const formattedTime = date.toTimeString().split(' ')[0]; // Lấy phần thời gian
+    return { formattedDate, formattedTime };
+  };
+
   return (
     <div className="container mx-auto py-4" style={{ paddingLeft: '100px', paddingRight: '100px', paddingTop: '100px' }}>
       <h1 className="text-2xl font-bold mb-4">Quotations List</h1>
@@ -81,9 +88,9 @@ const Quotation = () => {
           <Option value="FINISH">Accept</Option>
           <Option value="REJECTED">Reject</Option>
         </Select>
-        {/* <DatePicker
+        <DatePicker
           onChange={(date) => setDateFilter(date)}
-        /> */}
+        />
         <Button type="primary" onClick={fetchQuotations}>
           Reload Quotations
         </Button>
@@ -169,7 +176,12 @@ const Quotation = () => {
             <p><strong>Staff Name:</strong> {selectedQuotation.staffName}</p>
             <p><strong>Manager Name:</strong> {selectedQuotation.managerName}</p>
             <p><strong>Status:</strong> {selectedQuotation.isApprove}</p>
-            <p><strong>Approve Time:</strong> {selectedQuotation.approveTime}</p>
+            {selectedQuotation.approveTime && (
+              <>
+                <p><strong>Approve Date:</strong> {formatDateTime(selectedQuotation.approveTime).formattedDate}</p>
+                <p><strong>Approve Time:</strong> {formatDateTime(selectedQuotation.approveTime).formattedTime}</p>
+              </>
+            )}
           </div>
         )}
       </Modal>
