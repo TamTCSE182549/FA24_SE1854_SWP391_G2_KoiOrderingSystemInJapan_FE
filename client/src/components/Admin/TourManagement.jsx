@@ -50,22 +50,38 @@ const TourManagement = () => {
 
   const handleCreate = async (values) => {
     try {
-      // Upload hình ảnh lên Firebase
+      // Upload images and get URLs
       const uploadedImages = await Promise.all(
         fileList.map(async (file) => {
           if (file.originFileObj) {
-            const url = await uploadFile(file.originFileObj);
-            return url;
+            try {
+              const url = await uploadFile(file.originFileObj);
+              return url;
+            } catch (error) {
+              console.error("Error uploading file:", error);
+              message.error(`Failed to upload ${file.name}`);
+              return null;
+            }
           }
           return file.url;
         })
       );
 
+      const validImages = uploadedImages.filter((img) => img !== null);
+
+      // Convert dates to LocalDateTime format with time set to 00:00:00
       const tourData = {
         ...values,
-        tourImg: uploadedImages[0], // Lấy URL của hình ảnh đầu tiên
+        startTime: moment(values.startTime)
+          .startOf("day")
+          .format("YYYY-MM-DDTHH:mm:ss"),
+        endTime: moment(values.endTime)
+          .endOf("day")
+          .format("YYYY-MM-DDTHH:mm:ss"),
+        tourImg: validImages[0], // Include the image URL
       };
 
+      // Call API to create tour
       await axios.post("http://localhost:8080/tour/createTourRes", tourData, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -248,17 +264,50 @@ const TourManagement = () => {
             name="startTime"
             label="Start Time"
             rules={[
-              { required: true, message: "Please input the start time!" },
+              {
+                required: true,
+                message: "Please select the start date!",
+              },
+              {
+                validator: (_, value) =>
+                  value && moment(value).isAfter(moment().add(7, "days"))
+                    ? Promise.resolve()
+                    : Promise.reject(
+                        new Error(
+                          "Start date must be at least 7 days from today"
+                        )
+                      ),
+              },
             ]}
           >
-            <Input type="datetime-local" />
+            <Input type="date" />
           </Form.Item>
           <Form.Item
             name="endTime"
             label="End Time"
-            rules={[{ required: true, message: "Please input the end time!" }]}
+            rules={[
+              {
+                required: true,
+                message: "Please select the end date!",
+              },
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  if (
+                    !value ||
+                    moment(value).isSameOrAfter(getFieldValue("startTime"))
+                  ) {
+                    return Promise.resolve();
+                  }
+                  return Promise.reject(
+                    new Error(
+                      "End date must be the same as or after the start date"
+                    )
+                  );
+                },
+              }),
+            ]}
           >
-            <Input type="datetime-local" />
+            <Input type="date" />
           </Form.Item>
           <Form.Item label="Tour Image">
             <Upload
