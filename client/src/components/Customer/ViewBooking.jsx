@@ -1,25 +1,25 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useNavigate } from 'react-router-dom';
-import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
 import { useCookies } from "react-cookie"; // Thêm useCookies để lấy token từ cookie
 
 const BookingInformation = () => {
-    const [cookies] = useCookies(["token"]);
-    const token = cookies.token;
-    const [bookingList, setBookingList] = useState([]);
-    const navigate = useNavigate();
+  const [cookies] = useCookies(["token"]);
+  const token = cookies.token;
+  const [bookingList, setBookingList] = useState([]);
+  const navigate = useNavigate();
 
-//   useEffect(() => {
-//     if (token) {
-//       try {
-//         const decodedToken = jwtDecode(token);
-//         setUserId(decodedToken.sub); // Cập nhật userId từ decoded token
-//       } catch (error) {
-//         console.error("Error decoding token:", error);
-//       }
-//     }
-//   }, [token]);
+  //   useEffect(() => {
+  //     if (token) {
+  //       try {
+  //         const decodedToken = jwtDecode(token);
+  //         setUserId(decodedToken.sub); // Cập nhật userId từ decoded token
+  //       } catch (error) {
+  //         console.error("Error decoding token:", error);
+  //       }
+  //     }
+  //   }, [token]);
 
   // Lấy dữ liệu từ API
   const formatDateTime = (dateTimeString) => {
@@ -30,7 +30,7 @@ const BookingInformation = () => {
   const bookingListResponse = async () => {
     try {
       const response = await axios.get(
-        'http://localhost:8080/bookings/listBookingTourResponse',
+        "http://localhost:8080/bookings/listBookingTourResponse",
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -48,11 +48,13 @@ const BookingInformation = () => {
   };
 
   const handleCreateQuotation = (booking) => {
-    if(!token) {
+    if (!token) {
       toast.warning("You are not logged in. Please login.");
       navigate(`/login`);
     } else {
-      navigate(`/createQuotation/${booking.id}`, { state: { bookingData: booking } });
+      navigate(`/createQuotation/${booking.id}`, {
+        state: { bookingData: booking },
+      });
     }
   };
 
@@ -62,6 +64,38 @@ const BookingInformation = () => {
 
   if (!bookingList.length) {
     return <div>Loading...</div>;
+  }
+
+  const handleViewDetailBooking = (booking) => {
+    if (!token) {
+      toast.warn("You not login to Booking");
+      navigate(`/login`);
+    } else {
+      // navigate(`/tourdetail/${tour.id}`);
+      navigate("/bookingTourDetail", { state: { booking } });
+    }
+  }
+
+  const handleDeleteBooking = async (booking) => {
+    try {
+      if(booking.paymentStatus !== "pending"){
+        toast.warn("You only can delete if Payment Status is PENDING")
+        return;
+      }
+      await axios.put(
+        `http://localhost:8080/bookings/delete/${booking.id}`,{},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      toast.success("Delete Success");
+      bookingListResponse();
+
+    } catch (error) {
+      toast.error("Delete Booking Fail")
+    }
   }
 
   return (
@@ -82,43 +116,76 @@ const BookingInformation = () => {
             </p>
           </div>
           <div className="md:w-2/3 mt-4 md:mt-0 md:ml-6 shadow-[60px_60px_60px_60px_rgba(0,0,0,0.3)] p-10 rounded-2xl ">
-            <h2 className="text-5xl font-bold text-red-600"><text>Booking Information</text></h2>
+            <h2 className="text-5xl font-bold text-red-600">
+              <text>Booking Information</text>
+            </h2>
             <div className="mt-4 text-lg">
               <p className="mt-1 text-black text-2xl">
-                VAT: <span className="text-red-600"><strong>{booking.vat}</strong></span>
+                VAT:{" "}
+                <span className="text-red-600">
+                  <strong>{booking.vat}</strong>
+                </span>
               </p>
               <p className="mt-1 text-black text-2xl">
-                VAT AMOUNT: <span className="text-red-600"><strong>{booking.vatAmount}</strong></span>
+                VAT AMOUNT:{" "}
+                <span className="text-red-600">
+                  <strong>{booking.vatAmount}</strong>
+                </span>
               </p>
               <p className="mt-1 text-black text-2xl">
-                DISCOUNT AMOUNT: <span className="text-red-600"><strong>{booking.discountAmount}</strong></span>
+                DISCOUNT AMOUNT:{" "}
+                <span className="text-red-600">
+                  <strong>{booking.discountAmount}</strong>
+                </span>
               </p>
               <p className="mt-1 text-black text-2xl">
-                TOTAL AMOUNT: <span className="text-red-600"><strong>{booking.totalAmount}</strong></span>
+                TOTAL AMOUNT:{" "}
+                <span className="text-red-600">
+                  <strong>{booking.totalAmount}</strong>
+                </span>
               </p>
               <p className="mt-1 text-black text-2xl">
-                PAYMENT METHOD: <span className="text-red-600"><strong>{booking.paymentMethod}</strong></span>
+                PAYMENT METHOD:{" "}
+                <span className="text-red-600">
+                  <strong>{booking.paymentMethod}</strong>
+                </span>
               </p>
               <p className="mt-1 text-black text-2xl">
-                PAYMENT STATUS: <span className="text-blue-600 uppercase"><strong>{booking.paymentStatus}</strong></span>
+                PAYMENT STATUS:{" "}
+                <span className="text-blue-600 uppercase">
+                  <strong>{booking.paymentStatus}</strong>
+                </span>
               </p>
               <p className="mt-1 text-2xl underline font-bold text-black">
-              <strong>TOTAL AMOUNT WITH VAT:</strong> {booking.totalAmountWithVAT}
+                <strong>TOTAL AMOUNT WITH VAT:</strong>{" "}
+                {booking.totalAmountWithVAT}
               </p>
             </div>
-            <button className="mt-4 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
-              View Detail
-            </button>
-            <span className="px-2"></span>
-            <button 
-            className="mt-4 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
-            onClick={() => handleCreateQuotation(booking)}
-            >
-              Create Quotation
-            </button>
+            <div>
+              <button 
+                className="mt-4 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
+                onClick={() => handleViewDetailBooking(booking)}
+                >
+                View Detail
+              </button>
+              <button 
+                className="mt-4 bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 active:bg-red-900"
+                onClick={() => handleDeleteBooking(booking)}
+              >
+                Delete Booking
+              </button>
+              <span className="px-2"></span>
+              <button
+                className="mt-4 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
+                onClick={() => handleCreateQuotation(booking)}
+              >
+                Create Quotation
+              </button>
+            </div>
           </div>
         </div>
       ))}
+      <ToastContainer />
     </div>
   );
 };
