@@ -1,15 +1,13 @@
-
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useCookies } from "react-cookie";
 import { jwtDecode } from "jwt-decode";
-import { Table, Button, Modal, Form, Input, message, Upload } from "antd";
+import { Table, Button, Modal, Form, Input, message, Upload, Tag } from "antd";
 import { useNavigate } from "react-router-dom";
 import { PlusOutlined } from "@ant-design/icons";
 import uploadFile from "../../utils/upload";
 
 const { TextArea } = Input;
-
 
 const FarmManagement = () => {
   const [cookies] = useCookies(["token"]);
@@ -24,7 +22,6 @@ const FarmManagement = () => {
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const [farmToDelete, setFarmToDelete] = useState(null);
 
-
   useEffect(() => {
     if (token) {
       try {
@@ -36,19 +33,16 @@ const FarmManagement = () => {
     }
   }, [token]);
 
-
   useEffect(() => {
     fetchFarms();
   }, [token]);
 
   const fetchFarms = async () => {
     try {
-
       const response = await axios.get(
-        "http://localhost:8080/koi-farm/list-farm-active",
+        "http://localhost:8080/koi-farm/list-farm-res",
         {
           headers: {
-
             Authorization: `Bearer ${token}`,
           },
         }
@@ -62,7 +56,6 @@ const FarmManagement = () => {
   };
 
   const createFarm = async (values) => {
-
     try {
       const uploadedImages = await Promise.all(
         fileList.map(async (file) => {
@@ -125,7 +118,7 @@ const FarmManagement = () => {
   };
 
   const viewFarm = (id) => {
-    navigate(`/admin/farm/${id}`);
+    navigate(`/admin/farm/${id}`); // Ensure the path matches your route configuration
   };
 
   const columns = [
@@ -158,6 +151,16 @@ const FarmManagement = () => {
       title: "Description",
       dataIndex: "description",
       key: "description",
+    },
+    {
+      title: "Status",
+      dataIndex: "active",
+      key: "active",
+      render: (active) => (
+        <Tag color={active === true ? "green" : "red"}>
+          {active === true ? "Active" : "Inactive"}
+        </Tag>
+      ),
     },
     {
       title: "Actions",
@@ -199,12 +202,10 @@ const FarmManagement = () => {
     } else {
       message.error("Invalid farm ID");
     }
-
   };
 
   return (
     <div className="p-4">
-
       <h2 className="text-2xl font-bold mb-4">Farm Management</h2>
       <Button
         onClick={() => setIsModalVisible(true)}
@@ -299,9 +300,7 @@ const FarmManagement = () => {
       >
         <p>Are you sure you want to delete this farm?</p>
       </Modal>
-
     </div>
   );
 };
 export default FarmManagement;
-

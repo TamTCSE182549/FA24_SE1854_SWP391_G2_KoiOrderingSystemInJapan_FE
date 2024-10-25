@@ -129,6 +129,7 @@ function Farmdetail() {
         website: values.website,
         description: values.description,
         images: validImages,
+        active: values.active, // Add active status
       };
 
       await axios.put(
@@ -203,7 +204,7 @@ function Farmdetail() {
       await axios.delete(`http://localhost:8080/KoiOfFarm/${koiOfFarmId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      message.success("Koi removed from farm successfully");
+      message.success("Koi removed f  rom farm successfully");
       fetchFarmKois(); // Refresh the list of kois
     } catch (error) {
       console.error("Error removing koi from farm:", error);
@@ -309,6 +310,16 @@ function Farmdetail() {
           </Form.Item>
           <Form.Item name="description" label="Description">
             <TextArea rows={4} />
+          </Form.Item>
+          <Form.Item
+            name="active"
+            label="Status"
+            rules={[{ required: true, message: "Please select the status!" }]}
+          >
+            <Select>
+              <Option value={true}>Active</Option>
+              <Option value={false}>Inactive</Option>
+            </Select>
           </Form.Item>
           <Form.Item label="Images">
             <Upload
