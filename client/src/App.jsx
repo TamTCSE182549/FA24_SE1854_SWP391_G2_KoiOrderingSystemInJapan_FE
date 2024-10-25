@@ -33,6 +33,7 @@ import CreateCheckin from './components/SaleStaff/CreateCheckin';
 
 
 import BookingKoiDetail from "./components/Hero/BookingKoiDetail";
+import BookingTourDetail from "./components/Customer/BookingTourDetail";
 import CreateBooking from "./components/Hero/CreateBooking";
 
 //for manager and staff
@@ -79,6 +80,7 @@ const App = () => {
             <Route path="/*" element={<AdminRoutes />} />
             <Route path="/ViewBooking" element={<ViewBooking />} />
             <Route path="/bookingkoidetail" element={<BookingKoiDetail />} />
+            <Route path="/bookingTourDetail" element={<BookingTourDetail />} />
             <Route path="/createbooking" element={<CreateBooking />} />
 
             <Route path="/farmdetail/:id" element={<FarmDetail />} />
