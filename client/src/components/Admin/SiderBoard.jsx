@@ -66,13 +66,22 @@ const menuItems = [
       </Link>
     ), // Đảm bảo route đúng
   },
+  {
+    key: "7",
+    icon: <SettingOutlined style={{ color: "black" }} />,
+    label: (
+      <Link style={{ color: "black" }} to="/admin/BookingManagement">
+        Booking Management
+      </Link>
+    ), // Đảm bảo route đúng
+  },
 ];
 
 const SiderBoard = () => {
   return (
 
     <Sider className="bg-[#98b7a1]">
-      <div className="text-gray-900 text-center my-4 ">
+      <div className="text-gray-900 text-center my-4">
         <h1 className="text-2xl font-bold text-black-900">Admin Dashboard</h1>
       </div>
       <Menu theme="light bg-[#98b7a1] " mode="inline" items={menuItems} />

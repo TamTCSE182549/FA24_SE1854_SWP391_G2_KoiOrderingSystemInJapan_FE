@@ -161,7 +161,7 @@ const BookingInformation = () => {
                 {booking.totalAmountWithVAT}
               </p>
             </div>
-            <div>
+            <div className="gap-4">
               <button 
                 className="mt-4 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
                 onClick={() => handleViewDetailBooking(booking)}
@@ -174,7 +174,6 @@ const BookingInformation = () => {
               >
                 Delete Booking
               </button>
-              <span className="px-2"></span>
               <button
                 className="mt-4 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
                 onClick={() => handleCreateQuotation(booking)}
