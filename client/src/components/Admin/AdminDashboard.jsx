@@ -3,12 +3,14 @@ import React from "react";
 import { Layout } from "antd";
 import { Route, Routes } from "react-router-dom";
 import Dashboard from "./Dashboard";
+import Dashboard2 from "./Dashboard2";
 import Users from "./Users";
 import TourManagement from "./TourManagement";
 import Settings from "./Settings";
 
 import SiderBoard from "./SiderBoard";
 import FarmManagement from "./FarmManagement";
+import BookingManagement from "./BookingManagement"
 
 import KoiManagement from "./KoiManagement";
 import FarmDetail from "./Farmdetail";
@@ -29,10 +31,11 @@ const AdminDashboard = () => {
           {/* Định nghĩa các route con của Admin */}
 
           <Routes>
-            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="dashboard" element={<Dashboard2 />} />
             <Route path="users" element={<Users />} />
             <Route path="tour-management" element={<TourManagement />} />
             <Route path="farm-management" element={<FarmManagement />} />
+            <Route path="BookingManagement" element={<BookingManagement/>}/>
             <Route path="settings" element={<Settings />} />
             <Route path="tourdetail/:id" element={<TourDetail />} />
             <Route path="koi-management" element={<KoiManagement />} />

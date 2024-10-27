@@ -264,7 +264,7 @@ const Tour = () => {
   useEffect(() => {
     const fetchKois = async () => {
       try {
-        response = await axios.get("http://localhost:8080/kois/all");
+        response = await axios.get("http://localhost:8080/kois/all/active");
         if (Array.isArray(response.data)) {
           console.log(response.data);
           setKois(response.data); // Lưu danh sách farm vào state

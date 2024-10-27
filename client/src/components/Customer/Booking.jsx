@@ -12,8 +12,6 @@ const BookingTrip = () => {
   const [tourID, setTourID] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("CASH");
   const [participants, setParticipants] = useState(1);
-  const [message, setMessage] = useState("");
-  const [decodedToken, setDecodedToken] = useState(null);
   const location = useLocation();
   const { tour } = location.state || {};
 

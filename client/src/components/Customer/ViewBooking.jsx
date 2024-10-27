@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
+
+import { ToastContainer, toast } from "react-toastify";
 import { useCookies } from "react-cookie"; // Thêm useCookies để lấy token từ cookie
 
 const BookingInformation = () => {
@@ -64,6 +65,7 @@ const BookingInformation = () => {
       navigate(`/login`);
     } else {
       navigate(`/payment/${booking.id}`);
+
     }
   };
 
@@ -73,6 +75,38 @@ const BookingInformation = () => {
 
   if (!bookingList.length) {
     return <div>Loading...</div>;
+  }
+
+  const handleViewDetailBooking = (booking) => {
+    if (!token) {
+      toast.warn("You not login to Booking");
+      navigate(`/login`);
+    } else {
+      // navigate(`/tourdetail/${tour.id}`);
+      navigate("/bookingTourDetail", { state: { booking } });
+    }
+  }
+
+  const handleDeleteBooking = async (booking) => {
+    try {
+      if(booking.paymentStatus !== "pending"){
+        toast.warn("You only can delete if Payment Status is PENDING")
+        return;
+      }
+      await axios.put(
+        `http://localhost:8080/bookings/delete/${booking.id}`,{},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      toast.success("Delete Success");
+      bookingListResponse();
+
+    } catch (error) {
+      toast.error("Delete Booking Fail")
+    }
   }
 
   return (
@@ -138,7 +172,7 @@ const BookingInformation = () => {
                 {booking.totalAmountWithVAT}
               </p>
             </div>
-            <button className="mt-4 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+          <button className="mt-4 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
               View Detail
             </button>
             <span className="px-2"></span>
@@ -155,9 +189,38 @@ const BookingInformation = () => {
             >
               Pay
             </button>
+
+            <div className="gap-4">
+              <button 
+                className="mt-4 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
+                onClick={() => handleViewDetailBooking(booking)}
+                >
+                View Detail
+              </button>
+              <button 
+                className="mt-4 bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 active:bg-red-900"
+                onClick={() => handleDeleteBooking(booking)}
+              >
+                Delete Booking
+              </button>
+              <button
+                className="mt-4 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
+                onClick={() => handleCreateQuotation(booking)}
+              >
+                Create Quotation
+              </button>
+              <button
+              className="mt-4 bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700"
+              onClick={() => handlePayment(booking)}
+            >
+              Pay
+            </button>
+            </div>
+
           </div>
         </div>
       ))}
+      <ToastContainer />
     </div>
   );
 };
