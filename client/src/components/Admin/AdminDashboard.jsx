@@ -16,6 +16,8 @@ import KoiManagement from "./KoiManagement";
 import FarmDetail from "./Farmdetail";
 import TourDetail from "./TourDetail";
 
+import ServiceManagement from "./ServiceManagement";
+
 const { Header, Content } = Layout;
 
 const AdminDashboard = () => {
@@ -40,6 +42,7 @@ const AdminDashboard = () => {
             <Route path="tourdetail/:id" element={<TourDetail />} />
             <Route path="koi-management" element={<KoiManagement />} />
             <Route path="farm/:id" element={<FarmDetail />} />
+            <Route path="ServiceManagement" element={<ServiceManagement/>}/>
           </Routes>
         </Content>
       </Layout>

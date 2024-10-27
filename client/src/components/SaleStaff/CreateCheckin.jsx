@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useCookies } from "react-cookie";
+
 const CreateCheckin = () => {
     const { bookingId } = useParams();
+    const navigate = useNavigate();
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [checkinDate, setCheckinDate] = useState('');
@@ -14,7 +16,6 @@ const CreateCheckin = () => {
     const [cookies] = useCookies();
     const token = cookies.token;
 
-    
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
@@ -37,11 +38,13 @@ const CreateCheckin = () => {
                     Authorization: `Bearer ${token}`,
                 },
             });
-            setFirstName('');
-            setLastName('');
             setSuccess('Check-in created successfully!');
+            // Chuyển hướng đến trang ViewCheckin sau khi tạo check-in thành công
+            setTimeout(() => {
+                navigate('/viewcheckin');
+            }, 1500); // Đợi 1.5 giây trước khi chuyển hướng
         } catch (err) {
-            console.error(err); // In ra thông tin lỗi
+            console.error(err);
             setError(err.response?.data?.message || 'An error occurred. Please try again.');
         }
     };
