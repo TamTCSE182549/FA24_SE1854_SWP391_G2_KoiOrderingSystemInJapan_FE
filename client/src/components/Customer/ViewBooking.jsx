@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+
 import { ToastContainer, toast } from "react-toastify";
 import { useCookies } from "react-cookie"; // Thêm useCookies để lấy token từ cookie
 
@@ -55,6 +56,16 @@ const BookingInformation = () => {
       navigate(`/createQuotation/${booking.id}`, {
         state: { bookingData: booking },
       });
+    }
+  };
+
+  const handlePayment = (booking) => {
+    if (!token) {
+      toast.warning("You are not logged in. Please login.");
+      navigate(`/login`);
+    } else {
+      navigate(`/payment/${booking.id}`);
+
     }
   };
 
@@ -161,6 +172,24 @@ const BookingInformation = () => {
                 {booking.totalAmountWithVAT}
               </p>
             </div>
+          <button className="mt-4 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+              View Detail
+            </button>
+            <span className="px-2"></span>
+            <button
+              className="mt-4 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
+              onClick={() => handleCreateQuotation(booking)}
+            >
+              Create Quotation
+            </button>
+            <span className="px-2"></span>
+            <button
+              className="mt-4 bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700"
+              onClick={() => handlePayment(booking)}
+            >
+              Pay
+            </button>
+
             <div className="gap-4">
               <button 
                 className="mt-4 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
@@ -180,7 +209,14 @@ const BookingInformation = () => {
               >
                 Create Quotation
               </button>
+              <button
+              className="mt-4 bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700"
+              onClick={() => handlePayment(booking)}
+            >
+              Pay
+            </button>
             </div>
+
           </div>
         </div>
       ))}
