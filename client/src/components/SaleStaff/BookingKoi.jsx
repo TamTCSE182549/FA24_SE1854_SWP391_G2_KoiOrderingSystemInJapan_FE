@@ -285,6 +285,10 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Typography, message } from "antd";
 import { useCookies } from "react-cookie";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { useNavigate } from 'react-router-dom';
+
 
 const { Title } = Typography;
 
@@ -299,13 +303,15 @@ const BookingKoi = () => {
     const [selectedKoiId, setSelectedKoiId] = useState('');
     const [quantity, setQuantity] = useState('');
     const [unitPrice, setUnitPrice] = useState('');
+    const [vat, setVat] = useState(0);
+    const [discountAmount, setDiscountAmount] = useState(0);
+    const navigate = useNavigate();
+
 
     const [cookies] = useCookies();
     const token = cookies.token;
-
     useEffect(() => {
         fetchFarms();
-        fetchBookings();
     }, []);
 
     const fetchFarms = async () => {
@@ -321,18 +327,7 @@ const BookingKoi = () => {
         }
     };
 
-    const fetchBookings = async () => {
-        try {
-            const response = await axios.get('http://localhost:8080/bookings/BookingForKoi', {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-            setBookings(response.data);
-        } catch (error) {
-            console.error('Error fetching bookings:', error);
-        }
-    };
+    
 
     const handleFarmChange = async (farmId) => {
         setSelectedFarmId(farmId);
@@ -406,6 +401,10 @@ const BookingKoi = () => {
         setSelectedKoiId('');
         setQuantity('');
         setUnitPrice('');
+        setQuantity('');
+        setUnitPrice('');
+        setVat("");
+        setDiscountAmount("");
     };
 
     const handleSubmit = async (e) => {
@@ -432,23 +431,37 @@ const BookingKoi = () => {
         const bookingKoiRequest = {
             farmId: selectedFarmId,
             paymentMethod,
+            vat,
+            discountAmount,
             details: bookingDetails.map(detail => ({
                 koiId: detail.koiId,
                 quantity: detail.quantity,
                 unitPrice: detail.unitPrice,
             })),
         };
-    
+        console.log("Booking Request:", bookingKoiRequest);
         try {
             const response = await axios.post(`http://localhost:8080/bookings/koi/create/${2}`, bookingKoiRequest, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             });
+            toast.success("Booking successful!", {
+                autoClose: 1000,
+                onClose: () => {
+                    // Chuyển hướng sau khi toast hiển thị xong
+                    navigate('/booking-detail', {
+                        state: {
+                            bookingId: response.data.id,
+                            selectedFarmId: selectedFarmId
+                        }
+                    });
+                }
+            });
             console.log('Booking created successfully:', response.data);
-            fetchBookings(); // Cập nhật danh sách booking sau khi tạo thành công
-            resetForm(); // Đặt lại form nếu cần thiết
+            resetForm(); 
         } catch (error) {
+            toast.error("Booking Failed");
             console.error('Error creating booking:', error);
         }
     };
@@ -519,8 +532,48 @@ const BookingKoi = () => {
                     />
                 </div>
 
+                    {/* Hiển thị danh sách Koi đã thêm */}
+                {bookingDetails.length > 0 && (
+                    <div className="mb-4">
+                        <Title level={4} className="text-xl font-bold text-black mb-2">Booking Koi Details</Title>
+                        <ul className="list-disc list-inside">
+                            {bookingDetails.map((detail, index) => (
+                                <li key={index} className="text-black">
+                                    {`Koi Name: ${detail.koiName}, Quantity: ${detail.quantity}, Unit Price: ${detail.unitPrice}`}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                )}
                 <div className="mb-4">
                     <button type="button" onClick={handleAddKoi} className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">Add Koi</button>
+                </div>
+                 {/* VAT */}
+                 <div className="mb-4">
+                    <label htmlFor="vat" className="block text-lg font-semibold text-black mb-2">VAT:</label>
+                    <input
+                        id="vat"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={vat}
+                        onChange={(e) => setVat(e.target.value)}
+                        className="w-full p-2 border border-gray-300 rounded-lg text-black"
+                    />
+                </div>
+
+                {/* Discount Amount */}
+                <div className="mb-4">
+                    <label htmlFor="discountAmount" className="block text-lg font-semibold text-black mb-2">Discount Amount:</label>
+                    <input
+                        id="discountAmount"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={discountAmount}
+                        onChange={(e) => setDiscountAmount(e.target.value)}
+                        className="w-full p-2 border border-gray-300 rounded-lg text-black"
+                    />
                 </div>
 
                 <div className="mb-4">
@@ -539,24 +592,13 @@ const BookingKoi = () => {
                     </select>
                 </div>
 
-                {/* Hiển thị danh sách Koi đã thêm */}
-                {bookingDetails.length > 0 && (
-                    <div className="mb-4">
-                        <Title level={4} className="text-xl font-bold text-black mb-2">Booking Koi Details</Title>
-                        <ul className="list-disc list-inside">
-                            {bookingDetails.map((detail, index) => (
-                                <li key={index} className="text-black">
-                                    {`Koi Name: ${detail.koiName}, Quantity: ${detail.quantity}, Unit Price: ${detail.unitPrice}`}
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                )}
+                
 
                 <div className="flex justify-center">
                     <button type="submit" className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
                         {editingBookingId ? 'Update Booking' : 'Create Booking'}
                     </button>
+                    <ToastContainer />
                 </div>
             </form>
         </div>

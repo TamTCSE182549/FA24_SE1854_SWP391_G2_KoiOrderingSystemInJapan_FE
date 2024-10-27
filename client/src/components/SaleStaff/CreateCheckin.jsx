@@ -37,6 +37,8 @@ const CreateCheckin = () => {
                     Authorization: `Bearer ${token}`,
                 },
             });
+            setFirstName('');
+            setLastName('');
             setSuccess('Check-in created successfully!');
         } catch (err) {
             console.error(err); // In ra thông tin lỗi

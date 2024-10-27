@@ -19,7 +19,7 @@ import AdminRoutes from "./components/Admin/AdminRoutes";
 import KoiDetail from "./components/KoiDetail";
 import FarmDetail from "./components/Hero/FarmDetail";
 import TourDetail from "./components/Hero/TourDetail";
-
+import BookingDetail from './components/SaleStaff/BookingDetail';
 
 import ViewBooking from "./components/Customer/ViewBooking";
 
@@ -31,7 +31,7 @@ import ForgotPassword from "./components/LoginAndSignIn/ForgotPassword";
 import BookingKoi from './components/SaleStaff/BookingKoi';
 import CreateCheckin from './components/SaleStaff/CreateCheckin';
 
-
+import CreateDeposit from"./components/SaleStaff/CreateDeposit"
 import BookingKoiDetail from "./components/Hero/BookingKoiDetail";
 import BookingTourDetail from "./components/Customer/BookingTourDetail";
 import CreateBooking from "./components/Hero/CreateBooking";
@@ -41,6 +41,8 @@ import Quotation from "./components/Admin/Quotation";
 import CreateQuotation from "./components/Admin/CreateQuotation";
 import UpdateQuotation from "./components/Admin/UpdateQuotation";
 
+import ViewDetailDeposit from "./components/SaleStaff/ViewDetailDeposit";
+import BookingForKoiList from "./components/SaleStaff/BookingForKoiList";
 const App = () => {
   return (
     // <AuthProvider>
@@ -96,6 +98,10 @@ const App = () => {
             <Route path="/paymentsuccess" element={<PaymentSuccess />} />
             <Route path="/booking-koi" element={<BookingKoi />} />
             <Route path="/create-checkin/:bookingId" element={<CreateCheckin />} />
+            <Route path="/create-deposit/:bookingId" element={<CreateDeposit />} />
+            <Route path="/booking-detail" element={<BookingDetail />} />
+            <Route path="/view-detail-deposit/:bookingId" element={<ViewDetailDeposit />} />
+            <Route path="//booking-for-koi-list" element={<BookingForKoiList />} />
 
           </Routes>
         </div>
