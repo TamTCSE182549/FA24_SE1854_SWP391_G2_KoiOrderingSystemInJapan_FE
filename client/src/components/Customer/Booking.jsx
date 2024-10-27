@@ -101,7 +101,7 @@ const BookingTrip = () => {
   };
 
   return (
-    <div className="text-black">
+    <div className="text-black mt-40">
       {/* <h1 className="text-xl font-bold">Book a Trip</h1> */}
       {/* <form onSubmit={handleBooking}>
         <div className="mb-4">

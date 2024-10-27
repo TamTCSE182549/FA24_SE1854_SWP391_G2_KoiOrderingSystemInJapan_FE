@@ -75,6 +75,15 @@ const menuItems = [
       </Link>
     ), // Đảm bảo route đúng
   },
+  {
+    key: "8",
+    icon: <SettingOutlined style={{ color: "black" }} />,
+    label: (
+      <Link style={{ color: "black" }} to="/admin/ServiceManagement">
+        Service Management
+      </Link>
+    ),
+  },
 ];
 
 const SiderBoard = () => {

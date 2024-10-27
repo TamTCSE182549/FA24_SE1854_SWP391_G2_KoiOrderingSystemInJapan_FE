@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Card, Button, Tag, Space, DatePicker, Select, Row, Col, Pagination, Modal, Form, Input } from "antd";
+import { Card, Button, Tag, Space, Select, Row, Col, Pagination, Modal, Form, Input } from "antd";
 import { useLocation } from 'react-router-dom';
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -7,13 +7,12 @@ import { useCookies } from "react-cookie";
 
 const { Option } = Select;
 
-const Quotation = () => {
+const QuotationService = () => {
   const location = useLocation();
   const newQuotationId = location.state?.newQuotationId;
   const [quotations, setQuotations] = useState([]);
   const [loading, setLoading] = useState(false);
   const [statusFilter, setStatusFilter] = useState("ALL");
-  const [dateFilter, setDateFilter] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 6;
   const navigate = useNavigate();
@@ -29,32 +28,24 @@ const Quotation = () => {
     try {
       const response = await axios.get("http://localhost:8080/quotations/all", {
         headers: {
-          'Authorization': `Bearer ${token}` // Add token to request headers
+          'Authorization': `Bearer ${token}`
         }
       });
-      // Ensure that the response data is an array
       setQuotations(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
       console.error("Error when getting Quotation List:", error);
-      setQuotations([]); // Set to empty array in case of error
+      setQuotations([]);
     } finally {
       setLoading(false);
     }
   };
 
-  
   useEffect(() => {
     fetchQuotations();
   }, [newQuotationId]);
 
-  const handleUpdateStatus = (id) => {
-    navigate(`/update-quotation/${id}`);
-  };
-
-  // Add a check before filtering
   const filteredQuotations = Array.isArray(quotations) ? quotations.filter(quotation => {
     if (statusFilter !== "ALL" && quotation.isApprove !== statusFilter) return false;
-    if (dateFilter && !quotation.approveTime.startsWith(dateFilter.format("YYYY-MM-DD"))) return false;
     return true;
   }) : [];
 
@@ -67,10 +58,9 @@ const Quotation = () => {
     try {
       const response = await axios.get(`http://localhost:8080/quotations/${id}`, {
         headers: {
-          'Authorization': `Bearer ${token}` // Add token to request headers
+          'Authorization': `Bearer ${token}`
         }
       });
-      console.log("Quotation data:", response.data); // Log d liệu nhận được
       setSelectedQuotation(response.data);
       setIsModalVisible(true);
     } catch (error) {
@@ -85,8 +75,8 @@ const Quotation = () => {
 
   const formatDateTime = (dateTimeString) => {
     const date = new Date(dateTimeString);
-    const formattedDate = date.toISOString().split('T')[0]; // Lấy phần ngày
-    const formattedTime = date.toTimeString().split(' ')[0]; // Lấy phần thời gian
+    const formattedDate = date.toISOString().split('T')[0];
+    const formattedTime = date.toTimeString().split(' ')[0];
     return { formattedDate, formattedTime };
   };
 
@@ -94,27 +84,6 @@ const Quotation = () => {
     if (quotation.isApprove === "FINISH") {
       setSelectedQuotation(quotation);
       setIsPaymentModalVisible(true);
-    }
-  };
-
-  const updateBookingStatus = async (bookingId, status) => {
-    try {
-      const response = await axios.put(
-        "http://localhost:8080/bookings/updateResponseFormStaff",
-        {
-          bookingID: bookingId,
-          paymentStatus: status,
-        },
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        }
-      );
-      console.log("Booking status updated:", response.data);
-      fetchQuotations(); // Refresh the quotations list
-    } catch (error) {
-      console.error("Error updating booking status:", error);
     }
   };
 
@@ -138,7 +107,7 @@ const Quotation = () => {
       console.log("Payment sent:", response.data);
       setIsPaymentModalVisible(false);
       paymentForm.resetFields();
-      fetchQuotations(); // Refresh the quotations list
+      fetchQuotations();
     } catch (error) {
       console.error("Error sending payment:", error);
     }
@@ -158,9 +127,6 @@ const Quotation = () => {
           <Option value="FINISH">Accept</Option>
           <Option value="REJECTED">Reject</Option>
         </Select>
-        {/* <DatePicker
-          onChange={(date) => setDateFilter(date)}
-        /> */}
         <Button type="primary" onClick={fetchQuotations}>
           Reload Quotations
         </Button>
@@ -206,28 +172,6 @@ const Quotation = () => {
         total={filteredQuotations.length}
         pageSize={pageSize}
         onChange={(page) => setCurrentPage(page)}
-        itemRender={(_, type, originalElement) => {
-          if (type === 'next' || type === 'prev') {
-            return (
-              <Button 
-                style={{ 
-                  color: 'white', 
-                  backgroundColor: '#1890ff', 
-                  border: 'none',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  width: '32px',  // Đảm bảo kích thước đồng nhất
-                  height: '32px', // Đảm bảo kích thước đồng nhất
-                  fontSize: '14px' // Điều chỉnh kích thước chữ nếu cần
-                }}
-              >
-                {type === 'next' ? '>' : '<'}
-              </Button>
-            );
-          }
-          return originalElement;
-        }}
       />
 
       <Modal
@@ -289,4 +233,4 @@ const Quotation = () => {
   );
 };
 
-export default Quotation;
+export default QuotationService;

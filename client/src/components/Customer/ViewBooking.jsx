@@ -48,17 +48,6 @@ const BookingInformation = () => {
     }
   };
 
-  const handleCreateQuotation = (booking) => {
-    if (!token) {
-      toast.warning("You are not logged in. Please login.");
-      navigate(`/login`);
-    } else {
-      navigate(`/createQuotation/${booking.id}`, {
-        state: { bookingData: booking },
-      });
-    }
-  };
-
   const handlePayment = (booking) => {
     if (!token) {
       toast.warning("You are not logged in. Please login.");
@@ -180,20 +169,19 @@ const BookingInformation = () => {
                 View Detail
               </button>
               <button
-                className="mt-4 bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 active:bg-red-900"
+                className="mt-4 bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 active:bg-red-900 ml-4"
                 onClick={() => handleDeleteBooking(booking)}
               >
                 Delete Booking
               </button>
               <button
-                className="mt-4 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
-                onClick={() => handleCreateQuotation(booking)}
-              >
-                Create Quotation
-              </button>
-              <button
-                className="mt-4 bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700"
+                className={`mt-4 px-6 py-2 rounded-lg ml-4 ${
+                  booking.paymentStatus.toLowerCase() === "processing"
+                    ? "bg-green-600 hover:bg-green-700 text-white"
+                    : "bg-gray-400 cursor-not-allowed text-gray-200"
+                }`}
                 onClick={() => handlePayment(booking)}
+                disabled={booking.paymentStatus.toLowerCase() !== "processing"}
               >
                 Pay
               </button>
