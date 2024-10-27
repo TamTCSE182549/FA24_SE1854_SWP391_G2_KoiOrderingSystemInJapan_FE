@@ -20,17 +20,14 @@ import KoiDetail from "./components/KoiDetail";
 import FarmDetail from "./components/Hero/FarmDetail";
 import TourDetail from "./components/Hero/TourDetail";
 
-
 import ViewBooking from "./components/Customer/ViewBooking";
-
 
 import Delivery from "./components/Customer/Delivery";
 import ResetPassword from "./components/LoginAndSignIn/ResetPassword";
 import ForgotPassword from "./components/LoginAndSignIn/ForgotPassword";
 
-import BookingKoi from './components/SaleStaff/BookingKoi';
-import CreateCheckin from './components/SaleStaff/CreateCheckin';
-
+import BookingKoi from "./components/SaleStaff/BookingKoi";
+import CreateCheckin from "./components/SaleStaff/CreateCheckin";
 
 import BookingKoiDetail from "./components/Hero/BookingKoiDetail";
 import CreateBooking from "./components/Hero/CreateBooking";
@@ -54,8 +51,14 @@ const App = () => {
         <Navbar />
         <div className="flex-grow text-white">
           <Routes>
-            <Route path="/update-quotation/:quotationId" element={<UpdateQuotation />} />
-            <Route path="/createQuotation/:bookingId" element={<CreateQuotation />} />
+            <Route
+              path="/update-quotation/:quotationId"
+              element={<UpdateQuotation />}
+            />
+            <Route
+              path="/createQuotation/:bookingId"
+              element={<CreateQuotation />}
+            />
             <Route path="/quotation" element={<Quotation />} />
             <Route path="/" element={<Hero />} />
             <Route path="/koiforsale" element={<KoiForSale />} />
@@ -69,7 +72,7 @@ const App = () => {
             </Route>
             <Route path="/resetpassword" element={<ResetPassword />} />
             <Route path="/bookings" element={<Booking />} />
-            <Route path="/payment" element={<Payment />} />
+            <Route path="/payment/:id" element={<Payment />} />
             <Route path="/tour" element={<Tour />} />
 
             <Route path="/koi/:id" element={<KoiDetail />} />
@@ -93,8 +96,10 @@ const App = () => {
 
             <Route path="/paymentsuccess" element={<PaymentSuccess />} />
             <Route path="/booking-koi" element={<BookingKoi />} />
-            <Route path="/create-checkin/:bookingId" element={<CreateCheckin />} />
-
+            <Route
+              path="/create-checkin/:bookingId"
+              element={<CreateCheckin />}
+            />
           </Routes>
         </div>
         <div className="">
