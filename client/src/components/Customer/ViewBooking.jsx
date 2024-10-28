@@ -51,17 +51,6 @@ const BookingInformation = () => {
     }
   };
 
-  const handleCreateQuotation = (booking) => {
-    if (!token) {
-      toast.warning("You are not logged in. Please login.");
-      navigate(`/login`);
-    } else {
-      navigate(`/createQuotation/${booking.id}`, {
-        state: { bookingData: booking },
-      });
-    }
-  };
-
   const handlePayment = (booking) => {
     if (!token) {
       toast.warning("You are not logged in. Please login.");
@@ -118,6 +107,7 @@ const BookingInformation = () => {
     indexOfLastBooking
   );
 
+
   const onPageChange = (page) => {
     setCurrentPage(page);
   };
@@ -139,6 +129,7 @@ const BookingInformation = () => {
                   alignItems: "center",
                   padding: "5px",
                 }}
+
               >
                 <div style={{ display: "flex", width: "100%" }}>
                   <img

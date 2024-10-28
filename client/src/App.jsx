@@ -23,6 +23,7 @@ import TourDetail from "./components/Hero/TourDetail";
 import BookingDetail from "./components/SaleStaff/BookingDetail";
 
 import ViewBooking from "./components/Customer/ViewBooking";
+import ViewCheckin from "./components/Customer/ViewCheckin";
 
 import Delivery from "./components/Customer/Delivery";
 import ResetPassword from "./components/LoginAndSignIn/ResetPassword";
@@ -44,6 +45,8 @@ import UpdateQuotation from "./components/Admin/UpdateQuotation";
 
 import ViewDetailDeposit from "./components/SaleStaff/ViewDetailDeposit";
 import BookingForKoiList from "./components/SaleStaff/BookingForKoiList";
+import QuotationService from "./components/SaleStaff/QuotationService";
+import BookingListForStaff from "./components/SaleStaff/BookingListForStaff";
 const App = () => {
   return (
     // <AuthProvider>
@@ -66,6 +69,7 @@ const App = () => {
               path="/createQuotation/:bookingId"
               element={<CreateQuotation />}
             />
+            <Route path="/viewcheckin" element={<ViewCheckin />} />
             <Route path="/quotation" element={<Quotation />} />
             <Route path="/" element={<Hero />} />
             <Route path="/koiforsale" element={<KoiForSale />} />
@@ -114,14 +118,12 @@ const App = () => {
               element={<CreateDeposit />}
             />
             <Route path="/booking-detail" element={<BookingDetail />} />
-            <Route
-              path="/view-detail-deposit/:bookingId"
-              element={<ViewDetailDeposit />}
-            />
-            <Route
-              path="/booking-for-koi-list"
-              element={<BookingForKoiList />}
-            />
+
+            <Route path="/view-detail-deposit/:bookingId" element={<ViewDetailDeposit />} />
+            <Route path="//booking-for-koi-list" element={<BookingForKoiList />} />
+            <Route path="/QuotationService" element={<QuotationService />}/>
+            <Route path="/booking-list-for-staff" element={<BookingListForStaff/>}/>
+
           </Routes>
         </div>
         <div className="">

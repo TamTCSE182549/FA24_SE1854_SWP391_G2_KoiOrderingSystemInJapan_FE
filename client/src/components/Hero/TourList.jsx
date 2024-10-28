@@ -205,23 +205,10 @@ const Tour = () => {
   let response = "";
   const fetchTourData = async (page = 0, keyword = "") => {
     try {
-      // const response = await axios.get("http://localhost:8080/tour/listTourResponseActive");
-      if (selectedValue === "tour name") {
-        // toast.success("Search by Tour Name success");
-        response = await axios.get(
-          `http://localhost:8080/tour/showTourByName/${keyword}?page=${page}`
-        );
-      } else if (selectedValue === "koi name") {
-        // toast.success("Search by Koi Name success");
-        response = await axios.get(
-          `http://localhost:8080/tour/findTourByKoiName/${keyword}?page=${page}`
-        );
-      } else {
-        // toast.success("Show all tour success");
-        response = await axios.get(
-          `http://localhost:8080/tour/showAllPageable?page=${page}`
-        );
-      }
+      // toast.success("Show all tour success");
+      response = await axios.get(
+        `http://localhost:8080/tour/showAllPageable?page=${page}`
+      );
 
       if (Array.isArray(response.data.content)) {
         setTours(response.data.content);
@@ -311,12 +298,12 @@ const Tour = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col mt-10 ml-40 mr-40">
+    <div className="mt-40 ml-20 mr-20 mb-20">
       <div className="flex-grow">
         <div className="container mx-auto">
           <div className="">
             {/* Tour List */}
-            <div className="ml-4 backdrop-blur-2xl p-20">
+            <div className="ml-4 backdrop-blur-2xl p-10">
               {/* ------------------------------ */}
               <form
                 onSubmit={handleSubmit}
@@ -441,84 +428,79 @@ const Tour = () => {
                 </div>
               </div> */}
 
-              <div className="space-y-6">
-                {filteredTours.length === 0 ? (
-                  <p>No tours found.</p>
-                ) : (
-                  filteredTours.map((tour) => (
-                    <div
-                      key={tour.id}
-                      className="bg-slate-300 shadow-lg rounded-lg overflow-hidden flex flex-col justify-between"
-                    >
-                      <img
-                        src={
-                          tour.tourImg
-                            ? tour.tourImg
-                            : `https://via.placeholder.com/400x200?text=No+image`
-                        }
-                        alt={tour.tourName}
-                        className="w-full h-64 object-none shadow-2xl"
-                      />
-                      <div className="p-4 flex-grow">
-                        <h3 className="text-xl font-bold mb-2 text-black">
-                          {tour.tourName}
-                        </h3>
-                        <p className="text-gray-700 mb-2">{tour.description}</p>
-                        <p className="text-sm text-gray-500">
-                          Price: {tour.unitPrice} USD
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          Max Participants: {tour.maxParticipants}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          Remaining: {tour.remaining}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          Start Time:{" "}
-                          {new Date(tour.startTime).toLocaleString()}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          End Time: {new Date(tour.endTime).toLocaleString()}
-                        </p>
-                      </div>
-
-                      {(role === "CUSTOMER" || !token) && (
-                        <div className="p-4 flex">
-                          <button
-                            className="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-                            onClick={() => handleBooking(tour)}
-                          >
-                            Book Now
-                          </button>
-                          {tour.paymentStatus === "pending" && (
-                            <button
-                              className="w-full bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-900"
-                              onClick={() => handleDeleteBooking(tour.id)}
-                            >
-                              Delete
-                            </button>
-                          )}
-                        </div>
-                      )}
-                      {role === "MANAGER" && (
-                        <div className="flex p-4 gap-2">
-                          <button
-                            className="w-full bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-700"
-                            onClick={() => handleBooking(tour)}
-                          >
-                            Update Tour
-                          </button>
-                          <button
-                            className="w-full bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-700"
-                            onClick={() => handleBooking(tour)}
-                          >
-                            Delete Tour
-                          </button>
-                        </div>
-                      )}
+              <div className="flex flex-wrap -mx-4">
+                {tours.map((tour) => (
+                  <div
+                    key={tour.id}
+                    className="bg-slate-300 shadow-lg rounded-lg overflow-hidden flex flex-col justify-between w-full sm:w-1/2 md:w-1/3 mb-10"
+                  >
+                    <img
+                      src={
+                        tour.tourImg
+                          ? tour.tourImg
+                          : `https://via.placeholder.com/400x200?text=No+image`
+                      }
+                      alt={tour.tourName}
+                      className="w-full h-64 object-cover shadow-2xl"
+                    />
+                    <div className="p-4 flex-grow">
+                      <h3 className="text-xl font-bold mb-2 text-black">
+                        {tour.tourName}
+                      </h3>
+                      <p className="text-gray-700 mb-2">{tour.description}</p>
+                      <p className="text-sm text-gray-500">
+                        Price: {tour.unitPrice} USD
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        Max Participants: {tour.maxParticipants}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        Remaining: {tour.remaining}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        Start Time: {new Date(tour.startTime).toLocaleString()}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        End Time: {new Date(tour.endTime).toLocaleString()}
+                      </p>
                     </div>
-                  ))
-                )}
+
+                    {(role === "CUSTOMER" || !token) && (
+                      <div className="p-4 flex">
+                        <button
+                          className="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+                          onClick={() => handleBooking(tour)}
+                        >
+                          Book Now
+                        </button>
+                        {tour.paymentStatus === "pending" && (
+                          <button
+                            className="w-full bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-900"
+                            onClick={() => handleDeleteBooking(tour.id)}
+                          >
+                            Delete
+                          </button>
+                        )}
+                      </div>
+                    )}
+                    {role === "MANAGER" && (
+                      <div className="flex p-4 gap-2">
+                        <button
+                          className="w-full bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-700"
+                          onClick={() => handleBooking(tour)}
+                        >
+                          Update Tour
+                        </button>
+                        <button
+                          className="w-full bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-700"
+                          onClick={() => handleBooking(tour)}
+                        >
+                          Delete Tour
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))}
               </div>
               {/* Pagination Buttons */}
               <div className="flex justify-between mt-4">
