@@ -141,7 +141,7 @@ function Farmdetail() {
       );
       message.success("Farm updated successfully");
       setIsModalVisible(false);
-      fetchFarm();
+      fetchFarm(); // Refresh farm data
     } catch (error) {
       console.error("Error updating farm:", error);
       message.error("Failed to update farm");
@@ -182,7 +182,7 @@ function Farmdetail() {
       message.success("Koi added to farm successfully");
       setIsAddKoiToFarmModalVisible(false);
       addKoiToFarmForm.resetFields();
-      fetchFarm(); // Refresh farm data
+      fetchFarmKois(); // Refresh the list of kois
     } catch (error) {
       console.error("Error adding koi to farm:", error);
       message.error(error.response?.data);
@@ -204,7 +204,7 @@ function Farmdetail() {
       await axios.delete(`http://localhost:8080/KoiOfFarm/${koiOfFarmId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      message.success("Koi removed f  rom farm successfully");
+      message.success("Koi removed from farm successfully");
       fetchFarmKois(); // Refresh the list of kois
     } catch (error) {
       console.error("Error removing koi from farm:", error);
