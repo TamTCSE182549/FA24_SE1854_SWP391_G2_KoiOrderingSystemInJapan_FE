@@ -78,7 +78,7 @@ const PaymentSuccess = () => {
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <Card className="w-full max-w-lg p-8 text-center">
         {/* <CheckCircleOutlined className="text-green-500 text-6xl mb-4" /> */}
-        <h2 className="text-2xl font-semibold mb-2">Payment Successful!</h2>
+        <h2 className="text-2xl font-semibold mb-2">Payment Done!</h2>
         <p className="text-gray-500 mb-6">
           Thank you for your payment. Your transaction was completed
           successfully.

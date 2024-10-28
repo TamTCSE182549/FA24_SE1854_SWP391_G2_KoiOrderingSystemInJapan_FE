@@ -230,11 +230,11 @@ const Delivery = () => {
 
   return (
     <div
-      className="mt-40"
+      className="mt-60"
       style={{
         padding: "20px",
         maxWidth: "800px",
-        margin: "50px auto",
+        margin: "100px auto",
         backgroundColor: "#f0f2f5",
         borderRadius: "8px",
         boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",

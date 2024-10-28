@@ -24,6 +24,7 @@
     "jwt-decode": "^4.0.0",
     "lucide-react": "^0.453.0",
     "mdb-react-ui-kit": "^9.0.0",
+    "mdb-ui-kit": "^8.0.0",
     "moment": "^2.30.1",
     "react": "^18.3.1",
     "react-awesome-reveal": "^4.2.14",

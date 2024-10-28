@@ -1,28 +1,31 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-
 import { ToastContainer, toast } from "react-toastify";
 import { useCookies } from "react-cookie"; // Thêm useCookies để lấy token từ cookie
+import { jwtDecode } from "jwt-decode";
+import { Card, Button, Row, Col, Pagination } from "antd"; // Import Ant Design components
 
 const BookingInformation = () => {
   const [cookies] = useCookies(["token"]);
   const token = cookies.token;
   const [bookingList, setBookingList] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const bookingsPerPage = 3;
   const navigate = useNavigate();
+  const [userRole, setUserRole] = useState("");
 
-  //   useEffect(() => {
-  //     if (token) {
-  //       try {
-  //         const decodedToken = jwtDecode(token);
-  //         setUserId(decodedToken.sub); // Cập nhật userId từ decoded token
-  //       } catch (error) {
-  //         console.error("Error decoding token:", error);
-  //       }
-  //     }
-  //   }, [token]);
+  useEffect(() => {
+    if (token) {
+      try {
+        const decodedToken = jwtDecode(token);
+        setUserRole(decodedToken.role); // Assuming the role is stored under 'role'
+      } catch (error) {
+        console.error("Error decoding token:", error);
+      }
+    }
+  }, [token]);
 
-  // Lấy dữ liệu từ API
   const formatDateTime = (dateTimeString) => {
     const date = new Date(dateTimeString);
     return date.toLocaleString();
@@ -44,7 +47,7 @@ const BookingInformation = () => {
       }
     } catch (error) {
       console.error("Error fetching Booking data:", error);
-      setError("Failed to fetch Booking data.");
+      toast.error("Failed to fetch Booking data.");
     }
   };
 
@@ -81,7 +84,6 @@ const BookingInformation = () => {
       toast.warn("You not login to Booking");
       navigate(`/login`);
     } else {
-      // navigate(`/tourdetail/${tour.id}`);
       navigate("/bookingTourDetail", { state: { booking } });
     }
   };
@@ -108,99 +110,136 @@ const BookingInformation = () => {
     }
   };
 
-  return (
-    <div className="pt-32 pl-60 pr-60 grid grid-cols-1 gap-6 p-6">
-      {bookingList.map((booking, index) => (
-        <div
-          key={index}
-          className="bg-white rounded-lg shadow-lg p-6 flex flex-col md:flex-row"
-        >
-          <div className="md:w-2/4 text-center">
-            <img
-              src=".\src\assets\koicart.jpg"
-              alt="Koi Fish"
-              className="rounded-lg object-cover w-full h-60"
-            />
-            <p className="mt-4 text-gray-700 text-2xl font-semibold pt-20">
-              BOOKING TIME: {formatDateTime(booking.createdDate)}
-            </p>
-          </div>
-          <div className="md:w-2/3 mt-4 md:mt-0 md:ml-6 shadow-[60px_60px_60px_60px_rgba(0,0,0,0.3)] p-10 rounded-2xl ">
-            <h2 className="text-5xl font-bold text-red-600">
-              <text>Booking Information</text>
-            </h2>
-            <div className="mt-4 text-lg">
-              <p className="mt-1 text-black text-2xl">
-                VAT:{" "}
-                <span className="text-red-600">
-                  <strong>{booking.vat}</strong>
-                </span>
-              </p>
-              <p className="mt-1 text-black text-2xl">
-                VAT AMOUNT:{" "}
-                <span className="text-red-600">
-                  <strong>{booking.vatAmount}</strong>
-                </span>
-              </p>
-              <p className="mt-1 text-black text-2xl">
-                DISCOUNT AMOUNT:{" "}
-                <span className="text-red-600">
-                  <strong>{booking.discountAmount}</strong>
-                </span>
-              </p>
-              <p className="mt-1 text-black text-2xl">
-                TOTAL AMOUNT:{" "}
-                <span className="text-red-600">
-                  <strong>{booking.totalAmount}</strong>
-                </span>
-              </p>
-              <p className="mt-1 text-black text-2xl">
-                PAYMENT METHOD:{" "}
-                <span className="text-red-600">
-                  <strong>{booking.paymentMethod}</strong>
-                </span>
-              </p>
-              <p className="mt-1 text-black text-2xl">
-                PAYMENT STATUS:{" "}
-                <span className="text-blue-600 uppercase">
-                  <strong>{booking.paymentStatus}</strong>
-                </span>
-              </p>
-              <p className="mt-1 text-2xl underline font-bold text-black">
-                <strong>TOTAL AMOUNT WITH VAT:</strong>{" "}
-                {booking.totalAmountWithVAT}
-              </p>
-            </div>
+  // Calculate the bookings to display on the current page
+  const indexOfLastBooking = currentPage * bookingsPerPage;
+  const indexOfFirstBooking = indexOfLastBooking - bookingsPerPage;
+  const currentBookings = bookingList.slice(
+    indexOfFirstBooking,
+    indexOfLastBooking
+  );
 
-            <div className="gap-4">
-              <button
-                className="mt-4 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
-                onClick={() => handleViewDetailBooking(booking)}
+  const onPageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  return (
+    <div className="container mt-20">
+      <section className="text-center">
+        <h4 className="mb-5">
+          <strong>Booking List</strong>
+        </h4>
+        <Row gutter={[16, 16]}>
+          {currentBookings.map((booking, index) => (
+            <Col key={index} span={15} style={{ margin: "10px auto" }}>
+              <Card
+                hoverable
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  padding: "5px",
+                }}
               >
-                View Detail
-              </button>
-              <button
-                className="mt-4 bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 active:bg-red-900"
-                onClick={() => handleDeleteBooking(booking)}
-              >
-                Delete Booking
-              </button>
-              <button
-                className="mt-4 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
-                onClick={() => handleCreateQuotation(booking)}
-              >
-                Create Quotation
-              </button>
-              <button
-                className="mt-4 bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700"
-                onClick={() => handlePayment(booking)}
-              >
-                Pay
-              </button>
-            </div>
-          </div>
-        </div>
-      ))}
+                <div style={{ display: "flex", width: "100%" }}>
+                  <img
+                    alt="Koi Fish"
+                    src="https://asiatourist.vn/wp-content/uploads/2021/04/khu-du-lich-la-phong-da-lat-5.jpg"
+                    style={{ width: 150, marginRight: 20 }}
+                  />
+                  <div style={{ flex: 1 }}>
+                    <h5 className="mb-5">
+                      <strong>Booking Information</strong>
+                    </h5>
+                    <Row gutter={[16, 16]}>
+                      <Col span={12}>
+                        <p>Time: {formatDateTime(booking.createdDate)}</p>
+                        <p>
+                          VAT: <strong>{booking.vat}</strong>
+                        </p>
+                      </Col>
+                      <Col span={12}>
+                        <p>
+                          VAT Amount: <strong>{booking.vatAmount}</strong>
+                        </p>
+                        <p>
+                          Discount Amount:{" "}
+                          <strong>{booking.discountAmount}</strong>
+                        </p>
+                      </Col>
+                      <Col span={12}>
+                        <p>
+                          Total Amount: <strong>{booking.totalAmount}</strong>
+                        </p>
+                        <p>
+                          Payment Method:{" "}
+                          <strong>{booking.paymentMethod}</strong>
+                        </p>
+                      </Col>
+                      <Col span={12}>
+                        <p>
+                          Payment Status:{" "}
+                          <strong>{booking.paymentStatus}</strong>
+                        </p>
+                        <p>
+                          Total Amount With VAT:{" "}
+                          <strong>{booking.totalAmountWithVAT}</strong>
+                        </p>
+                      </Col>
+                    </Row>
+                  </div>
+                </div>
+                <hr style={{ width: "100%", margin: "20px 0" }} />
+                <div
+                  className="d-flex justify-content-start"
+                  style={{ width: "100%" }}
+                >
+                  <Button
+                    type="primary"
+                    className="me-2"
+                    onClick={() => handleViewDetailBooking(booking)}
+                  >
+                    View Detail
+                  </Button>
+                  <Button
+                    type="primary"
+                    danger
+                    color="danger"
+                    className="me-2 bg-red-500"
+                    onClick={() => handleDeleteBooking(booking)}
+                  >
+                    Cancel Booking
+                  </Button>
+                  {booking.paymentStatus === "pending" &&
+                    userRole === "SALES_STAFF" && (
+                      <Button
+                        type="secondary"
+                        className="me-2"
+                        onClick={() => handleCreateQuotation(booking)}
+                      >
+                        Create Quotation
+                      </Button>
+                    )}
+                  {booking.paymentStatus === "processing" && (
+                    <Button
+                      type="success"
+                      onClick={() => handlePayment(booking)}
+                    >
+                      Pay
+                    </Button>
+                  )}
+                </div>
+              </Card>
+            </Col>
+          ))}
+        </Row>
+        <Pagination
+          current={currentPage}
+          pageSize={bookingsPerPage}
+          total={bookingList.length}
+          onChange={onPageChange}
+          style={{ marginTop: "20px" }}
+        />
+      </section>
       <ToastContainer />
     </div>
   );
