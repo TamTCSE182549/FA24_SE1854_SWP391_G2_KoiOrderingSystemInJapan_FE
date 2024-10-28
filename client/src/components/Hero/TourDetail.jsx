@@ -21,24 +21,29 @@ const TourDetail = () => {
   const [cookies] = useCookies(["token"]);
   const token = cookies.token;
   const [loading, setLoading] = useState(true);
+  const [bookings, setBookings] = useState(true);
   const [error, setError] = useState(null);
-  const [curTour, setCurTour] = useState([]);
   const location = useLocation();
   const { tour } = location.state || {};
   // State for departure date and number of guests
-  const [departureDate, setDepartureDate] = useState(null);
-  const [guests, setGuests] = useState(1);
   const { id } = useParams(); // Get the id from the URL
 
   const [paymentMethod, setPaymentMethod] = useState("CASH");
   const [participants, setParticipants] = useState(1);
 
   useEffect(() => {
-    const fetchTourData = async () => {
+    const fetchBookingData = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:8080/tour/findById/${tour.id}`
+          `http://localhost:8080/bookings/listBookingTourOtherStatus`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`, // Ensure the token is correctly passed
+              "Content-Type": "application/json",
+            },
+          }
         );
+        setBookings(response.data);
       } catch (error) {
         console.error("Error fetching tour data:", error);
         setError("Failed to fetch tour data.");
@@ -47,7 +52,7 @@ const TourDetail = () => {
       }
     };
 
-    fetchTourData();
+    fetchBookingData();
   }, [id]); // Use id in the dependency array
 
   if (loading) {
@@ -94,6 +99,10 @@ const TourDetail = () => {
 
     try {
       if (participants <= tour.remaining) {
+        if(Object.keys(bookings).length > 0) {
+          toast.warn("You have booking not complete. Please check your booking!");
+          return;
+        }
         const response = await axios.post(
           "http://localhost:8080/bookings/CreateForTour",
           bookingData,
@@ -216,7 +225,12 @@ const TourDetail = () => {
 
           {/* Positioned "Book Now" Button */}
           <div className="absolute bottom-0 right-0 mt-4 mr-4 -my-10">
-            <button className="bg-red-600 hover:bg-red-800 active:bg-red-900 rounded-md px-4 py-2 transition duration-300 ease-in-out mr-5" onClick={handleBack}>Back</button>
+            <button
+              className="bg-red-600 hover:bg-red-800 active:bg-red-900 rounded-md px-4 py-2 transition duration-300 ease-in-out mr-5"
+              onClick={handleBack}
+            >
+              Back
+            </button>
             <button
               className="bg-green-900 text-white rounded-md px-4 py-2 transition duration-300 ease-in-out hover:bg-green-700"
               onClick={handleBooking}
