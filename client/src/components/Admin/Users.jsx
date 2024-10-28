@@ -9,6 +9,7 @@ const Users = () => {
   const [loading, setLoading] = useState(true);
   const [cookies] = useCookies(["token"]);
   const token = cookies.token;
+
   useEffect(() => {
     fetchUsers();
   }, []);
@@ -40,10 +41,33 @@ const Users = () => {
     }
   };
 
-  const handleBan = (userId) => {
-    // Implement ban logic here
-    console.log(`Ban user with ID: ${userId}`);
-    message.success(`User with ID ${userId} has been banned.`);
+  const handleBan = async (userId) => {
+    try {
+      if (!token) {
+        throw new Error("No token found");
+      }
+
+      const response = await axios.put(
+        `http://localhost:8080/api/ban`,
+        {
+          accountId: userId, // Pass accountId in the request body
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // Include token in the request
+            "Content-Type": "application/json", // Ensure the content type is JSON
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        message.success(`User with ID ${userId} has been banned.`);
+        fetchUsers(); // Refresh the user list after banning
+      }
+    } catch (error) {
+      console.error("Error banning user:", error);
+      message.error("Failed to ban user. Please try again later.");
+    }
   };
 
   const columns = [
