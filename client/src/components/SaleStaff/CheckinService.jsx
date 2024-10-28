@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useCookies } from "react-cookie";
 import { Table, Button, message } from 'antd';
+import { useNavigate } from 'react-router-dom';
 
-const ViewCheckin = () => {
+const CheckinService = () => {
     const [checkins, setCheckins] = useState([]);
     const [loading, setLoading] = useState(true);
     const [cookies] = useCookies();
+    const navigate = useNavigate();
 
     useEffect(() => {
         fetchCheckins();
@@ -93,12 +95,37 @@ const ViewCheckin = () => {
             title: 'Status',
             dataIndex: 'status',
             key: 'status',
-        }
+        },
+        {
+            title: 'Updated By',
+            dataIndex: 'updateBy',
+            key: 'updateBy',
+        },
+        {
+            title: 'Action',
+            key: 'action',
+            render: (_, record) => (
+                <Button 
+                    onClick={() => updateStatus(record.id)}
+                    disabled={record.status === 'CHECKED'}
+                >
+                    Mark as Checked
+                </Button>
+            ),
+        },
     ];
 
     return (
         <div className="max-w-6xl mx-auto p-6 bg-white rounded-lg shadow-md mt-40">
-            <h2 className="text-2xl font-semibold text-center text-black mb-6">Check-in List</h2>
+            <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-semibold text-black">Check-in Management</h2>
+                <Button 
+                    type="primary"
+                    onClick={() => navigate('/booking-list-for-staff')}
+                >
+                    View Bookings
+                </Button>
+            </div>
             <Table 
                 dataSource={checkins}
                 columns={columns}
@@ -109,4 +136,4 @@ const ViewCheckin = () => {
     );
 };
 
-export default ViewCheckin;
+export default CheckinService;

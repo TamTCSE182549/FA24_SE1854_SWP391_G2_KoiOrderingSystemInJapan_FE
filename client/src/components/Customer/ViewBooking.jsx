@@ -212,7 +212,8 @@ const BookingInformation = () => {
                     )}
                   {booking.paymentStatus === "processing" && (
                     <Button
-                      type="success"
+                      type="primary"
+                      className="bg-green-500 hover:bg-green-600"  // Added green color classes
                       onClick={() => handlePayment(booking)}
                     >
                       Pay

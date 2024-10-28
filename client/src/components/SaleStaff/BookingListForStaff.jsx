@@ -12,6 +12,7 @@ const BookingListForStaff = () => {
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
+  const [bookingsWithQuotations, setBookingsWithQuotations] = useState([]);
 
   const formatDateTime = (dateTimeString) => {
     const date = new Date(dateTimeString);
@@ -38,8 +39,24 @@ const BookingListForStaff = () => {
     }
   };
 
+  const fetchQuotations = async () => {
+    try {
+      const response = await axios.get("http://localhost:8080/quotations/all", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      // Lưu danh sách booking ID đã có quotation
+      const bookingIdsWithQuotations = response.data.map(quot => quot.bookingId);
+      setBookingsWithQuotations(bookingIdsWithQuotations);
+    } catch (error) {
+      console.error("Error fetching quotations:", error);
+    }
+  };
+
   useEffect(() => {
     bookingListResponse();
+    fetchQuotations();
   }, []);
 
   const handleViewDetailBooking = (booking) => {
@@ -54,7 +71,7 @@ const BookingListForStaff = () => {
   };
 
   const handleCreateCheckin = (bookingId) => {
-    navigate(`/createCheckin/${bookingId}`);
+    navigate(`/create-checkin/${bookingId}`);  // Updated path with hyphen
   };
     // Mỗi booking sẽ có nút Create Checkin
     // Nút sẽ bị vô hiệu hóa nếu booking chưa được thanh toán
@@ -85,7 +102,9 @@ const BookingListForStaff = () => {
       render: (status) => (
         <Tag color={
           status === 'PAID' ? 'green' :
-          status === 'PENDING' ? 'gold' : 'red'
+          status === 'PENDING' ? 'gold' :
+          status === 'PROCESSING' ? 'blue' :  // Changed to blue for processing
+          'red'
         }>
           {status}
         </Tag>
@@ -99,13 +118,15 @@ const BookingListForStaff = () => {
           <Button type="primary" onClick={() => handleViewDetailBooking(record)}>
             View Details
           </Button>
-          <Button onClick={() => handleCreateQuotation(record)}>
-            Create Quotation
-          </Button>
+          {!bookingsWithQuotations.includes(record.id) && (
+            <Button onClick={() => handleCreateQuotation(record)}>
+              Create Quotation
+            </Button>
+          )}
           <Button 
             type="default"
             onClick={() => handleCreateCheckin(record.id)}
-            disabled={record.paymentStatus !== 'PAID'}
+            disabled={record.paymentStatus.toLowerCase() !== 'processing'}
           >
             Create Checkin
           </Button>
@@ -115,8 +136,26 @@ const BookingListForStaff = () => {
   ];
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">Booking List</h1>
+    <div className="p-6" style={{ marginTop: '100px' }}>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Booking List</h1>
+        <Space>
+          <Button 
+            type="primary"
+            onClick={() => navigate('/QuotationService')}
+            style={{ zIndex: 1000 }}
+          >
+            View Quotations
+          </Button>
+          <Button 
+            type="primary"
+            onClick={() => navigate('/CheckinService')}
+            style={{ zIndex: 1000 }}
+          >
+            View Check-ins
+          </Button>
+        </Space>
+      </div>
       
       <Table 
         columns={columns}
