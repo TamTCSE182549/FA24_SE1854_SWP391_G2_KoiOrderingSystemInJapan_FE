@@ -176,8 +176,8 @@ const Tour = () => {
       toast.warn("You not login to Booking");
       navigate(`/login`);
     } else {
-      // navigate(`/tourdetail/${tour.id}`);
-      navigate("/bookings", { state: { tour } });
+      navigate(`/tourdetail`, { state: { tour } });
+      // navigate("/bookings", { state: { tour } });
     }
   };
 
