@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { useCookies } from "react-cookie"; // Thêm useCookies để lấy token từ cookie
 import { jwtDecode } from "jwt-decode";
 import { Card, Button, Row, Col, Pagination } from "antd"; // Import Ant Design components
@@ -84,8 +85,7 @@ const BookingInformation = () => {
         return;
       }
       await axios.put(
-        `http://localhost:8080/bookings/delete/${booking.id}`,
-        {},
+        `http://localhost:8080/bookings/delete/${booking.id}`,{},
         {
           headers: {
             Authorization: `Bearer ${token}`,
