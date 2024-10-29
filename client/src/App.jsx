@@ -47,6 +47,7 @@ import ViewDetailDeposit from "./components/SaleStaff/ViewDetailDeposit";
 import BookingForKoiList from "./components/SaleStaff/BookingForKoiList";
 import QuotationService from "./components/SaleStaff/QuotationService";
 import BookingListForStaff from "./components/SaleStaff/BookingListForStaff";
+import CheckinService from "./components/SaleStaff/CheckinService";
 const App = () => {
   return (
     // <AuthProvider>
@@ -119,19 +120,13 @@ const App = () => {
             />
             <Route path="/booking-detail" element={<BookingDetail />} />
 
-            <Route
-              path="/view-detail-deposit/:bookingId"
-              element={<ViewDetailDeposit />}
-            />
-            <Route
-              path="//booking-for-koi-list"
-              element={<BookingForKoiList />}
-            />
-            <Route path="/QuotationService" element={<QuotationService />} />
-            <Route
-              path="/booking-list-for-staff"
-              element={<BookingListForStaff />}
-            />
+
+            <Route path="/view-detail-deposit/:bookingId" element={<ViewDetailDeposit />} />
+            <Route path="//booking-for-koi-list" element={<BookingForKoiList />} />
+            <Route path="/QuotationService" element={<QuotationService />}/>
+            <Route path="/booking-list-for-staff" element={<BookingListForStaff/>}/>
+            <Route path="/CheckinService" element={<CheckinService/>}/>
+
           </Routes>
         </div>
         <div className="">

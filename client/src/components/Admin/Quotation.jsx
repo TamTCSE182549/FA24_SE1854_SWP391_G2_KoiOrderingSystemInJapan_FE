@@ -21,8 +21,6 @@ const Quotation = () => {
   const [selectedQuotation, setSelectedQuotation] = useState(null);
   const [cookies] = useCookies(["token"]);
   const token = cookies.token;
-  const [isPaymentModalVisible, setIsPaymentModalVisible] = useState(false);
-  const [paymentForm] = Form.useForm();
 
   const fetchQuotations = async () => {
     setLoading(true);
@@ -90,60 +88,6 @@ const Quotation = () => {
     return { formattedDate, formattedTime };
   };
 
-  const handleSendPayment = (quotation) => {
-    if (quotation.isApprove === "FINISH") {
-      setSelectedQuotation(quotation);
-      setIsPaymentModalVisible(true);
-    }
-  };
-
-  const updateBookingStatus = async (bookingId, status) => {
-    try {
-      const response = await axios.put(
-        "http://localhost:8080/bookings/updateResponseFormStaff",
-        {
-          bookingID: bookingId,
-          paymentStatus: status,
-        },
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        }
-      );
-      console.log("Booking status updated:", response.data);
-      fetchQuotations(); // Refresh the quotations list
-    } catch (error) {
-      console.error("Error updating booking status:", error);
-    }
-  };
-
-  const handlePaymentSubmit = async (values) => {
-    try {
-      const response = await axios.put(
-        "http://localhost:8080/bookings/updateResponseFormStaff",
-        {
-          bookingID: selectedQuotation.bookingId,
-          paymentStatus: "processing",
-          paymentMethod: values.paymentMethod,
-          vat: parseFloat(values.vat),
-          discountAmount: parseFloat(values.discountAmount),
-        },
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        }
-      );
-      console.log("Payment sent:", response.data);
-      setIsPaymentModalVisible(false);
-      paymentForm.resetFields();
-      fetchQuotations(); // Refresh the quotations list
-    } catch (error) {
-      console.error("Error sending payment:", error);
-    }
-  };
-
   return (
     <div className="container mx-auto py-4" style={{ paddingLeft: '100px', paddingRight: '100px', paddingTop: '100px' }}>
       <h1 className="text-2xl font-bold mb-4">Quotations List</h1>
@@ -186,14 +130,6 @@ const Quotation = () => {
                 <Button onClick={() => handleViewDetails(quotation.id)}>
                   View Detail
                 </Button>
-                {quotation.isApprove === "FINISH" && (
-                  <Button 
-                    onClick={() => handleSendPayment(quotation)}
-                    type="primary"
-                  >
-                    Send Payment
-                  </Button>
-                )}
               </Space>
             </Card>
           </Col>
@@ -256,34 +192,6 @@ const Quotation = () => {
             )}
           </div>
         )}
-      </Modal>
-
-      <Modal
-        title="Send Payment"
-        visible={isPaymentModalVisible}
-        onCancel={() => setIsPaymentModalVisible(false)}
-        footer={null}
-      >
-        <Form form={paymentForm} onFinish={handlePaymentSubmit} layout="vertical">
-          <Form.Item name="paymentMethod" label="Payment Method" rules={[{ required: true }]}>
-            <Select>
-              <Option value="CASH">Cash</Option>
-              <Option value="CREDIT_CARD">Credit Card</Option>
-              <Option value="BANK_TRANSFER">Bank Transfer</Option>
-            </Select>
-          </Form.Item>
-          <Form.Item name="vat" label="VAT (%)" rules={[{ required: true }]}>
-            <Input type="number" step="0.01" min="0" max="100" />
-          </Form.Item>
-          <Form.Item name="discountAmount" label="Discount Amount" rules={[{ required: true }]}>
-            <Input type="number" step="0.01" min="0" />
-          </Form.Item>
-          <Form.Item>
-            <Button type="primary" htmlType="submit">
-              Send Payment
-            </Button>
-          </Form.Item>
-        </Form>
       </Modal>
     </div>
   );

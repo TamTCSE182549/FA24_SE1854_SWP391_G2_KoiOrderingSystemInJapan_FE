@@ -3,28 +3,47 @@ import { DatePicker, InputNumber, Select } from "antd";
 import "antd/dist/reset.css"; // Import Ant Design CSS if not already done
 import { FaPlane } from "react-icons/fa"; // Import plane icon from react-icons
 import { getTourById } from "../../services/tourservice"; // Import the API function
+import { format } from "date-fns";
+import { useCookies } from "react-cookie";
+import { jwtDecode } from "jwt-decode"; // Ensure correct import
 import Img1 from "../../assets/321.jpg";
 import Img2 from "../../assets/291281.jpg";
 import Img3 from "../../assets/koi+shopping.jpg";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation, useNavigate } from "react-router-dom";
+import axios from "axios";
+import { ToastContainer, toast } from "react-toastify"; // Import ToastContainer và toast
+import "react-toastify/dist/ReactToastify.css"; // Import CSS cho Toast
 
 const { Option } = Select; // Ensure Option is imported
 
 const TourDetail = () => {
-  const [tour, setTour] = useState(null);
+  const navigate = useNavigate();
+  const [cookies] = useCookies(["token"]);
+  const token = cookies.token;
   const [loading, setLoading] = useState(true);
+  const [bookings, setBookings] = useState(true);
   const [error, setError] = useState(null);
-
+  const location = useLocation();
+  const { tour } = location.state || {};
   // State for departure date and number of guests
-  const [departureDate, setDepartureDate] = useState(null);
-  const [guests, setGuests] = useState(1);
   const { id } = useParams(); // Get the id from the URL
 
+  const [paymentMethod, setPaymentMethod] = useState("CASH");
+  const [participants, setParticipants] = useState(1);
+
   useEffect(() => {
-    const fetchTourData = async () => {
+    const fetchBookingData = async () => {
       try {
-        const data = await getTourById(id);
-        setTour(data);
+        const response = await axios.get(
+          `http://localhost:8080/bookings/listBookingTourOtherStatus`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`, // Ensure the token is correctly passed
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        setBookings(response.data);
       } catch (error) {
         console.error("Error fetching tour data:", error);
         setError("Failed to fetch tour data.");
@@ -33,7 +52,7 @@ const TourDetail = () => {
       }
     };
 
-    fetchTourData();
+    fetchBookingData();
   }, [id]); // Use id in the dependency array
 
   if (loading) {
@@ -54,6 +73,71 @@ const TourDetail = () => {
     { id: 3, img: Img3 },
   ];
 
+  const handleBack = () => {
+    navigate(-1); // Di chuyển về trang trước đó
+  };
+
+  const handleBooking = async (e) => {
+    e.preventDefault();
+
+    // if (!token) {
+    //   setMessage("Token not found or invalid. Please log in.");
+    //   return;
+    // }
+
+    if (!token) {
+      toast.error("Token not found or invalid. Please log in."); // Hiển thị thông báo lỗi
+      return;
+    }
+
+    // Dữ liệu booking tương ứng với BookingRequest class
+    const bookingData = {
+      tourID: Number(tour.id),
+      paymentMethod: paymentMethod,
+      participants: Number(participants),
+    };
+
+    try {
+      if (participants <= tour.remaining) {
+        if(Object.keys(bookings).length > 0) {
+          toast.warn("You have booking not complete. Please check your booking!");
+          return;
+        }
+        const response = await axios.post(
+          "http://localhost:8080/bookings/CreateForTour",
+          bookingData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`, // Ensure the token is correctly passed
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        console.log("Booking successful:", response.data);
+        // NotificationManager.success("Booking successful!", "Success", 5000);
+        toast.success("Booking successful!");
+      } else {
+        toast.warning(
+          "Participants must be less than or equal remaning of tour AND must be greater than 0"
+        );
+      }
+    } catch (error) {
+      if (error.response) {
+        console.error("Error response:", error.response.data);
+        toast.error(
+          error.response.data.message ||
+            "Failed to book the trip. Please try again."
+        ); // Hiển thị thông báo lỗi
+      } else if (error.request) {
+        console.error("Error request:", error.request);
+        toast.error("No response from server. Please check your connection.");
+      } else {
+        console.error("Error message:", error.message);
+        toast.error("An unexpected error occurred. Please try again.");
+      }
+    }
+  };
+
   return (
     <div className="p-10 max-w-7xl mx-auto backdrop-filter backdrop-blur-3xl rounded-2xl shadow-lg mt-40 relative">
       <div className="flex flex-col md:flex-row space-y-8 md:space-y-0 md:space-x-12">
@@ -68,13 +152,18 @@ const TourDetail = () => {
 
         {/* Tour Info */}
         <div className="md:w-1/2 relative">
-          <h2 className="text-4xl font-bold mb-4">{tour.title}</h2>
+          <h2 className="text-4xl font-bold mb-4">{tour.tourName}</h2>
           <div className="tour-details text-lg text-white space-y-4">
             <p>
-              <strong>Location:</strong> {tour.location}
+              <strong>Start Time: </strong>{" "}
+              {format(new Date(tour.startTime), "yyyy-MM-dd HH:mm:ss")}
             </p>
             <p>
-              <strong>Duration:</strong> {tour.duration}
+              <strong>End Time: </strong>{" "}
+              {format(new Date(tour.endTime), "yyyy-MM-dd HH:mm:ss")}
+            </p>
+            <p>
+              <strong>Max Participants: </strong> {tour.maxParticipants}
             </p>
             {/* Hardcoded Transportation Label */}
           </div>
@@ -89,11 +178,12 @@ const TourDetail = () => {
           <div className="mt-10 grid grid-cols-3 gap-4 mb-5">
             <div>
               <h4 className="text-xl font-semibold text-white mb-2">
-                Departure Date
+                Remaning of Tour
               </h4>
-              <DatePicker
-                onChange={(date) => setDepartureDate(date)}
-                className="w-full"
+              <input
+                value={tour.remaining} // Hiển thị tên tour
+                readOnly
+                className="border border-gray-300 rounded-md p-2 w-full h-8 bg-gray-100 text-black"
               />
             </div>
             <div>
@@ -104,7 +194,7 @@ const TourDetail = () => {
                 min={1}
                 max={1000}
                 defaultValue={1}
-                onChange={(value) => setGuests(value)}
+                onChange={(value) => setParticipants(value)}
                 className="w-full"
                 size="middle"
                 style={{ width: "60 %" }}
@@ -118,24 +208,33 @@ const TourDetail = () => {
             </div>
             <div>
               <h4 className="text-xl font-semibold text-white mb-2">
-                Starting Place
+                Payment method
               </h4>
               <Select
-                placeholder="Select starting place"
+                placeholder="Select payment method"
+                value={paymentMethod}
                 className="w-[50vh]"
-                onChange={(value) => setStartingPlace(value)}
+                onChange={(value) => setPaymentMethod(value)}
               >
-                <Option value="Tokyo">Tokyo</Option>
-                <Option value="Osaka">Osaka</Option>
-                <Option value="Nagoya">Nagoya</Option>
-                <Option value="Hokkaido">Hokkaido</Option>
+                <Option value="CASH">Cash</Option>
+                <Option value="VISA">Visa</Option>
+                <Option value="TRANSFER">Transfer</Option>
               </Select>
             </div>
           </div>
 
           {/* Positioned "Book Now" Button */}
           <div className="absolute bottom-0 right-0 mt-4 mr-4 -my-10">
-            <button className="bg-green-900 text-white rounded-md px-4 py-2 transition duration-300 ease-in-out hover:bg-green-700">
+            <button
+              className="bg-red-600 hover:bg-red-800 active:bg-red-900 rounded-md px-4 py-2 transition duration-300 ease-in-out mr-5"
+              onClick={handleBack}
+            >
+              Back
+            </button>
+            <button
+              className="bg-green-900 text-white rounded-md px-4 py-2 transition duration-300 ease-in-out hover:bg-green-700"
+              onClick={handleBooking}
+            >
               Book Now
             </button>
           </div>
@@ -155,6 +254,7 @@ const TourDetail = () => {
           ))}
         </div>
       </div>
+      <ToastContainer />
     </div>
   );
 };

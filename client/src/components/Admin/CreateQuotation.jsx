@@ -41,20 +41,20 @@ const CreateQuotation = () => {
             amount: parseFloat(amount),
             description
         };
-        console.log("Sending data:", quotationData);
         
         try {
             const response = await axios.post("http://localhost:8080/quotations/create", 
                 quotationData,
                 {
                     headers: {
-                      Authorization: `Bearer ${token}`, // Ensure the token is correctly passed
+                      Authorization: `Bearer ${token}`,
                       "Content-Type": "application/json",
                     },
                   });
             if (response.status === 201) {
                 toast.success('Quotation created successfully!');
-                navigate(-1);
+                // Chuyển hướng về trang BookingListForStaff
+                navigate('/booking-list-for-staff');
             }
         } catch (err) {
             console.error("Error details:", err.response.data);

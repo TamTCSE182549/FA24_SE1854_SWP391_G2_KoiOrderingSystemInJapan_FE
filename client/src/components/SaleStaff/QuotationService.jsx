@@ -90,12 +90,12 @@ const QuotationService = () => {
   const handlePaymentSubmit = async (values) => {
     try {
       const response = await axios.put(
-        "http://localhost:8080/bookings/updateResponseFormStaff",
+        "http://localhost:8080/admin/updateResponseFormStaff",  // Updated endpoint
         {
           bookingID: selectedQuotation.bookingId,
-          paymentStatus: "processing",
+          paymentStatus: "processing",  // Using the PaymentStatus enum value
           paymentMethod: values.paymentMethod,
-          vat: parseFloat(values.vat),
+          vat: parseFloat(values.vat) / 100,  // Convert percentage to decimal
           discountAmount: parseFloat(values.discountAmount),
         },
         {
@@ -104,18 +104,27 @@ const QuotationService = () => {
           }
         }
       );
-      console.log("Payment sent:", response.data);
+      console.log("Payment updated:", response.data);
       setIsPaymentModalVisible(false);
       paymentForm.resetFields();
       fetchQuotations();
     } catch (error) {
-      console.error("Error sending payment:", error);
+      console.error("Error updating payment:", error);
     }
   };
 
   return (
     <div className="container mx-auto py-4" style={{ paddingLeft: '100px', paddingRight: '100px', paddingTop: '100px' }}>
-      <h1 className="text-2xl font-bold mb-4">Quotations List</h1>
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold">Quotations List</h1>
+        <Button 
+          onClick={() => navigate('/booking-list-for-staff')}
+          type="primary"
+        >
+          Back to Booking List
+        </Button>
+      </div>
+
       <Space className="mb-4">
         <Select
           defaultValue="ALL"
