@@ -65,7 +65,7 @@ const BookingTrip = () => {
     };
 
     try {
-      if(participants<=tour.remaining){
+      if (participants <= tour.remaining) {
         const response = await axios.post(
           "http://localhost:8080/bookings/CreateForTour",
           bookingData,
@@ -80,9 +80,10 @@ const BookingTrip = () => {
         // NotificationManager.success("Booking successful!", "Success", 5000);
         toast.success("Booking successful!");
       } else {
-        toast.warning("Participants must be less than or equal remaning of tour AND must be greater than 0");
+        toast.warning(
+          "Participants must be less than or equal remaning of tour AND must be greater than 0"
+        );
       }
-      
     } catch (error) {
       if (error.response) {
         console.error("Error response:", error.response.data);
