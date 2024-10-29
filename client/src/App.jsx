@@ -37,7 +37,7 @@ import CreateDeposit from "./components/SaleStaff/CreateDeposit";
 import BookingKoiDetail from "./components/Hero/BookingKoiDetail";
 import BookingTourDetail from "./components/Customer/BookingTourDetail";
 import CreateBooking from "./components/Hero/CreateBooking";
-
+import BookingForKoiListcus from "./components/Customer/BookingForKoiListcus";
 //for manager and staff
 import Quotation from "./components/Admin/Quotation";
 import CreateQuotation from "./components/Admin/CreateQuotation";
@@ -108,7 +108,7 @@ const App = () => {
             <Route path="/forgotpassword" element={<ForgotPassword />} />
 
             <Route path="/paymentsuccess" element={<PaymentSuccess />} />
-            <Route path="/booking-koi" element={<BookingKoi />} />
+            <Route path="/booking-koi/:bookingId" element={<BookingKoi />} />
 
             <Route
               path="/create-checkin/:bookingId"
@@ -121,10 +121,11 @@ const App = () => {
             <Route path="/booking-detail" element={<BookingDetail />} />
 
             <Route path="/view-detail-deposit/:bookingId" element={<ViewDetailDeposit />} />
-            <Route path="//booking-for-koi-list" element={<BookingForKoiList />} />
+            <Route path="/booking-for-koi-list" element={<BookingForKoiList />} />
             <Route path="/QuotationService" element={<QuotationService />}/>
             <Route path="/booking-list-for-staff" element={<BookingListForStaff/>}/>
             <Route path="/CheckinService" element={<CheckinService/>}/>
+            <Route path="/customer/booking-for-koi-list" element={<BookingForKoiListcus/>}/>
           </Routes>
         </div>
         <div className="">

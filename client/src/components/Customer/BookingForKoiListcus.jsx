@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
 import { ToastContainer, toast } from 'react-toastify';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useNavigate } from 'react-router-dom';
 import 'react-toastify/dist/ReactToastify.css';
 
 const statusStyles = {
@@ -17,14 +17,19 @@ const statusStyles = {
 const BookingForKoiList = () => {
   const [bookings, setBookings] = useState([]);
   const [errorMessage, setErrorMessage] = useState('');
-  const [cookies] = useCookies();
+  const [cookies, setCookies] = useCookies(['accountId', 'token']);
+
   const token = cookies.token;
-  const navigate = useNavigate(); // Khởi tạo useNavigate
+  const navigate = useNavigate();
+  const accountId = cookies.accountId;
+  console.log("Account ID:", accountId);
+  const role = cookies.role; // Lấy vai trò từ cookie
 
   useEffect(() => {
+
     const fetchBookings = async () => {
       try {
-        const response = await axios.get(`http://localhost:8080/bookings/BookingForKoi`, {
+        const response = await axios.get(`http://localhost:8080/bookings/kois/list/${accountId}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -38,10 +43,10 @@ const BookingForKoiList = () => {
     };
 
     fetchBookings();
-  }, [token]);
+  }, [token, role, navigate, accountId]);
 
-  const handleViewDetail = (bookingId) => {
-    navigate('/booking-detail', { state: { bookingId } }); // Điều hướng với state
+  const handleContactStaff = () => {
+    navigate('/contact-staff'); // Điều hướng đến trang liên hệ
   };
 
   return (
@@ -76,9 +81,9 @@ const BookingForKoiList = () => {
                 </div>
               </div>
               <button 
-                onClick={() => handleViewDetail(booking.id)} // Gọi hàm với bookingId
-                className="mt-2 bg-blue-500 text-white rounded py-1 px-3 hover:bg-blue-600 transition duration-200">
-                Xem Chi Tiết
+                onClick={handleContactStaff}
+                className="mt-2 bg-green-500 text-white rounded py-1 px-3 hover:bg-green-600 transition duration-200">
+                Liên hệ với Nhân viên
               </button>
             </li>
           ))}
