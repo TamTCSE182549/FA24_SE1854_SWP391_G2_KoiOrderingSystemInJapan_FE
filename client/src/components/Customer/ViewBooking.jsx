@@ -107,7 +107,6 @@ const BookingInformation = () => {
     indexOfLastBooking
   );
 
-
   const onPageChange = (page) => {
     setCurrentPage(page);
   };
@@ -115,9 +114,6 @@ const BookingInformation = () => {
   return (
     <div className="container mt-20">
       <section className="text-center">
-        <h4 className="mb-5">
-          <strong>Booking List</strong>
-        </h4>
         <Row gutter={[16, 16]}>
           {currentBookings.map((booking, index) => (
             <Col key={index} span={15} style={{ margin: "10px auto" }}>
@@ -128,14 +124,15 @@ const BookingInformation = () => {
                   flexDirection: "column",
                   alignItems: "center",
                   padding: "5px",
+                  borderRadius: "10px",
+                  boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
                 }}
-
               >
                 <div style={{ display: "flex", width: "100%" }}>
                   <img
                     alt="Koi Fish"
                     src="https://asiatourist.vn/wp-content/uploads/2021/04/khu-du-lich-la-phong-da-lat-5.jpg"
-                    style={{ width: 150, marginRight: 20 }}
+                    style={{ width: 150, marginRight: 20, borderRadius: "8px" }}
                   />
                   <div style={{ flex: 1 }}>
                     <h5 className="mb-5">
@@ -159,7 +156,8 @@ const BookingInformation = () => {
                       </Col>
                       <Col span={12}>
                         <p>
-                          Total Amount: <strong>{booking.totalAmount}</strong>
+                          Payment Status:{" "}
+                          <strong>{booking.paymentStatus}</strong>
                         </p>
                         <p>
                           Payment Method:{" "}
@@ -168,12 +166,16 @@ const BookingInformation = () => {
                       </Col>
                       <Col span={12}>
                         <p>
-                          Payment Status:{" "}
-                          <strong>{booking.paymentStatus}</strong>
+                          Total Amount:{" "}
+                          <strong className="text-red-500">
+                            {booking.totalAmount}
+                          </strong>
                         </p>
                         <p>
                           Total Amount With VAT:{" "}
-                          <strong>{booking.totalAmountWithVAT}</strong>
+                          <strong className="text-red-500">
+                            {booking.totalAmountWithVAT}
+                          </strong>
                         </p>
                       </Col>
                     </Row>
@@ -213,7 +215,7 @@ const BookingInformation = () => {
                   {booking.paymentStatus === "processing" && (
                     <Button
                       type="primary"
-                      className="bg-green-500 hover:bg-green-600"  // Added green color classes
+                      className="bg-green-500 hover:bg-green-600" // Added green color classes
                       onClick={() => handlePayment(booking)}
                     >
                       Pay

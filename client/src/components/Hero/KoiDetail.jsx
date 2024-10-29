@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Tabs } from "antd";
 
@@ -9,6 +9,7 @@ const KoiDetail = () => {
   const { id } = useParams(); // Get the ID from the route parameters
   const [koiData, setKoiData] = useState(null);
   const [mainImage, setMainImage] = useState("");
+  const navigate = useNavigate(); // Hook to navigate programmatically
 
   useEffect(() => {
     // Fetch koi data by ID
@@ -34,7 +35,7 @@ const KoiDetail = () => {
   }
 
   return (
-    <div className="flex justify-center pt-4 mt-40">
+    <div className="flex justify-center pt-4 mt-20 ">
       <div className="w-full max-w-4xl mx-auto px-6 py-12 bg-white shadow-lg rounded-lg ">
         <div className="flex flex-wrap -mx-4">
           {/* Image Gallery */}
@@ -87,10 +88,23 @@ const KoiDetail = () => {
                 <li>
                   <span className="font-medium">Diet:</span> Gobble
                 </li>
+                <li>
+                  <span className="font-medium">Water conditions: </span>
+                  {"36-90 °F, KH 2-12, pH 6,8 – 7,2"}
+                </li>
+                <li>
+                  <span className="font-medium">Personality: </span> Peaceful
+                </li>
               </ul>
             </div>
             <button className="bg-blue-600 text-white px-8 py-3 rounded-full hover:bg-blue-700 transition duration-300 shadow-md">
               Contact Us
+            </button>
+            <button
+              onClick={() => navigate("/koiforsale")}
+              className="bg-gray-600 text-white px-8 py-3 rounded-full hover:bg-gray-700 transition duration-300 shadow-md ml-4"
+            >
+              Back
             </button>
           </div>
         </div>

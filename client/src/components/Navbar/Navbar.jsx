@@ -167,17 +167,18 @@ const Navbar = () => {
       )}
     </Drawer>
   );
+
   return location.pathname === "/" ? (
     <>
       <MenuOutlined
-        className="text-white text-2xl cursor-pointer z-50 fixed top-3 left-3"
+        className="text-black text-2xl cursor-pointer z-50 fixed top-3 left-3"
         onClick={onOpenDrawer}
       />
       <Sidebar />
     </>
   ) : (
     <div className="fixed top-0 left-0 w-full z-20 mb-20">
-      <div className="backdrop-filter bg-gradient-to-r from-emerald-700 via-green-800 to-teal-600 w-full shadow-lg fixed z-10">
+      <div className="bg-white shadow-md border-b border-gray-300 w-full fixed z-10">
         {/* upper Navbar */}
 
         <div className="flex justify-between items-center w-full px-6 lg:px-12 py-1">
@@ -189,7 +190,7 @@ const Navbar = () => {
               className="w-14 h-auto cursor-pointer"
               onClick={onHomeClick}
             />
-            <div className="text-gray-300 font-serif text-2xl ml-2">
+            <div className="text-black font-serif text-2xl ml-2">
               KOIBOOKING
             </div>
           </div>
@@ -204,8 +205,8 @@ const Navbar = () => {
                 >
                   <Link
                     to={data.link}
-                    className="text-white font-serif text-lg transition duration-500
-                             hover:text-white hover:shadow-2xl hover:rounded-3xl hover:font-bold w-full h-[50px]
+                    className="text-black font-serif text-lg transition duration-500
+                             hover:text-gray-700 hover:shadow-2xl hover:rounded-3xl hover:font-bold w-full h-[50px]
                             flex justify-center items-center"
                   >
                     {data.name}
@@ -219,15 +220,15 @@ const Navbar = () => {
           <div className="flex items-center space-x-6">
             {login ? (
               <Dropdown overlay={userMenu} trigger={["click"]}>
-                <div className="flex items-center cursor-pointer text-gray-800 ">
+                <div className="flex items-center cursor-pointer text-black">
                   <Avatar icon={<UserOutlined />} />
-                  <span className="ml-2 text-white">{`${firstName} ${lastName}`}</span>
+                  <span className="ml-2 text-black">{`${firstName} ${lastName}`}</span>
                   <DownOutlined className="ml-2" />
                 </div>
               </Dropdown>
             ) : (
               <UserOutlined
-                className="text-gray-300 text-2xl cursor-pointer"
+                className="text-black text-2xl cursor-pointer"
                 onClick={onMenuClick}
               />
             )}

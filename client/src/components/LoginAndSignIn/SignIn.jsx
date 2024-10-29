@@ -38,8 +38,8 @@ const SignIn = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center">
-      <div className="bg-[#c5bd92] p-8 rounded-lg shadow-lg w-full max-w-md">
-        <h2 className="text-white text-3xl font-bold text-center mb-6">
+      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+        <h2 className="text-black text-3xl font-bold text-center mb-6">
           Sign up
         </h2>
         <Form
@@ -141,17 +141,17 @@ const SignIn = () => {
             <Button
               type="primary"
               htmlType="submit"
-              className="w-full bg-[#b7aa61] text-white hover:bg-[#b7aa59] hover:scale-105 transition-all duration-300"
+              className="w-full bg-black text-white hover:bg-gray-800 hover:scale-105 transition-all duration-300"
             >
               Sign Up
             </Button>
           </Form.Item>
         </Form>
 
-        <div className="text-center text-white my-4">
+        <div className="text-center text-black my-4">
           <span>Already have an account?</span>
           <span
-            className="text-white hover:underline ml-2 cursor-pointer"
+            className="text-black hover:underline ml-2 cursor-pointer"
             onClick={() => navigate("/login")}
           >
             Log in

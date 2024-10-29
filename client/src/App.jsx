@@ -16,7 +16,7 @@ import PrivateRoute from "./components/PrivateRouter/PrivateRouter";
 import Tour from "./components/Hero/TourList";
 import BookingList from "./components/Customer/BookingList";
 import AdminRoutes from "./components/Admin/AdminRoutes";
-import KoiDetail from "./components/KoiDetail";
+import KoiDetail from "./components/Hero/KoiDetail";
 import FarmDetail from "./components/Hero/FarmDetail";
 import TourDetail from "./components/Hero/TourDetail";
 
@@ -55,9 +55,9 @@ const App = () => {
       {/* Phần hình nền parallax */}
       <div
         className="bg-fixed bg-center bg-cover w-full h-full flex-grow flex flex-col min-h-screen"
-        // style={{
-        //   backgroundImage: `url(${MainImg})`,
-        // }}
+        style={{
+          backgroundColor: "#f6f6f4",
+        }}
       >
         <Navbar />
         <div className="flex-grow text-white">
@@ -120,13 +120,20 @@ const App = () => {
             />
             <Route path="/booking-detail" element={<BookingDetail />} />
 
-
-            <Route path="/view-detail-deposit/:bookingId" element={<ViewDetailDeposit />} />
-            <Route path="//booking-for-koi-list" element={<BookingForKoiList />} />
-            <Route path="/QuotationService" element={<QuotationService />}/>
-            <Route path="/booking-list-for-staff" element={<BookingListForStaff/>}/>
-            <Route path="/CheckinService" element={<CheckinService/>}/>
-
+            <Route
+              path="/view-detail-deposit/:bookingId"
+              element={<ViewDetailDeposit />}
+            />
+            <Route
+              path="//booking-for-koi-list"
+              element={<BookingForKoiList />}
+            />
+            <Route path="/QuotationService" element={<QuotationService />} />
+            <Route
+              path="/booking-list-for-staff"
+              element={<BookingListForStaff />}
+            />
+            <Route path="/CheckinService" element={<CheckinService />} />
           </Routes>
         </div>
         <div className="">
