@@ -16,24 +16,18 @@ import PrivateRoute from "./components/PrivateRouter/PrivateRouter";
 import Tour from "./components/Hero/TourList";
 import BookingList from "./components/Customer/BookingList";
 import AdminRoutes from "./components/Admin/AdminRoutes";
-import KoiDetail from "./components/KoiDetail";
+import KoiDetail from "./components/Hero/KoiDetail";
 import FarmDetail from "./components/Hero/FarmDetail";
 import TourDetail from "./components/Hero/TourDetail";
-
 import BookingDetail from "./components/SaleStaff/BookingDetail";
-
 import ViewBooking from "./components/Customer/ViewBooking";
 import ViewCheckin from "./components/Customer/ViewCheckin";
-
-import Delivery from "./components/Customer/Delivery";
+import Delivery from "./components/Delivery/Delivery";
 import ResetPassword from "./components/LoginAndSignIn/ResetPassword";
 import ForgotPassword from "./components/LoginAndSignIn/ForgotPassword";
-
 import BookingKoi from "./components/SaleStaff/BookingKoi";
 import CreateCheckin from "./components/SaleStaff/CreateCheckin";
-
 import CreateDeposit from "./components/SaleStaff/CreateDeposit";
-
 import BookingKoiDetail from "./components/Hero/BookingKoiDetail";
 import BookingTourDetail from "./components/Customer/BookingTourDetail";
 import CreateBooking from "./components/Hero/CreateBooking";
@@ -56,7 +50,7 @@ const App = () => {
       <div
         className="bg-fixed bg-center bg-cover w-full h-full flex-grow flex flex-col min-h-screen"
         style={{
-          backgroundImage: `url(${MainImg})`,
+          backgroundColor: "#f6f6f4",
         }}
       >
         <Navbar />
@@ -119,13 +113,13 @@ const App = () => {
               element={<CreateDeposit />}
             />
             <Route path="/booking-detail" element={<BookingDetail />} />
-
             <Route path="/view-detail-deposit/:bookingId" element={<ViewDetailDeposit />} />
             <Route path="/booking-for-koi-list" element={<BookingForKoiList />} />
             <Route path="/QuotationService" element={<QuotationService />}/>
             <Route path="/booking-list-for-staff" element={<BookingListForStaff/>}/>
             <Route path="/CheckinService" element={<CheckinService/>}/>
             <Route path="/customer/booking-for-koi-list" element={<BookingForKoiListcus/>}/>
+
           </Routes>
         </div>
         <div className="">

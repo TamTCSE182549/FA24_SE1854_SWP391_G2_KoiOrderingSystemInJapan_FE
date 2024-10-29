@@ -12,7 +12,6 @@ const BookingListForStaff = () => {
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
-  const [bookingsWithQuotations, setBookingsWithQuotations] = useState([]);
 
   const formatDateTime = (dateTimeString) => {
     const date = new Date(dateTimeString);
@@ -39,24 +38,8 @@ const BookingListForStaff = () => {
     }
   };
 
-  const fetchQuotations = async () => {
-    try {
-      const response = await axios.get("http://localhost:8080/quotations/all", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      // Lưu danh sách booking ID đã có quotation
-      const bookingIdsWithQuotations = response.data.map(quot => quot.bookingId);
-      setBookingsWithQuotations(bookingIdsWithQuotations);
-    } catch (error) {
-      console.error("Error fetching quotations:", error);
-    }
-  };
-
   useEffect(() => {
     bookingListResponse();
-    fetchQuotations();
   }, []);
 
   const handleViewDetailBooking = (booking) => {
@@ -118,11 +101,9 @@ const BookingListForStaff = () => {
           <Button type="primary" onClick={() => handleViewDetailBooking(record)}>
             View Details
           </Button>
-          {!bookingsWithQuotations.includes(record.id) && (
-            <Button onClick={() => handleCreateQuotation(record)}>
-              Create Quotation
-            </Button>
-          )}
+          <Button onClick={() => handleCreateQuotation(record)}>
+            Create Quotation
+          </Button>
           <Button 
             type="default"
             onClick={() => handleCreateCheckin(record.id)}

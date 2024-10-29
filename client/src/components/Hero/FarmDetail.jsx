@@ -28,7 +28,6 @@ const FarmDetail = () => {
     fetchFarmDetail();
   }, [id]);
 
-
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -105,17 +104,26 @@ const FarmDetail = () => {
 
           {/* Koi Fish Carousel */}
           <div className="mt-10">
-            <h2 className="text-3xl font-semibold mb-6 text-center">
+            <h2 className="text-3xl font-semibold mb-6 text-center text-black">
               Koi Fish Available
             </h2>
             <Carousel
               dots={true}
-              slidesToShow={3}
-              autoplay
-              autoplaySpeed={3000}
+              slidesToShow={4} // Show 4 cards at a time
+              arrows={true} // Enable navigation arrows
+              autoplay={false} // Disable autoplay
               responsive={[
                 {
                   breakpoint: 1024,
+                  settings: {
+                    slidesToShow: 3,
+                    slidesToScroll: 1,
+                    infinite: true,
+                    dots: true,
+                  },
+                },
+                {
+                  breakpoint: 768,
                   settings: {
                     slidesToShow: 2,
                     slidesToScroll: 1,
@@ -124,7 +132,7 @@ const FarmDetail = () => {
                   },
                 },
                 {
-                  breakpoint: 768,
+                  breakpoint: 480,
                   settings: {
                     slidesToShow: 1,
                     slidesToScroll: 1,
@@ -135,7 +143,7 @@ const FarmDetail = () => {
               ]}
             >
               {farmDetail.koiResponses.map((fish) => (
-                <div key={fish.id} className="p-4">
+                <div key={fish.id} className="p-2">
                   <Card
                     hoverable
                     className="mx-2 rounded-lg overflow-hidden shadow-lg"
@@ -143,7 +151,7 @@ const FarmDetail = () => {
                       <img
                         src={fish.koiImageList[0].imageUrl}
                         alt={fish.name}
-                        style={{ height: "500px" }} // Set specific width and height
+                        style={{ height: "400px" }} // Adjusted height for smaller cards
                         className="object-cover rounded-t-lg w-full"
                       />
                     }

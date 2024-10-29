@@ -12,27 +12,25 @@ const ResetPassword = () => {
   const queryParams = new URLSearchParams(location.search);
   const token = queryParams.get("token");
 
-
   const onFinish = async (values) => {
     try {
       const response = await axios.post(
         `http://localhost:8080/api/reset-password`,
-        { 
-          password: values.newPassword,  // Thay đổi từ newPassword thành password
+        {
+          password: values.newPassword,
           confirmPassword: values.newPassword,
-          token: token
+          token: token,
         },
         {
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
         }
       );
-      
 
       if (response.status === 200) {
-        if(response.data.token){
+        if (response.data.token) {
           const decoded = jwtDecode(response.data.token);
           setUser(decoded);
           console.log(decoded);
@@ -58,8 +56,8 @@ const ResetPassword = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center">
-      <div className="bg-[#c5bd92] p-8 rounded-lg shadow-lg w-full max-w-md">
-        <h2 className="text-white text-3xl font-bold text-center mb-6">
+      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+        <h2 className="text-black text-3xl font-bold text-center mb-6">
           Reset Password
         </h2>
         <Form
@@ -107,17 +105,17 @@ const ResetPassword = () => {
             <Button
               type="primary"
               htmlType="submit"
-              className="w-full bg-[#b7aa61] text-white hover:bg-[#b7aa59] hover:scale-105 transition-all duration-300"
+              className="w-full bg-black text-white hover:bg-gray-800 hover:scale-105 transition-all duration-300"
             >
               Reset Password
             </Button>
           </Form.Item>
         </Form>
 
-        <div className="text-center text-white my-4">
+        <div className="text-center text-black my-4">
           <span>Remember your password?</span>
           <span
-            className="text-white hover:underline ml-2 cursor-pointer"
+            className="text-black hover:underline ml-2 cursor-pointer"
             onClick={() => navigate("/login")}
           >
             Log in

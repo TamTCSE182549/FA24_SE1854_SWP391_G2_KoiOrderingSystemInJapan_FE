@@ -245,7 +245,7 @@ const Delivery = () => {
         Delivery History
       </Title>
 
-      {role === "DELIVERING_STAFF" && (
+      {role === "DELIVERING_STAFF" && !checkoutInfo && (
         <Button
           type="primary"
           style={{ position: "absolute", top: "20px", right: "20px" }}
@@ -324,94 +324,6 @@ const Delivery = () => {
           ))}
         </>
       )}
-
-      <Modal
-        title="Add Delivery"
-        visible={isAddModalVisible}
-        onOk={handleAdd}
-        onCancel={() => setIsAddModalVisible(false)}
-      >
-        <Input
-          value={newDeliveryRoute}
-          onChange={(e) => setNewDeliveryRoute(e.target.value)}
-          placeholder="Route"
-          style={{ marginBottom: 16 }}
-        />
-        <Input.TextArea
-          value={newDeliveryDescription}
-          onChange={(e) => setNewDeliveryDescription(e.target.value)}
-          placeholder="Health Koi Description"
-          rows={4}
-          style={{ marginBottom: 16 }}
-        />
-      </Modal>
-
-      <Modal
-        title="Update Delivery"
-        visible={isModalVisible}
-        onOk={handleUpdate}
-        onCancel={() => setIsModalVisible(false)}
-      >
-        <Input
-          value={newRoute}
-          onChange={(e) => setNewRoute(e.target.value)}
-          placeholder="Route"
-          style={{ marginBottom: 16 }}
-        />
-        <Input.TextArea
-          value={newDescription}
-          onChange={(e) => setNewDescription(e.target.value)}
-          placeholder="Health Koi Description"
-          rows={4}
-          style={{ marginBottom: 16 }}
-        />
-      </Modal>
-
-      <Modal
-        title="Checkout Delivery"
-        visible={isCheckoutModalVisible}
-        onOk={handleCheckout}
-        onCancel={() => setIsCheckoutModalVisible(false)}
-      >
-        <Input
-          value={checkoutCustomerName}
-          onChange={(e) => setCheckoutCustomerName(e.target.value)}
-          placeholder="Customer Name"
-          style={{ marginBottom: 16 }}
-        />
-        <DatePicker
-          value={checkoutReceiveDate}
-          onChange={(date) => setCheckoutReceiveDate(date)}
-          style={{ marginBottom: 16, width: "100%" }}
-          placeholder="Receive Date"
-        />
-        <Input.TextArea
-          value={checkoutHealthDescription}
-          onChange={(e) => setCheckoutHealthDescription(e.target.value)}
-          placeholder="Health Koi Description"
-          rows={4}
-          style={{ marginBottom: 16 }}
-        />
-        <Select
-          value={checkoutStatus}
-          onChange={(value) => setCheckoutStatus(value)}
-          style={{ width: "100%", marginBottom: 16 }}
-          placeholder="Select Delivery Status"
-        >
-          <Option value="COMPLETED">COMPLETED</Option>
-          <Option value="CANCELLED">CANCELLED</Option>
-        </Select>
-        {checkoutStatus === "CANCELLED" && (
-          <Input.TextArea
-            value={checkoutReason}
-            onChange={(e) => setCheckoutReason(e.target.value)}
-            placeholder="Reason for cancellation"
-            rows={4}
-            style={{ marginBottom: 16 }}
-            required
-          />
-        )}
-      </Modal>
 
       {checkoutInfo && (
         <Card

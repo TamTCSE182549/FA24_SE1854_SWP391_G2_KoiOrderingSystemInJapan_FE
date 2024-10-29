@@ -104,8 +104,8 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center">
-      <div className="backdrop-filter backdrop-blur-3xl p-8 rounded-lg shadow-lg w-full max-w-md">
-        <h2 className="text-white text-3xl font-bold text-center mb-6">
+      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+        <h2 className="text-black text-3xl font-bold text-center mb-6">
           Log In
         </h2>
         <ToastContainer />
@@ -140,10 +140,10 @@ const Login = () => {
             />
           </Form.Item>
 
-          <div className="flex justify-between items-center text-white">
-            <Checkbox className="text-white">Remember me</Checkbox>
+          <div className="flex justify-between items-center text-black">
+            <Checkbox className="text-black">Remember me</Checkbox>
             <span
-              className="text-white hover:underline ml-2 cursor-pointer"
+              className="text-black hover:underline ml-2 cursor-pointer"
               onClick={handleNavigateToForgotPassword}
             >
               Forgot password?
@@ -154,14 +154,14 @@ const Login = () => {
             <Button
               type="custom"
               htmlType="submit"
-              className="w-full backdrop-filter backdrop-blur-3xl text-white hover:bg-gradient-to-r from-green-600 to-green-950 hover:scale-105 transition-all duration-300 border border-white"
+              className="w-full bg-black text-white hover:bg-gray-800 hover:scale-105 transition-all duration-300 border border-black"
             >
               Sign in
             </Button>
           </Form.Item>
         </Form>
 
-        <div className="text-center text-white my-4">Or Login with</div>
+        <div className="text-center text-black my-4">Or Login with</div>
 
         <div className="flex justify-center gap-4 mb-6">
           <GoogleOAuthProvider clientId={clientId}>
@@ -177,9 +177,9 @@ const Login = () => {
         </div>
 
         <div className="text-center">
-          <span className="text-white">Don't have an account?</span>
+          <span className="text-black">Don't have an account?</span>
           <span
-            className="text-white hover:underline ml-2 cursor-pointer"
+            className="text-black hover:underline ml-2 cursor-pointer"
             onClick={handleNavigateToSignIn}
           >
             Sign In
