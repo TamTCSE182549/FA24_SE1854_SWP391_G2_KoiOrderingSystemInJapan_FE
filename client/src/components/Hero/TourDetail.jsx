@@ -30,6 +30,7 @@ const TourDetail = () => {
 
   const [paymentMethod, setPaymentMethod] = useState("CASH");
   const [participants, setParticipants] = useState(1);
+  const [isLoading, setIsLoading] = useState(false); 
 
   useEffect(() => {
     const fetchBookingData = async () => {
@@ -99,8 +100,10 @@ const TourDetail = () => {
 
     try {
       if (participants <= tour.remaining) {
-        if(Object.keys(bookings).length > 0) {
-          toast.warn("You have booking not complete. Please check your booking!");
+        if (Object.keys(bookings).length > 0) {
+          toast.warn(
+            "You have booking not complete. Please check your booking!"
+          );
           return;
         }
         const response = await axios.post(
@@ -115,7 +118,7 @@ const TourDetail = () => {
         );
         console.log("Booking successful:", response.data);
         // NotificationManager.success("Booking successful!", "Success", 5000);
-        toast.success("Booking successful!");
+        navigate("/tour", { state: { toastMessage: "Booking successful!" } });
       } else {
         toast.warning(
           "Participants must be less than or equal remaning of tour AND must be greater than 0"
@@ -135,11 +138,18 @@ const TourDetail = () => {
         console.error("Error message:", error.message);
         toast.error("An unexpected error occurred. Please try again.");
       }
+    } finally {
+      setIsLoading(false); // Kết thúc trạng thái loading
     }
   };
 
   return (
     <div className="p-10 max-w-7xl mx-auto backdrop-filter backdrop-blur-3xl rounded-2xl shadow-lg mt-40 relative">
+      {isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black opacity-50 z-10">
+          <span className="text-white text-xl">Processing...</span>
+        </div>
+      )}
       <div className="flex flex-col md:flex-row space-y-8 md:space-y-0 md:space-x-12">
         {/* Single Image for Tour */}
         <div className="md:w-1/2">

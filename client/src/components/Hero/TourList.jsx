@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 // import Navbar from "../Navbar/Navbar";
 // import Footer from "../Footer/Footer";
 import { ToastContainer, toast } from "react-toastify";
@@ -36,6 +36,14 @@ const Tour = () => {
   const [searchKeyword, setSearchKeyword] = useState("");
   const navigate = useNavigate();
   const [selectedValue, setSelectedValue] = useState("all");
+  const location = useLocation();
+
+  useEffect(() => {
+    // Kiểm tra nếu có thông báo toast từ state
+    if (location.state && location.state.toastMessage) {
+      toast.success(location.state.toastMessage);
+    }
+  }, [location]);
 
   const handleSubmit = async (e, page = 0) => {
     e.preventDefault();
@@ -471,7 +479,7 @@ const Tour = () => {
                           className="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
                           onClick={() => handleBooking(tour)}
                         >
-                          Book Now
+                          View Detail
                         </button>
                         {tour.paymentStatus === "pending" && (
                           <button
