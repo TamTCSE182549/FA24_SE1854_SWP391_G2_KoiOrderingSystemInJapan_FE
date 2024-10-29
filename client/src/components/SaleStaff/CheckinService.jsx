@@ -1,192 +1,139 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useParams } from 'react-router-dom';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import { useCookies } from 'react-cookie';
+import { useCookies } from "react-cookie";
+import { Table, Button, message } from 'antd';
 import { useNavigate } from 'react-router-dom';
 
-const ViewDetailDeposit = () => {
-  const { bookingId } = useParams();
-  const [deposit, setDeposit] = useState(null);
-  const [BookingDetails, setBookingDetails] = useState(null);
-  const [errorMessage, setErrorMessage] = useState('');
-  const [cookies] = useCookies();
-  const token = cookies.token;
-  const navigate = useNavigate();
+const CheckinService = () => {
+    const [checkins, setCheckins] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [cookies] = useCookies();
+    const navigate = useNavigate();
 
-  // State for editable fields
-  const [shippingFee, setShippingFee] = useState(0);
-  const [deliveryExpectedDate, setDeliveryExpectedDate] = useState('');
-  const [shippingAddress, setShippingAddress] = useState('');
-  const [depositPercentage, setDepositPercentage] = useState(0);
+    useEffect(() => {
+        fetchCheckins();
+    }, []);
 
-  useEffect(() => {
-    const fetchDepositData = async () => {
-      try {
-        const response = await axios.get(`http://localhost:8080/deposit/${bookingId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (response.data) {
-          setDeposit(response.data);
-          setShippingFee(response.data.shippingFee);
-          setDeliveryExpectedDate(response.data.deliveryExpectedDate);
-          setShippingAddress(response.data.shippingAddress);
-          setDepositPercentage(response.data.depositPercentage);
-        } else {
-          setDeposit(null);
+    const fetchCheckins = async () => {
+        setLoading(true);
+        try {
+            const response = await axios.get('http://localhost:8080/checkins/all', {
+                headers: {
+                    Authorization: `Bearer ${cookies.token}`,
+                },
+            });
+            setCheckins(response.data);
+        } catch (err) {
+            message.error('Failed to fetch check-ins');
+            console.error(err);
+        } finally {
+            setLoading(false);
         }
-      } catch (error) {
-        console.error("Error fetching deposit data:", error);
-        toast.error("Failed to fetch deposit data");
-      }
     };
 
-    const fetchBookingData = async () => {
-      try {
-        const response = await axios.get(`http://localhost:8080/bookings/ViewDetail/${bookingId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        setBookingDetails(response.data);
-      } catch (error) {
-        console.error("Error fetching booking data:", error);
-        toast.error("Failed to fetch booking data");
-      }
+    const updateStatus = async (checkinId) => {
+        if (!checkinId) {
+            message.error('Invalid checkin ID');
+            return;
+        }
+
+        try {
+            const response = await axios.put(
+                `http://localhost:8080/checkins/status/${checkinId}`,
+                {},  // Empty object as body
+                {
+                    headers: {
+                        Authorization: `Bearer ${cookies.token}`,
+                    },
+                }
+            );
+
+            const updatedCheckin = response.data;
+
+            setCheckins(prevCheckins => 
+                prevCheckins.map(checkin => 
+                    checkin.id === checkinId ? updatedCheckin : checkin
+                )
+            );
+
+            message.success('Check-in status updated successfully');
+        } catch (err) {
+            console.error('Error updating check-in status:', err.response?.data || err.message);
+            message.error('Failed to update check-in status: ' + (err.response?.data?.message || err.message));
+        }
     };
 
-    fetchDepositData();
-    fetchBookingData();
-  }, [bookingId]);
-
-  const handleUpdateDeposit = async () => {
-    try {
-      const updatedDeposit = {
-        ...deposit,
-        shippingFee,
-        deliveryExpectedDate,
-        shippingAddress,
-        depositPercentage,
-      };
-
-      const response = await axios.put(`http://localhost:8080/deposit/${bookingId}`, updatedDeposit, {
-        headers: {
-          Authorization: `Bearer ${token}`,
+    const columns = [
+        {
+            title: 'Name',
+            dataIndex: 'name',
+            key: 'name',
+            render: (_, record) => `${record.firstName} ${record.lastName}`,
         },
-      });
+        {
+            title: 'Airline',
+            dataIndex: 'airline',
+            key: 'airline',
+        },
+        {
+            title: 'Airport',
+            dataIndex: 'airport',
+            key: 'airport',
+        },
+        {
+            title: 'Check-in Date',
+            dataIndex: 'checkinDate',
+            key: 'checkinDate',
+            render: (date) => new Date(date).toLocaleDateString(),
+        },
+        {
+            title: 'Booking ID',
+            dataIndex: 'bookingId',
+            key: 'bookingId',
+        },
+        {
+            title: 'Status',
+            dataIndex: 'status',
+            key: 'status',
+        },
+        {
+            title: 'Updated By',
+            dataIndex: 'updateBy',
+            key: 'updateBy',
+        },
+        {
+            title: 'Action',
+            key: 'action',
+            render: (_, record) => (
+                <Button 
+                    onClick={() => updateStatus(record.id)}
+                    disabled={record.status === 'CHECKED'}
+                >
+                    Mark as Checked
+                </Button>
+            ),
+        },
+    ];
 
-      setDeposit(response.data);
-      toast.success("Deposit updated successfully");
-    } catch (error) {
-      console.error("Error updating deposit:", error);
-      toast.error("Failed to update deposit");
-    }
-  };
-
-  if (!deposit || !BookingDetails) {
-    return <div>Loading...</div>;
-  }
-
-  return (
-    <div className="p-4 max-w-2xl mx-auto bg-white shadow-md rounded-lg mt-40 text-black">
-      <ToastContainer />
-      <h2 className="text-2xl font-semibold mb-4 text-black">Deposit Details</h2>
-      <div className="mb-4">
-        <h3 className="font-semibold">Deposit Information</h3>
-        <p><strong>Deposit Amount:</strong> {deposit.depositAmount}</p>
-        <p><strong>Remain Amount:</strong> {deposit.remainAmount}</p>
-        {/* Editable fields */}
-        <div className="mb-2">
-          <label className="block">
-            <strong>Shipping Fee:</strong>
-            <input 
-              type="number" 
-              value={shippingFee} 
-              onChange={(e) => setShippingFee(e.target.value)} 
-              className="border border-gray-300 rounded p-1 ml-2 w-full"
+    return (
+        <div className="max-w-6xl mx-auto p-6 bg-white rounded-lg shadow-md mt-40">
+            <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-semibold text-black">Check-in Management</h2>
+                <Button 
+                    type="primary"
+                    onClick={() => navigate('/booking-list-for-staff')}
+                >
+                    View Bookings
+                </Button>
+            </div>
+            <Table 
+                dataSource={checkins}
+                columns={columns}
+                rowKey="id"
+                loading={loading}
             />
-          </label>
         </div>
-        <div className="mb-2">
-          <label className="block">
-            <strong>Delivery Expected Date:</strong>
-            <input 
-              type="date" 
-              value={deliveryExpectedDate} 
-              onChange={(e) => setDeliveryExpectedDate(e.target.value)} 
-              className="border border-gray-300 rounded p-1 ml-2 w-full"
-            />
-          </label>
-        </div>
-        <div className="mb-2">
-          <label className="block">
-            <strong>Shipping Address:</strong>
-            <input 
-              type="text" 
-              value={shippingAddress} 
-              onChange={(e) => setShippingAddress(e.target.value)} 
-              className="border border-gray-300 rounded p-1 ml-2 w-full"
-            />
-          </label>
-        </div>
-        <div className="mb-2">
-          <label className="block">
-            <strong>Deposit Percentage:</strong>
-            <input 
-              type="number" 
-              value={depositPercentage} 
-              onChange={(e) => setDepositPercentage(e.target.value)} 
-              className="border border-gray-300 rounded p-1 ml-2 w-full"
-            />
-          </label>
-        </div>
-        <button 
-          onClick={handleUpdateDeposit}
-          className="bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600 mt-4"
-        >
-          Update Deposit
-        </button>
-      </div>
-
-      <h2 className="text-2xl font-semibold mb-4 text-black">Booking Information</h2>
-      <div className="mb-4">
-        <p><strong>Booking ID:</strong> {BookingDetails.id}</p>
-        <p><strong>Customer ID:</strong> {BookingDetails.customerID}</p>
-        <p><strong>Name:</strong> {BookingDetails.nameCus}</p>
-        <p><strong>Total Amount:</strong> {BookingDetails.totalAmount}</p>
-        <p><strong>VAT:</strong> {BookingDetails.vat}</p>
-        <p><strong>VAT Amount:</strong> {BookingDetails.vatAmount}</p>
-        <p><strong>Discount Amount:</strong> {BookingDetails.discountAmount}</p>
-        <p><strong>Total Amount with VAT:</strong> {BookingDetails.totalAmountWithVAT}</p>
-        <p><strong>Booking Type:</strong> {BookingDetails.bookingType}</p>
-        <p><strong>Payment Method:</strong> {BookingDetails.paymentMethod}</p>
-        <p><strong>Payment Status:</strong> {BookingDetails.paymentStatus}</p>
-      </div>
-
-      <h3 className="font-semibold">Koi Details</h3>
-      <ul>
-        {BookingDetails.koiDetails.map((koi) => (
-          <li key={koi.id}>
-            <p><strong>Koi ID:</strong> {koi.id}</p>
-            <p><strong>Quantity:</strong> {koi.quantity}</p>
-            <p><strong>Total Amount:</strong> {koi.totalAmount}</p>
-            <p><strong>Unit Price:</strong> {koi.unitPrice}</p>
-          </li>
-        ))}
-      </ul>
-
-      <button 
-        onClick={() => navigate('/booking-for-koi-list')} 
-        className="bg-green-500 text-white p-2 rounded-md hover:bg-green-600 mt-4"
-      >
-        View Booking For Koi List
-      </button>
-    </div>
-  );
+    );
 };
 
-export default ViewDetailDeposit;
+export default CheckinService;
