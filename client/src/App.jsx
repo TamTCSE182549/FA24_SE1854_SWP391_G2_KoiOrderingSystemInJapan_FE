@@ -19,21 +19,15 @@ import AdminRoutes from "./components/Admin/AdminRoutes";
 import KoiDetail from "./components/Hero/KoiDetail";
 import FarmDetail from "./components/Hero/FarmDetail";
 import TourDetail from "./components/Hero/TourDetail";
-
 import BookingDetail from "./components/SaleStaff/BookingDetail";
-
 import ViewBooking from "./components/Customer/ViewBooking";
 import ViewCheckin from "./components/Customer/ViewCheckin";
-
-import Delivery from "./components/Customer/Delivery";
+import Delivery from "./components/Delivery/Delivery";
 import ResetPassword from "./components/LoginAndSignIn/ResetPassword";
 import ForgotPassword from "./components/LoginAndSignIn/ForgotPassword";
-
 import BookingKoi from "./components/SaleStaff/BookingKoi";
 import CreateCheckin from "./components/SaleStaff/CreateCheckin";
-
 import CreateDeposit from "./components/SaleStaff/CreateDeposit";
-
 import BookingKoiDetail from "./components/Hero/BookingKoiDetail";
 import BookingTourDetail from "./components/Customer/BookingTourDetail";
 import CreateBooking from "./components/Hero/CreateBooking";

@@ -5,7 +5,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useCookies } from "react-cookie"; // Thêm useCookies để lấy token từ cookie
 import { jwtDecode } from "jwt-decode";
-import { Card, Button, Row, Col, Pagination } from "antd"; // Import Ant Design components
+import { Button, Row, Col, Pagination } from "antd"; // Import Ant Design components
 
 const BookingInformation = () => {
   const [cookies] = useCookies(["token"]);
@@ -85,7 +85,8 @@ const BookingInformation = () => {
         return;
       }
       await axios.put(
-        `http://localhost:8080/bookings/delete/${booking.id}`,{},
+        `http://localhost:8080/bookings/delete/${booking.id}`,
+        {},
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -112,84 +113,88 @@ const BookingInformation = () => {
   };
 
   return (
-    <div className="container mt-20">
+    <div className="container mt-20 text-black">
       <section className="text-center">
         <Row gutter={[16, 16]}>
           {currentBookings.map((booking, index) => (
-            <Col key={index} span={15} style={{ margin: "10px auto" }}>
-              <Card
-                hoverable
+            <Col key={index} span={12} style={{ margin: "10px auto" }}>
+              <div
                 style={{
                   display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  padding: "5px",
+                  padding: "12px",
                   borderRadius: "10px",
                   boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                  backgroundColor: "#fff",
                 }}
               >
-                <div style={{ display: "flex", width: "100%" }}>
+                {/* Left Column: Image */}
+                <div style={{ marginRight: 20 }}>
                   <img
                     alt="Koi Fish"
                     src="https://asiatourist.vn/wp-content/uploads/2021/04/khu-du-lich-la-phong-da-lat-5.jpg"
-                    style={{ width: 150, marginRight: 20, borderRadius: "8px" }}
+                    style={{ width: 150, borderRadius: "8px" }}
                   />
-                  <div style={{ flex: 1 }}>
-                    <h5 className="mb-5">
-                      <strong>Booking Information</strong>
-                    </h5>
-                    <Row gutter={[16, 16]}>
-                      <Col span={12}>
-                        <p>Time: {formatDateTime(booking.createdDate)}</p>
-                        <p>
-                          VAT: <strong>{booking.vat}</strong>
-                        </p>
-                      </Col>
-                      <Col span={12}>
-                        <p>
-                          VAT Amount: <strong>{booking.vatAmount}</strong>
-                        </p>
-                        <p>
-                          Discount Amount:{" "}
-                          <strong>{booking.discountAmount}</strong>
-                        </p>
-                      </Col>
-                      <Col span={12}>
-                        <p>
-                          Payment Status:{" "}
-                          <strong>{booking.paymentStatus}</strong>
-                        </p>
-                        <p>
-                          Payment Method:{" "}
-                          <strong>{booking.paymentMethod}</strong>
-                        </p>
-                      </Col>
-                      <Col span={12}>
-                        <p>
-                          Total Amount:{" "}
-                          <strong className="text-red-500">
-                            {booking.totalAmount}
-                          </strong>
-                        </p>
-                        <p>
-                          Total Amount With VAT:{" "}
-                          <strong className="text-red-500">
-                            {booking.totalAmountWithVAT}
-                          </strong>
-                        </p>
-                      </Col>
-                    </Row>
-                  </div>
                 </div>
-                <hr style={{ width: "100%", margin: "20px 0" }} />
+
+                {/* Middle Column: Information */}
+                <div style={{ flex: 1, marginRight: 20 }}>
+                  <h5 className="mb-2">
+                    <strong>Booking Information</strong>
+                  </h5>
+                  <Row gutter={[10, 8]}>
+                    <Col span={12}>
+                      <p style={{ textAlign: "left" }}>
+                        VAT: <strong>{booking.vat}</strong>
+                      </p>
+                      <p style={{ textAlign: "left" }}>
+                        VAT Amount: <strong>{booking.vatAmount}</strong>
+                      </p>
+                      <p style={{ textAlign: "left" }}>
+                        Discount Amount:{" "}
+                        <strong>{booking.discountAmount}</strong>
+                      </p>
+                    </Col>
+                    <Col span={12}>
+                      <p style={{ textAlign: "left" }}>
+                        Time: {formatDateTime(booking.createdDate)}
+                      </p>
+                      <p style={{ textAlign: "left" }}>
+                        Payment Status: <strong>{booking.paymentStatus}</strong>
+                      </p>
+                      <p style={{ textAlign: "left" }}>
+                        Payment Method: <strong>{booking.paymentMethod}</strong>
+                      </p>
+                    </Col>
+                  </Row>
+                </div>
+
+                {/* Right Column: Additional Information and Buttons */}
                 <div
-                  className="d-flex justify-content-start"
-                  style={{ width: "100%" }}
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "flex-end",
+                  }}
                 >
+                  <div style={{ marginBottom: "10px", textAlign: "left" }}>
+                    <p style={{ textAlign: "left" }}>
+                      Total Amount:{" "}
+                      <strong className="text-red-500">
+                        {booking.totalAmount}
+                      </strong>
+                    </p>
+                    <p style={{ textAlign: "left" }}>
+                      Total Amount With VAT:{" "}
+                      <strong className="text-red-500">
+                        {booking.totalAmountWithVAT}
+                      </strong>
+                    </p>
+                  </div>
                   <Button
                     type="primary"
                     className="me-2"
                     onClick={() => handleViewDetailBooking(booking)}
+                    style={{ width: "100%" }}
                   >
                     View Detail
                   </Button>
@@ -199,6 +204,7 @@ const BookingInformation = () => {
                     color="danger"
                     className="me-2 bg-red-500"
                     onClick={() => handleDeleteBooking(booking)}
+                    style={{ width: "100%" }}
                   >
                     Cancel Booking
                   </Button>
@@ -208,6 +214,7 @@ const BookingInformation = () => {
                         type="secondary"
                         className="me-2"
                         onClick={() => handleCreateQuotation(booking)}
+                        style={{ width: "100%" }}
                       >
                         Create Quotation
                       </Button>
@@ -215,14 +222,15 @@ const BookingInformation = () => {
                   {booking.paymentStatus === "processing" && (
                     <Button
                       type="primary"
-                      className="bg-green-500 hover:bg-green-600" // Added green color classes
+                      className="bg-green-500 hover:bg-green-600"
                       onClick={() => handlePayment(booking)}
+                      style={{ width: "100%" }}
                     >
                       Pay
                     </Button>
                   )}
                 </div>
-              </Card>
+              </div>
             </Col>
           ))}
         </Row>
