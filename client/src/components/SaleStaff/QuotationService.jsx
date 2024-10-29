@@ -90,7 +90,7 @@ const QuotationService = () => {
   const handlePaymentSubmit = async (values) => {
     try {
       const response = await axios.put(
-        "http://localhost:8080/admin/updateResponseFormStaff",  // Updated endpoint
+        "http://localhost:8080/bookings/admin/updateResponseFormStaff",  // Updated endpoint
         {
           bookingID: selectedQuotation.bookingId,
           paymentStatus: "processing",  // Using the PaymentStatus enum value

@@ -441,7 +441,7 @@ const BookingKoi = () => {
         };
         console.log("Booking Request:", bookingKoiRequest);
         try {
-            const response = await axios.post(`http://localhost:8080/bookings/koi/create/${2}`, bookingKoiRequest, {
+            const response = await axios.post(`http://localhost:8080/bookings/koi/create/${28}`, bookingKoiRequest, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
