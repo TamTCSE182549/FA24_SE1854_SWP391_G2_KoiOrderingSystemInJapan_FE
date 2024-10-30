@@ -16,13 +16,6 @@ const Tour = () => {
   const [tours, setTours] = useState([]); // State to store tour data
   const [farms, setFarms] = useState([]);
   const [kois, setKois] = useState([]);
-  const [filters, setFilters] = useState({
-    privatePool: false,
-    villas: false,
-    swimmingPool: false,
-    beachfront: false,
-    parking: false,
-  });
   const [currentPage, setCurrentPage] = useState(0); // Trang hiện tại (bắt đầu từ 0)
   const [totalPage, setTotalPage] = useState(1); // Tổng số trang (giả sử mặc định là 1)
   const [cookies] = useCookies(["token"]);
@@ -33,9 +26,7 @@ const Tour = () => {
   const [maxPrice, setMaxPrice] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  const [searchKeyword, setSearchKeyword] = useState("");
   const navigate = useNavigate();
-  const [selectedValue, setSelectedValue] = useState("all");
   const location = useLocation();
 
   useEffect(() => {
@@ -101,37 +92,6 @@ const Tour = () => {
     const decodedToken = jwtDecode(token);
     role = decodedToken.role;
   }
-
-  // Hàm xử lý khi người dùng chọn một giá trị
-  const handleChange = (event) => {
-    setSelectedValue(event.target.value);
-    // Reset lại ô tìm kiếm khi chọn "All"
-    if (event.target.value === "all") {
-      setSearchKeyword("");
-      fetchTourData(0); // Gọi lại dữ liệu khi chọn "All"
-    } else {
-      return;
-    }
-  };
-
-  const handleSearch = () => {
-    if (selectedValue === "all") {
-      // Khi chọn "all", tải lại dữ liệu
-      fetchTourData(0); // Reset lại trang về 0 và gọi API
-    } else if (searchKeyword.trim() === "") {
-      // Nếu ô tìm kiếm trống khi chọn các tùy chọn khác
-      toast.warn("Please choose another option to use search function");
-    } else {
-      // Gọi API tìm kiếm với từ khóa searchKeyword
-      fetchTourData(0, searchKeyword); // Reset lại trang về 0 và gọi API với từ khóa
-    }
-
-    // if(farm != "" && koi != "" && minPrice != "" && maxPrice != "" && startDate != "" && endDate != ""){
-    //   if(minPrice < maxPrice) {
-
-    //   }
-    // }
-  };
 
   const hardcodedTours = [
     // {
@@ -211,7 +171,7 @@ const Tour = () => {
   };
 
   let response = "";
-  const fetchTourData = async (page = 0, keyword = "") => {
+  const fetchTourData = async (page = 0) => {
     try {
       // toast.success("Show all tour success");
       response = await axios.get(
@@ -233,8 +193,8 @@ const Tour = () => {
   };
 
   useEffect(() => {
-    fetchTourData(currentPage, searchKeyword); // Gọi API mỗi khi `currentPage` thay đổi
-  }, [currentPage, selectedValue]);
+    fetchTourData(currentPage); // Gọi API mỗi khi `currentPage` thay đổi
+  }, [currentPage]);
 
   useEffect(() => {
     const fetchFarms = async () => {
@@ -274,22 +234,7 @@ const Tour = () => {
     fetchKois();
   }, []);
 
-  const handleFilterChange = (e) => {
-    const { name, checked } = e.target;
-    setFilters((prevFilters) => ({
-      ...prevFilters,
-      [name]: checked,
-    }));
-  };
-
   const handleDeleteBooking = (tourId) => {};
-
-  const filteredTours = tours.filter((tour) => {
-    if (filters.privatePool && !tour.facilities.privatePool) return false;
-    if (filters.villas && !tour.facilities.villas) return false;
-    if (filters.swimmingPool && !tour.facilities.swimmingPool) return false;
-    return true; // Return all tours that match the filters
-  });
 
   const handleNextPage = () => {
     if (currentPage < totalPage - 1) {
@@ -306,241 +251,208 @@ const Tour = () => {
   };
 
   return (
-    <div className="mt-40 ml-20 mr-20 mb-20">
-      <div className="flex-grow">
-        <div className="container mx-auto">
-          <div className="">
-            {/* Tour List */}
-            <div className="ml-4 backdrop-blur-2xl p-10 shadow-2xl">
-              {/* ------------------------------ */}
-              <form
-                onSubmit={handleSubmit}
-                className="bg-white p-6 mb-20 rounded-xl shadow-lg border border-gray-200"
+    // <div className="mt-40 ml-20 mr-20 mb-20">
+    //   <div className="flex-grow">
+    //     <div className="container mx-auto">
+    <div className="mt-40">
+      {/* Tour List */}
+      <div className="ml-4 backdrop-blur-2xl p-10 shadow-2xl">
+        {/* ------------------------------ */}
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white p-6 mb-20 rounded-xl shadow-lg border border-gray-200"
+        >
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-gray-700">Farm</label>
+              <select
+                value={farm}
+                onChange={(e) => setFarm(e.target.value)}
+                // onChange={handleChangeTour}
+                className="w-full p-2 border border-gray-300 rounded text-black"
               >
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-gray-700">Farm</label>
-                    <select
-                      value={farm}
-                      onChange={(e) => setFarm(e.target.value)}
-                      // onChange={handleChangeTour}
-                      className="w-full p-2 border border-gray-300 rounded text-black"
-                    >
-                      <option value="">Choose Farm</option>
-                      {farms.map((farm) => (
-                        <option key={farm.id} value={farm.id}>
-                          {farm.farmName}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-gray-700">Koi</label>
-                    <select
-                      value={koi}
-                      onChange={(e) => setKoi(e.target.value)}
-                      className="w-full p-2 border border-gray-300 rounded text-black"
-                    >
-                      <option value="">Koi Name</option>
-                      {kois.map((koi) => (
-                        <option key={koi.id} value={koi.id}>
-                          {koi.koiName}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-gray-700">
-                      Unit Price Domain (USD)
-                    </label>
-                    <div className="flex gap-2">
-                      <input
-                        type="number"
-                        placeholder="Min Unit Price"
-                        value={minPrice}
-                        onChange={(e) => setMinPrice(e.target.value)}
-                        className="w-full p-2 border border-gray-300 rounded text-black"
-                      />
-                      <input
-                        type="number"
-                        placeholder="Max Unit Price"
-                        value={maxPrice}
-                        onChange={(e) => setMaxPrice(e.target.value)}
-                        className="w-full p-2 border border-gray-300 rounded text-black"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-gray-700">
-                      Start Date - End Date
-                    </label>
-                    <div className="flex gap-2">
-                      <input
-                        type="date"
-                        value={startDate}
-                        onChange={handleStartDateChange}
-                        min={minStartDate} // Giới hạn ngày bắt đầu
-                        className="w-full p-2 border border-gray-300 rounded text-black"
-                      />
-                      <input
-                        type="date"
-                        value={endDate}
-                        onChange={handleEndDateChange}
-                        min={startDate} // Giới hạn ngày kết thúc phải sau ngày bắt đầu
-                        className="w-full p-2 border border-gray-300 rounded text-black"
-                        disabled={!startDate} // Vô hiệu hóa nếu chưa chọn start date
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <button
-                  type="submit"
-                  className="mt-4 w-full bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600 transition"
-                >
-                  Search
-                </button>
-              </form>
-              {/* ------------------- */}
-              {/* <div className="flex items-center mb-4">
-                <h1 className="text-2xl font-bold text-blac mr-4">Tour List</h1>
-                <input
-                  type="search"
-                  placeholder="Search..."
-                  aria-label="Search"
-                  className="border border-gray-300 rounded-l-lg px-4 py-2 focus:outline-none focus:ring focus:ring-blue-500 text-black"
-                  value={searchKeyword} // Liên kết với state searchKeyword
-                  onChange={(e) => setSearchKeyword(e.target.value)} // Cập nhật state khi nhập từ khóa
-                  disabled={selectedValue === "all"} // Disable ô tìm kiếm khi chọn "All"
-                />
-                <button
-                  type="submit"
-                  className="bg-blue-500 text-white rounded-r-lg px-4 py-2 hover:bg-blue-600"
-                  onClick={handleSearch}
-                >
-                  Search
-                </button>
-                <div>
-                  <select
-                    className="text-black ml-20"
-                    value={selectedValue}
-                    onChange={handleChange}
-                  >
-                    <option value="all">All</option>
-                    <option value="tour name">Find by Tour Name</option>
-                    <option value="koi name">Find by Koi Name</option>
-                  </select>
-                </div>
-              </div> */}
-
-              <div className="flex flex-wrap -mx-4">
-                {tours.map((tour) => (
-                  <div
-                    key={tour.id}
-                    className="bg-slate-300 shadow-lg rounded-lg overflow-hidden flex flex-col justify-between w-full sm:w-1/2 md:w-1/3 mb-10"
-                  >
-                    <img
-                      src={
-                        tour.tourImg
-                          ? tour.tourImg
-                          : `https://via.placeholder.com/400x200?text=No+image`
-                      }
-                      alt={tour.tourName}
-                      className="w-full h-64 object-cover shadow-2xl"
-                    />
-                    <div className="p-4 flex-grow">
-                      <h3 className="text-xl font-bold mb-2 text-black">
-                        {tour.tourName}
-                      </h3>
-                      <p className="text-gray-700 mb-2">{tour.description}</p>
-                      <p className="text-sm text-gray-500">
-                        Price: {tour.unitPrice} USD
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        Max Participants: {tour.maxParticipants}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        Remaining: {tour.remaining}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        Start Time: {new Date(tour.startTime).toLocaleString()}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        End Time: {new Date(tour.endTime).toLocaleString()}
-                      </p>
-                    </div>
-
-                    {(role === "CUSTOMER" || !token) && (
-                      <div className="p-4 flex">
-                        <button
-                          className="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-                          onClick={() => handleBooking(tour)}
-                        >
-                          View Detail
-                        </button>
-                        {tour.paymentStatus === "pending" && (
-                          <button
-                            className="w-full bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-900"
-                            onClick={() => handleDeleteBooking(tour.id)}
-                          >
-                            Delete
-                          </button>
-                        )}
-                      </div>
-                    )}
-                    {role === "MANAGER" && (
-                      <div className="flex p-4 gap-2">
-                        <button
-                          className="w-full bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-700"
-                          onClick={() => handleBooking(tour)}
-                        >
-                          Update Tour
-                        </button>
-                        <button
-                          className="w-full bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-700"
-                          onClick={() => handleBooking(tour)}
-                        >
-                          Delete Tour
-                        </button>
-                      </div>
-                    )}
-                  </div>
+                <option value="">Choose Farm</option>
+                {farms.map((farm) => (
+                  <option key={farm.id} value={farm.id}>
+                    {farm.farmName}
+                  </option>
                 ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-gray-700">Koi</label>
+              <select
+                value={koi}
+                onChange={(e) => setKoi(e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded text-black"
+              >
+                <option value="">Koi Name</option>
+                {kois.map((koi) => (
+                  <option key={koi.id} value={koi.id}>
+                    {koi.koiName}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-gray-700">
+                Unit Price Domain (USD)
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="number"
+                  placeholder="Min Unit Price"
+                  value={minPrice}
+                  onChange={(e) => setMinPrice(e.target.value)}
+                  className="w-full p-2 border border-gray-300 rounded text-black"
+                />
+                <input
+                  type="number"
+                  placeholder="Max Unit Price"
+                  value={maxPrice}
+                  onChange={(e) => setMaxPrice(e.target.value)}
+                  className="w-full p-2 border border-gray-300 rounded text-black"
+                />
               </div>
-              {/* Pagination Buttons */}
-              <div className="flex justify-between mt-4">
-                <button
-                  className={`px-4 py-2 bg-blue-500 rounded-lg ${
-                    currentPage === 0
-                      ? "cursor-not-allowed"
-                      : "hover:bg-blue-400"
-                  }`}
-                  onClick={handlePreviousPage}
-                  disabled={currentPage === 0}
-                >
-                  Previous
-                </button>
-                <button
-                  className={`px-4 py-2 bg-blue-500 rounded-lg ${
-                    currentPage === totalPage - 1
-                      ? "cursor-not-allowed"
-                      : "hover:bg-blue-400"
-                  }`}
-                  onClick={handleNextPage}
-                  disabled={currentPage === totalPage - 1}
-                >
-                  Next
-                </button>
+            </div>
+
+            <div>
+              <label className="block text-gray-700">
+                Start Date - End Date
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={handleStartDateChange}
+                  min={minStartDate} // Giới hạn ngày bắt đầu
+                  className="w-full p-2 border border-gray-300 rounded text-black"
+                />
+                <input
+                  type="date"
+                  value={endDate}
+                  onChange={handleEndDateChange}
+                  min={startDate} // Giới hạn ngày kết thúc phải sau ngày bắt đầu
+                  className="w-full p-2 border border-gray-300 rounded text-black"
+                  disabled={!startDate} // Vô hiệu hóa nếu chưa chọn start date
+                />
               </div>
             </div>
           </div>
+
+          <button
+            type="submit"
+            className="mt-4 w-full bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600 transition"
+          >
+            Search
+          </button>
+        </form>
+        <div className="flex flex-wrap -mx-4 gap-10">
+          {tours.map((tour) => (
+            <div
+              key={tour.id}
+              className="bg-slate-300 shadow-lg rounded-lg overflow-hidden flex flex-col justify-between w-full sm:w-1/2 md:w-1/3 mb-10"
+            >
+              <img
+                src={
+                  tour.tourImg
+                    ? tour.tourImg
+                    : `https://via.placeholder.com/400x200?text=No+image`
+                }
+                alt={tour.tourName}
+                className="w-full h-64 object-cover shadow-2xl"
+              />
+              <div className="p-4 flex-grow">
+                <h3 className="text-xl font-bold mb-2 text-black">
+                  {tour.tourName}
+                </h3>
+                <p className="text-gray-700 mb-2">{tour.description}</p>
+                <p className="text-sm text-gray-500">
+                  Price: {tour.unitPrice} USD
+                </p>
+                <p className="text-sm text-gray-500">
+                  Max Participants: {tour.maxParticipants}
+                </p>
+                <p className="text-sm text-gray-500">
+                  Remaining: {tour.remaining}
+                </p>
+                <p className="text-sm text-gray-500">
+                  Start Time: {new Date(tour.startTime).toLocaleString()}
+                </p>
+                <p className="text-sm text-gray-500">
+                  End Time: {new Date(tour.endTime).toLocaleString()}
+                </p>
+              </div>
+
+              {(role === "CUSTOMER" || !token) && (
+                <div className="p-4 flex">
+                  <button
+                    className="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+                    onClick={() => handleBooking(tour)}
+                  >
+                    View Detail
+                  </button>
+                  {tour.paymentStatus === "pending" && (
+                    <button
+                      className="w-full bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-900"
+                      onClick={() => handleDeleteBooking(tour.id)}
+                    >
+                      Delete
+                    </button>
+                  )}
+                </div>
+              )}
+              {role === "MANAGER" && (
+                <div className="flex p-4 gap-2">
+                  <button
+                    className="w-full bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-700"
+                    onClick={() => handleBooking(tour)}
+                  >
+                    Update Tour
+                  </button>
+                  <button
+                    className="w-full bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-700"
+                    onClick={() => handleBooking(tour)}
+                  >
+                    Delete Tour
+                  </button>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+        {/* Pagination Buttons */}
+        <div className="flex justify-between mt-4">
+          <button
+            className={`px-4 py-2 bg-blue-500 rounded-lg ${
+              currentPage === 0 ? "cursor-not-allowed" : "hover:bg-blue-400"
+            }`}
+            onClick={handlePreviousPage}
+            disabled={currentPage === 0}
+          >
+            Previous
+          </button>
+          <button
+            className={`px-4 py-2 bg-blue-500 rounded-lg ${
+              currentPage === totalPage - 1
+                ? "cursor-not-allowed"
+                : "hover:bg-blue-400"
+            }`}
+            onClick={handleNextPage}
+            disabled={currentPage === totalPage - 1}
+          >
+            Next
+          </button>
         </div>
       </div>
       <ToastContainer />
     </div>
+    //     </div>
+    //   </div>
+    //   <ToastContainer />
+    // </div>
   );
 };
 
