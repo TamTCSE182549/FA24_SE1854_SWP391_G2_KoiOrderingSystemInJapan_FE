@@ -162,8 +162,8 @@ const TourDetail = () => {
 
         {/* Tour Info */}
         <div className="md:w-1/2 relative">
-          <h2 className="text-4xl font-bold mb-4">{tour.tourName}</h2>
-          <div className="tour-details text-lg text-white space-y-4">
+          <h2 className="text-4xl text-black font-bold mb-4">{tour.tourName}</h2>
+          <div className="tour-details text-lg text-black space-y-4">
             <p>
               <strong>Start Time: </strong>{" "}
               {format(new Date(tour.startTime), "yyyy-MM-dd HH:mm:ss")}
@@ -179,7 +179,7 @@ const TourDetail = () => {
           </div>
           <div className="tour-description mt-10">
             <h3 className="text-2xl font-semibold mb-4">Tour Description</h3>
-            <p className="text-lg text-white leading-relaxed">
+            <p className="text-lg text-black leading-relaxed">
               {tour.description}
             </p>
           </div>
@@ -187,7 +187,7 @@ const TourDetail = () => {
           {/* Tour Options */}
           <div className="mt-10 grid grid-cols-3 gap-4 mb-5">
             <div>
-              <h4 className="text-xl font-semibold text-white mb-2">
+              <h4 className="text-xl font-semibold text-black mb-2">
                 Remaning of Tour
               </h4>
               <input
@@ -197,7 +197,7 @@ const TourDetail = () => {
               />
             </div>
             <div>
-              <h4 className="text-xl font-semibold text-white mb-2">
+              <h4 className="text-xl font-semibold text-black mb-2">
                 Number of Guests
               </h4>
               <InputNumber
@@ -217,7 +217,7 @@ const TourDetail = () => {
               </p>
             </div>
             <div>
-              <h4 className="text-xl font-semibold text-white mb-2">
+              <h4 className="text-xl font-semibold text-black mb-2">
                 Payment method
               </h4>
               <Select

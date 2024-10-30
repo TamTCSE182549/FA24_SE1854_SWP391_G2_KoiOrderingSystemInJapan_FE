@@ -311,7 +311,7 @@ const Tour = () => {
         <div className="container mx-auto">
           <div className="">
             {/* Tour List */}
-            <div className="ml-4 backdrop-blur-2xl p-10">
+            <div className="ml-4 backdrop-blur-2xl p-10 shadow-2xl">
               {/* ------------------------------ */}
               <form
                 onSubmit={handleSubmit}
@@ -513,7 +513,7 @@ const Tour = () => {
               {/* Pagination Buttons */}
               <div className="flex justify-between mt-4">
                 <button
-                  className={`px-4 py-2 bg-gray-300 rounded-lg ${
+                  className={`px-4 py-2 bg-blue-500 rounded-lg ${
                     currentPage === 0
                       ? "cursor-not-allowed"
                       : "hover:bg-blue-400"
@@ -524,7 +524,7 @@ const Tour = () => {
                   Previous
                 </button>
                 <button
-                  className={`px-4 py-2 bg-gray-300 rounded-lg ${
+                  className={`px-4 py-2 bg-blue-500 rounded-lg ${
                     currentPage === totalPage - 1
                       ? "cursor-not-allowed"
                       : "hover:bg-blue-400"
