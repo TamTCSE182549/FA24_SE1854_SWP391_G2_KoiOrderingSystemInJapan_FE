@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useCookies } from "react-cookie";
+import { useNavigate } from "react-router-dom";
 
 const BookingManagement = () => {
   const [cookies] = useCookies(["token"]);
   const token = cookies.token;
   const [bookings, setBookings] = useState([]);
+  const navigate = useNavigate();
 
   // Fetch bookings data from the API
   useEffect(() => {
@@ -27,6 +29,10 @@ const BookingManagement = () => {
   // Handle update action
   const handleUpdate = (booking) => {
     console.log("Updating booking:", booking);
+  };
+
+  const handleCreateBookingKoi = (bookingId) => {
+    navigate(`/booking-koi/${bookingId}`);
   };
 
   return (
@@ -152,6 +158,12 @@ const BookingManagement = () => {
                     className="bg-red-500 hover:bg-red-600 text-white font-semibold py-1 px-3 rounded"
                   >
                     Delete
+                  </button>
+                  <button
+                    onClick={() => handleCreateBookingKoi(booking.id)}
+                    className="bg-green-500 hover:bg-green-600 text-white font-semibold py-1 px-3 rounded"
+                  >
+                    Create Booking Koi
                   </button>
                 </td>
               </tr>
