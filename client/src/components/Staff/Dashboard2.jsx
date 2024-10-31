@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Bar, Pie } from "react-chartjs-2";
 import axios from "axios";
 import { useCookies } from "react-cookie";
-import { Table } from "antd";
+import { Table, Select } from "antd";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -30,6 +30,55 @@ const Dashboard = () => {
   const [bookings, setBookings] = useState([]);
   const [cookies] = useCookies(["token"]);
   const token = cookies.token;
+
+  // New state variables for chart data
+  const [monthlyRevenue, setMonthlyRevenue] = useState([]);
+  const [topKoiData, setTopKoiData] = useState([]);
+  const [dataStats, setDataStats] = useState([]);
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear()); // Default to current year
+  const [availableYears, setAvailableYears] = useState([]);
+
+  useEffect(() => {
+    // Fetch booking data
+
+    // Fetch monthly revenue data
+    axios
+      .get("http://localhost:8080/api/admin/revenue/monthy", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((response) => {
+        const revenueData = Array(12).fill(0); // Initialize with 12 months
+        const years = new Set();
+        response.data.monthlyRevenue.forEach((data) => {
+          if (data.year === selectedYear) {
+            revenueData[data.month - 1] = data.totalAmount; // Fill in the data
+          }
+          years.add(data.year);
+        });
+        setMonthlyRevenue(revenueData);
+        setAvailableYears(Array.from(years));
+      })
+      .catch((error) =>
+        console.error("Error fetching monthly revenue:", error)
+      );
+
+    // Fetch top koi data
+    axios
+      .get("http://localhost:8080/api/admin/stats", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((response) => {
+        setTopKoiData(response.data.topKoi);
+        setDataStats(response.data);
+      })
+      .catch((error) => console.error("Error fetching top koi data:", error));
+  }, [token, selectedYear]);
+
+  // Prepare data for bar chart
   const barChartData = {
     labels: [
       "January",
@@ -47,8 +96,8 @@ const Dashboard = () => {
     ],
     datasets: [
       {
-        label: "Sales",
-        data: [12, 200, 3, 5, 2, 3, 10, 15, 7, 9, 13, 17],
+        label: `Revenue for ${selectedYear}`,
+        data: monthlyRevenue,
         backgroundColor: "rgba(75, 192, 192, 0.6)",
         borderColor: "rgba(75, 192, 192, 1)",
         borderWidth: 1,
@@ -64,7 +113,7 @@ const Dashboard = () => {
       },
       title: {
         display: true,
-        text: "Monthly Sales",
+        text: `Monthly Revenue for ${selectedYear}`,
       },
     },
     scales: {
@@ -77,19 +126,12 @@ const Dashboard = () => {
     },
   };
 
+  // Prepare data for pie chart
   const pieChartData = {
-    labels: [
-      "Category 1",
-      "Category 2",
-      "Category 3",
-      "Category 4",
-      "Category 5",
-      "Category 6",
-      "Category 7",
-    ],
+    labels: topKoiData.map((koi) => koi.name),
     datasets: [
       {
-        data: [12, 19, 3, 5, 2, 3, 10],
+        data: topKoiData.map((koi) => koi.totalSold),
         backgroundColor: [
           "rgba(255, 99, 132, 0.6)",
           "rgba(54, 162, 235, 0.6)",
@@ -128,34 +170,13 @@ const Dashboard = () => {
       },
       title: {
         display: true,
-        text: "Category Distribution",
+        text: "Top Koi Sales",
         font: {
           size: 14,
         },
       },
     },
   };
-
-  // Sample data for the table
-  const tableData = [
-    {
-      key: "1",
-      id: 1,
-      type: "Sale",
-      created_at: "2023-05-01",
-      total_amount: 1000,
-      account_id: "ACC001",
-    },
-    {
-      key: "2",
-      id: 2,
-      type: "Purchase",
-      created_at: "2023-05-02",
-      total_amount: 1500,
-      account_id: "ACC002",
-    },
-    // Add more sample data as needed
-  ];
 
   const columns = [
     {
@@ -210,46 +231,42 @@ const Dashboard = () => {
     },
   ];
 
-  
-
-  useEffect(() => {
-    axios
-      .get("http://localhost:8080/bookings/admin/dashboard", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }) // Adjust API endpoint if needed
-      .then((response) => {
-
-        setColumn(columns); // Cập nhật state của columns
-        setBookings(response.data); // Cập nhật state của bookings với dữ liệu lấy được
-      })
-      .catch((error) => console.error("Error fetching booking data:", error));
-  }, []);
-
   return (
-
     <div className="bg-white p-6 rounded-lg shadow-md">
       <h3 className="text-xl font-bold mb-4">Overview</h3>
-      <div className="grid grid-cols-3 gap-6 mb-6">
-
+      <div className="grid grid-cols-4 gap-6 mb-6">
         <div className="p-4 bg-blue-500 text-white rounded-lg">
-          <h4 className="text-2xl font-semibold">150</h4>
-          <p>Total Users</p>
+          <h4 className="text-2xl font-semibold">{dataStats.totalCustomer}</h4>
+          <p>Total Customers</p>
         </div>
         <div className="p-4 bg-green-500 text-white rounded-lg">
-          <h4 className="text-2xl font-semibold">75</h4>
-          <p>New Orders</p>
+          <h4 className="text-2xl font-semibold">{dataStats.totalFarm}</h4>
+          <p>Total Farms</p>
         </div>
         <div className="p-4 bg-yellow-500 text-white rounded-lg">
-          <h4 className="text-2xl font-semibold">12</h4>
-          <p>Pending Issues</p>
+          <h4 className="text-2xl font-semibold">{dataStats.totalTOur}</h4>
+          <p>Total Tours</p>
+        </div>
+        <div className="p-4 bg-red-500 text-white rounded-lg">
+          <h4 className="text-2xl font-semibold">{dataStats.totalKoi}</h4>
+          <p>Total Koi</p>
         </div>
       </div>
       <div className="flex justify-center items-center w-full mb-6">
         <div className="w-full max-w-6xl">
           <div className="grid grid-cols-3 gap-15">
             <div className="col-span-2 mt-6 h-80">
+              <Select
+                value={selectedYear}
+                onChange={(value) => setSelectedYear(value)}
+                style={{ marginBottom: 20 }}
+              >
+                {availableYears.map((year) => (
+                  <Select.Option key={year} value={year}>
+                    {year}
+                  </Select.Option>
+                ))}
+              </Select>
               <Bar data={barChartData} options={barChartOptions} />
             </div>
             <div className="mt-3 h-72">
@@ -261,10 +278,6 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
-      </div>
-      <div className="mt-6">
-        <h3 className="text-xl font-bold mb-4">Recent Transactions</h3>
-        <Table columns={column} dataSource={bookings} />
       </div>
     </div>
   );
