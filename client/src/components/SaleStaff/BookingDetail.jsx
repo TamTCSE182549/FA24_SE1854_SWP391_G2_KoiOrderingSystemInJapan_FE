@@ -16,38 +16,46 @@ const BookingDetail = () => {
     const [cookies] = useCookies();
     const token = cookies.token;
 
-    useEffect(() => {
-        const fetchBookingDetails = async () => {
-            try {
-                const response = await axios.get(`http://localhost:8080/bookings/ViewDetail/${bookingId}`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
-                setBookingDetails(response.data);
-            } catch (err) {
-                setError('Failed to fetch booking details');
-            } finally {
-                setLoading(false);
-            }
-        };
+    const fetchBookingDetails = async () => {
+        try {
+            const response = await axios.get(`http://localhost:8080/bookings/ViewDetail/${bookingId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            setBookingDetails(response.data);
+        } catch (err) {
+            setError('Failed to fetch booking details');
+        } finally {
+            setLoading(false);
+        }
+    };
 
+    useEffect(() => {
         if (bookingId) {
             fetchBookingDetails();
         }
     }, [bookingId, token]);
 
-    const handleInputChange = (e, koiDetailId) => {
+    const handleInputChange = (e, koiDetailId = null) => {
         const { name, value } = e.target;
-        setBookingDetails(prev => {
-            const updatedKoiDetails = prev.koiDetails.map(koi => {
-                if (koi.id === koiDetailId) {
-                    return { ...koi, [name]: value }; // Cập nhật trường tương ứng
-                }
-                return koi;
+        
+        if (koiDetailId) {
+            setBookingDetails(prev => {
+                const updatedKoiDetails = prev.koiDetails.map(koi => {
+                    if (koi.id === koiDetailId) {
+                        return { ...koi, [name]: value };
+                    }
+                    return koi;
+                });
+                return { ...prev, koiDetails: updatedKoiDetails };
             });
-            return { ...prev, koiDetails: updatedKoiDetails };
-        });
+        } else {
+            setBookingDetails(prev => ({
+                ...prev,
+                [name]: value
+            }));
+        }
     };
     
     
@@ -57,37 +65,28 @@ const BookingDetail = () => {
         
         const payload = [{
             id: updatedKoiDetail.id,
-            koiId: updatedKoiDetail.koiId, // Nếu cần thiết
+            koiId: updatedKoiDetail.koiId,
             quantity: updatedKoiDetail.quantity,
             unitPrice: updatedKoiDetail.unitPrice,
-        }]; // Đặt trong mảng nếu API mong đợi mảng
-    
+        }];
+
         try {
-            await axios.put(`http://localhost:8080/BookingKoiDetail/update/${bookingId}`, payload, { // Đừng quên xóa id ở URL nếu cần
+            await axios.put(`http://localhost:8080/BookingKoiDetail/update/${bookingId}`, payload, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             });
-            setBookingDetails(prev => {
-                const updatedKoiDetails = prev.koiDetails.map(koi => 
-                    koi.id === bookingKoiDetailId ? updatedKoiDetail : koi
-                );
-                const newTotalAmount = updatedKoiDetails.reduce(
-                    (total, koi) => total + koi.quantity * koi.unitPrice, 0
-                );
-                return {
-                    ...prev,
-                    koiDetails: updatedKoiDetails,
-                    totalAmount: newTotalAmount
-                };
-            });
+            
+            await fetchBookingDetails();
             
             toast.success("Koi Detail updated successfully!", {
                 autoClose: 2000
             });
-        
         } catch (err) {
             setError('Failed to update Koi Detail');
+            toast.error("Failed to update Koi Detail", {
+                autoClose: 2000
+            });
         }
     };
     
@@ -126,19 +125,58 @@ const BookingDetail = () => {
     };
     
     
-    const handleDeposit = async () => {
+    const handleConfirm = async () => {
         try {
-            await axios.put(`http://localhost:8080/bookings/update/status/${bookingId}`, {}, {
+            await axios.put(
+                `http://localhost:8080/bookings/update/status/${bookingId}`,
+                null,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+            
+            toast.success("Booking confirmed successfully!", {
+                autoClose: 2000,
+                onClose: () => {
+                    navigate('/booking-for-koi-list');
+                }
+            });
+            
+        } catch (err) {
+            setError('Failed to confirm booking');
+            toast.error("Failed to confirm booking", {
+                autoClose: 2000
+            });
+        }
+    };
+
+    const handleUpdateBooking = async (e) => {
+        e.preventDefault();
+        
+        try {
+            const payload = {
+                vat: bookingDetails.vat,
+                paymentMethod: bookingDetails.paymentMethod,
+                discountAmount: bookingDetails.discountAmount,
+                totalAmount: bookingDetails.totalAmount
+            };
+
+            await axios.put(`http://localhost:8080/bookings/update/${bookingId}`, payload, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             });
-            toast.success("Booking status updated to processing!", {
-                autoClose: 2000,
+            await fetchBookingDetails();
+            toast.success("Booking updated successfully!", {
+                autoClose: 2000
             });
-            navigate(`/create-deposit/${bookingId}`, { state: { bookingId } });
         } catch (err) {
-            setError('Failed to update booking status');
+            setError('Failed to update booking');
+            toast.error("Failed to update booking", {
+                autoClose: 2000
+            });
         }
     };
 
@@ -146,116 +184,188 @@ const BookingDetail = () => {
     if (error) return <p className="text-red-500">{error}</p>;
 
     return (
-        <div className="container mx-auto py-10 px-4 mt-40">
+        <div className="container mx-auto py-8 px-4 mt-20 max-w-6xl bg-[#f8faff]">
             <ToastContainer />
-            <h2 className="text-center text-3xl font-bold text-gray-800 mb-6">Booking Detail</h2>
-            <div className="bg-gray-200 p-4 rounded-lg mb-6">
-                <p className="text-gray-800 text-lg"><strong>Booking ID:</strong> {bookingId}</p>
-                <h3 className="text-lg font-semibold mb-4 mt-8 text-gray-800">Koi Details</h3>
-                <ul className="space-y-4">
-                {bookingDetails.koiDetails.map((koiDetail) => (
-    <li key={koiDetail.id} className="p-4 border border-gray-300 rounded-lg flex justify-between items-center text-black">
-        <div className="flex-grow">
-            <p><strong>Koi Detail ID:</strong> {koiDetail.id}</p>
-            <label className="block mb-2">
-                <span className="text-gray-700">Quantity:</span>
-                <input 
-                    type="number" 
-                    name="quantity" 
-                    value={koiDetail.quantity} 
-                    onChange={(e) => handleInputChange(e, koiDetail.id)} 
-                    className="mt-1 block w-full border border-gray-300 rounded-md p-2 text-black" 
-                />
-            </label>
-            <label className="block mb-2">
-                <span className="text-gray-700">Unit Price:</span>
-                <input 
-                    type="number" 
-                    name="unitPrice" 
-                    value={koiDetail.unitPrice} 
-                    onChange={(e) => handleInputChange(e, koiDetail.id)} 
-                    className="mt-1 block w-full border border-gray-300 rounded-md p-2 text-black" 
-                />
-            </label>
-            <p><strong>Total Amount:</strong> {koiDetail.totalAmount}</p>
-        </div>
-        <div className="flex space-x-2">
-            <button onClick={() => handleUpdateKoiDetail(koiDetail.id)} className="bg-yellow-600 text-white py-1 px-2 rounded hover:bg-yellow-700 transition">Update</button>
-            <button onClick={() => handleDeleteKoiDetail(koiDetail.id)} className="bg-red-600 text-white py-1 px-2 rounded hover:bg-red-700 transition">Delete</button>
-        </div>
-    </li>
-))}
-
-
-                </ul>
+            <div className="mb-6 text-center">
+                <h1 className="text-3xl font-bold text-gray-800">Koi Booking System</h1>
+                <p className="text-gray-600 mt-2">Manage your premium koi booking details</p>
             </div>
-            {/* Phần update booking không thay đổi */}
-            <form onSubmit={(e) => { e.preventDefault(); /* handleUpdate logic here */ }} className="bg-white p-6 rounded-lg shadow-md">
-                {/* Các input không thay đổi */}
-                <h3 className="text-lg font-semibold mb-4 text-gray-800">Update Booking Information</h3>
-                <label className="block mb-4">
-                    <span className="text-gray-700">Customer ID:</span>
-                    <input 
-                        type="text" 
-                        name="customerID" 
-                        value={bookingDetails?.customerID} 
-                        readOnly 
-                        className="mt-1 block w-full border border-gray-300 rounded-md p-2 text-gray-600 bg-gray-200" 
-                    />
-                </label>
-                <label className="block mb-4">
-                    <span className="text-gray-700">Customer Name:</span>
-                    <input 
-                        type="text" 
-                        name="nameCus" 
-                        value={bookingDetails?.nameCus} 
-                        readOnly 
-                        className="mt-1 block w-full border border-gray-300 rounded-md p-2 text-gray-600 bg-gray-200" 
-                    />
-                </label>
-                <label className="block mb-4">
-                    <span className="text-gray-700">Total Amount:</span>
-                    <input 
-                        type="number" 
-                        name="totalAmount" 
-                        value={bookingDetails?.totalAmount} 
-                        readOnly 
-                        className="mt-1 block w-full border border-gray-300 rounded-md p-2 text-gray-600 bg-gray-200" 
-                    />
-                </label>
-                <label className="block mb-4">
-                    <span className="text-gray-700">VAT:</span>
-                    <input 
-                        type="number" 
-                        name="vat" 
-                        value={bookingDetails?.vat} 
-                        onChange={handleInputChange} 
-                        className="mt-1 block w-full border border-gray-300 rounded-md p-2 text-black" 
-                    />
-                </label>
-                <label className="block mb-4">
-                    <span className="text-gray-700">Payment Method:</span>
-                    <input 
-                        type="text" 
-                        name="paymentMethod" 
-                        value={bookingDetails?.paymentMethod} 
-                        onChange={handleInputChange} 
-                        className="mt-1 block w-full border border-gray-300 rounded-md p-2 text-black" 
-                    />
-                </label>
-                <label className="block mb-4">
-                    <span className="text-gray-700">Discount Amount:</span>
-                    <input 
-                        type="number" 
-                        name="discountAmount" 
-                        value={bookingDetails?.discountAmount} 
-                        onChange={handleInputChange} 
-                        className="mt-1 block w-full border border-gray-300 rounded-md p-2 text-black" 
-                    />
-                </label>
-                <button type="submit" className="mt-4 bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 transition">Update Booking</button>
-                <button type="button" onClick={handleDeposit} className="mt-4 ml-4 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition">Create Deposit</button>
-            </form>
+
+            <div className="bg-white rounded-lg shadow-md overflow-hidden">
+                {/* Header Section */}
+                <div className="bg-[#2563eb] text-white px-6 py-4">
+                    <h2 className="text-xl font-semibold">Booking Details #{bookingId}</h2>
+                </div>
+
+                {/* Main Content */}
+                <div className="p-6">
+                    {/* Customer Info & Summary Cards */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                        <div className="bg-white rounded-lg border border-gray-100 p-5">
+                            <h3 className="text-lg font-semibold mb-4 text-gray-700">Customer Information</h3>
+                            <div className="space-y-3">
+                                <div>
+                                    <label className="text-sm text-gray-600">Customer ID</label>
+                                    <p className="font-medium text-gray-800">{bookingDetails?.customerID}</p>
+                                </div>
+                                <div>
+                                    <label className="text-sm text-gray-600">Customer Name</label>
+                                    <p className="font-medium text-gray-800">{bookingDetails?.nameCus}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="bg-white rounded-lg border border-gray-100 p-5">
+                            <h3 className="text-lg font-semibold mb-4 text-gray-700">Booking Summary</h3>
+                            <div className="space-y-3">
+                                <div>
+                                    <label className="text-sm text-gray-600">Total Amount (with VAT)</label>
+                                    <p className="font-medium text-gray-800">${bookingDetails?.totalAmountWithVAT}</p>
+                                </div>
+                                <div>
+                                    <label className="text-sm text-gray-600">Status</label>
+                                    <span className="ml-2 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
+                                        {bookingDetails?.status}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Koi Details Section */}
+                    <div className="mb-8">
+                        <h3 className="text-lg font-semibold mb-4 text-gray-700">Koi Details</h3>
+                        <div className="space-y-4">
+                            {bookingDetails.koiDetails.map((koiDetail) => (
+                                <div key={koiDetail.id} className="bg-white border border-gray-100 rounded-lg p-5">
+                                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-600 mb-1">Quantity</label>
+                                            <input 
+                                                type="number" 
+                                                name="quantity" 
+                                                value={koiDetail.quantity} 
+                                                onChange={(e) => handleInputChange(e, koiDetail.id)} 
+                                                className="w-full border border-gray-200 rounded-md p-2 bg-[#f8faff] text-black focus:ring-blue-500 focus:border-blue-500" 
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-600 mb-1">Unit Price</label>
+                                            <input 
+                                                type="number" 
+                                                name="unitPrice" 
+                                                value={koiDetail.unitPrice} 
+                                                onChange={(e) => handleInputChange(e, koiDetail.id)} 
+                                                className="w-full border border-gray-200 rounded-md p-2 bg-[#f8faff] text-black focus:ring-blue-500 focus:border-blue-500" 
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-600 mb-1">Total Amount</label>
+                                            <input 
+                                                type="number" 
+                                                value={koiDetail.quantity * koiDetail.unitPrice} 
+                                                readOnly 
+                                                className="w-full border border-gray-200 rounded-md p-2 bg-gray-100 text-black" 
+                                            />
+                                        </div>
+                                        <div className="flex items-end justify-end space-x-2">
+                                            <button 
+                                                onClick={() => handleUpdateKoiDetail(koiDetail.id)} 
+                                                className="px-4 py-2 bg-[#2563eb] text-white rounded-md hover:bg-blue-700 transition-colors"
+                                            >
+                                                Update
+                                            </button>
+                                            <button 
+                                                onClick={() => handleDeleteKoiDetail(koiDetail.id)} 
+                                                className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
+                                            >
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Booking Update Form */}
+                    <div className="bg-white border border-gray-100 rounded-lg p-6">
+                        <h3 className="text-lg font-semibold mb-6 text-gray-700">Additional Details</h3>
+                        <form onSubmit={handleUpdateBooking} className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-600 mb-1">VAT (%)</label>
+                                <input 
+                                    type="number" 
+                                    name="vat" 
+                                    value={bookingDetails?.vat || ''} 
+                                    onChange={(e) => handleInputChange(e)} 
+                                    className="w-full border border-gray-200 rounded-md p-2 bg-[#f8faff] text-black focus:ring-blue-500 focus:border-blue-500" 
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-600 mb-1">Payment Method</label>
+                                <select 
+                                    name="paymentMethod" 
+                                    value={bookingDetails?.paymentMethod || ''} 
+                                    onChange={(e) => handleInputChange(e)} 
+                                    className="w-full border border-gray-200 rounded-md p-2 bg-[#f8faff] text-black focus:ring-blue-500 focus:border-blue-500"
+                                >
+                                    <option value="" className="text-black">Select method</option>
+                                    <option value="CASH" className="text-black">Cash</option>
+                                    <option value="VISA" className="text-black">Visa</option>
+                                    <option value="TRANSFER" className="text-black">Transfer</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-600 mb-1">Discount Amount</label>
+                                <input 
+                                    type="number" 
+                                    name="discountAmount" 
+                                    value={bookingDetails?.discountAmount || ''} 
+                                    onChange={(e) => handleInputChange(e)} 
+                                    className="w-full border border-gray-200 rounded-md p-2 bg-[#f8faff] text-black focus:ring-blue-500 focus:border-blue-500" 
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-600 mb-1">Total Amount With VAT</label>
+                                <input 
+                                    type="number" 
+                                    value={bookingDetails?.totalAmountWithVAT} 
+                                    readOnly 
+                                    className="w-full border border-gray-200 rounded-md p-2 bg-gray-100 text-black" 
+                                />
+                            </div>
+                            <div className="md:col-span-2 flex justify-end space-x-4 mt-4">
+                                <button 
+                                    type="submit" 
+                                    className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+                                >
+                                    Update Booking
+                                </button>
+                                <button 
+                                    type="button" 
+                                    onClick={handleConfirm} 
+                                    className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors flex items-center space-x-2"
+                                >
+                                    <svg 
+                                        xmlns="http://www.w3.org/2000/svg" 
+                                        className="h-5 w-5" 
+                                        viewBox="0 0 20 20" 
+                                        fill="currentColor"
+                                    >
+                                        <path 
+                                            fillRule="evenodd" 
+                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" 
+                                            clipRule="evenodd" 
+                                        />
+                                    </svg>
+                                    <span>Confirm</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 };
