@@ -198,16 +198,18 @@ const BookingInformation = () => {
                   >
                     View Detail
                   </Button>
-                  <Button
-                    type="primary"
-                    danger
-                    color="danger"
-                    className="me-2 bg-red-500"
-                    onClick={() => handleDeleteBooking(booking)}
-                    style={{ width: "100%" }}
-                  >
-                    Cancel Booking
-                  </Button>
+                  {booking.paymentStatus !== "complete" && (
+                    <Button
+                      type="primary"
+                      danger
+                      color="danger"
+                      className="me-2 bg-red-500"
+                      onClick={() => handleDeleteBooking(booking)}
+                      style={{ width: "100%" }}
+                    >
+                      Cancel Booking
+                    </Button>
+                  )}
                   {booking.paymentStatus === "pending" &&
                     userRole === "SALES_STAFF" && (
                       <Button

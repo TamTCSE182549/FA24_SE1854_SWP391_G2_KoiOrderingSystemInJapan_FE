@@ -36,11 +36,11 @@ import BookingForKoiListcus from "./components/Customer/BookingForKoiListcus";
 import Quotation from "./components/Admin/Quotation";
 import CreateQuotation from "./components/Admin/CreateQuotation";
 import UpdateQuotation from "./components/Admin/UpdateQuotation";
-
+import StaffRoutes from "./components/Staff/StaffRoutes";
 import ViewDetailDeposit from "./components/SaleStaff/ViewDetailDeposit";
 import BookingForKoiList from "./components/SaleStaff/BookingForKoiList";
 import QuotationService from "./components/SaleStaff/QuotationService";
-import BookingListForStaff from "./components/SaleStaff/BookingListForStaff";
+import BookingListForStaff from "./components/Staff/BookingListForStaff";
 import CheckinService from "./components/SaleStaff/CheckinService";
 const App = () => {
   return (
@@ -85,7 +85,8 @@ const App = () => {
 
             <Route path="/farmdetail" element={<FarmDetail />} />
             <Route path="/tourdetail" element={<TourDetail />} />
-            <Route path="/*" element={<AdminRoutes />} />
+            <Route path="/admin/*" element={<AdminRoutes />} />
+            <Route path="/staff/*" element={<StaffRoutes />} />
             <Route path="/ViewBooking" element={<ViewBooking />} />
             <Route path="/bookingkoidetail" element={<BookingKoiDetail />} />
             <Route path="/bookingTourDetail" element={<BookingTourDetail />} />
@@ -93,7 +94,6 @@ const App = () => {
 
             <Route path="/farmdetail/:id" element={<FarmDetail />} />
             <Route path="/tourdetail/:id" element={<TourDetail />} />
-            <Route path="/*" element={<AdminRoutes />} />
             <Route path="/ViewBooking" element={<ViewBooking />} />
 
             <Route
@@ -113,13 +113,24 @@ const App = () => {
               element={<CreateDeposit />}
             />
             <Route path="/booking-detail" element={<BookingDetail />} />
-            <Route path="/view-detail-deposit/:bookingId" element={<ViewDetailDeposit />} />
-            <Route path="/booking-for-koi-list" element={<BookingForKoiList />} />
-            <Route path="/QuotationService" element={<QuotationService />}/>
-            <Route path="/booking-list-for-staff" element={<BookingListForStaff/>}/>
-            <Route path="/CheckinService" element={<CheckinService/>}/>
-            <Route path="/customer/booking-for-koi-list" element={<BookingForKoiListcus/>}/>
-
+            <Route
+              path="/view-detail-deposit/:bookingId"
+              element={<ViewDetailDeposit />}
+            />
+            <Route
+              path="/booking-for-koi-list"
+              element={<BookingForKoiList />}
+            />
+            <Route path="/QuotationService" element={<QuotationService />} />
+            <Route
+              path="/booking-list-for-staff"
+              element={<BookingListForStaff />}
+            />
+            <Route path="/CheckinService" element={<CheckinService />} />
+            <Route
+              path="/customer/booking-for-koi-list"
+              element={<BookingForKoiListcus />}
+            />
           </Routes>
         </div>
         <div className="">

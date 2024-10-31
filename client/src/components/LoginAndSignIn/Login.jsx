@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Form, Input, Button, Checkbox } from "antd";
 import { useNavigate } from "react-router-dom";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
@@ -12,7 +12,6 @@ const Login = () => {
   window.scrollTo({ top: 0, behavior: "smooth" });
   const navigate = useNavigate();
   const cookies = new Cookies();
-  const [user, setUser] = useState(null);
   const clientId =
     "738391852199-e9cllf84bulqf7hsbgl5i7gofq1vrb8o.apps.googleusercontent.com";
 
@@ -22,16 +21,15 @@ const Login = () => {
         email: values.email,
         password: values.password,
       });
-      const decoded = jwtDecode(response.data.token);
-      setUser(decoded);
-      console.log(decoded);
 
       if (response.status === 200) {
+        const decoded = jwtDecode(response.data.token);
         cookies.set("token", response.data.token, {
           expires: new Date(decoded.exp * 1000),
         });
         toast.success("Login successful!");
-        navigate("/");
+
+        navigateBasedOnRole(decoded.role);
       } else {
         toast.error("Login failed. Please try again.");
       }
@@ -47,11 +45,19 @@ const Login = () => {
     }
   };
 
-  useEffect(() => {
-    if (user) {
-      console.log(user);
+  const navigateBasedOnRole = (role) => {
+    if (role === "CUSTOMER") {
+      navigate("/");
+    } else if (role === "MANAGER") {
+      navigate("/admin");
+    } else if (
+      ["SALES_STAFF", "DELIVERING_STAFF", "CONSULTING_STAFF"].includes(role)
+    ) {
+      navigate("/staff");
+    } else {
+      toast.error("Unauthorized role");
     }
-  }, [user]);
+  };
 
   const onFinishFailed = (errorInfo) => {
     console.log("Failed:", errorInfo);
@@ -72,17 +78,16 @@ const Login = () => {
       });
 
       if (response.status === 200) {
-        console.log(credentialResponse);
         const decoded = jwtDecode(response.data.token);
-        console.log(decoded);
         cookies.set("token", response.data.token, {
-          expires: new Date(decoded.exp * 1000), // Ensure the expiry is set correctly
-          path: "/", // Ensure the cookie is available to all pages
-          secure: true, // Use secure cookies if your site is HTTPS
-          sameSite: "None", // Adjust SameSite attribute if needed
+          expires: new Date(decoded.exp * 1000),
+          path: "/",
+          secure: true,
+          sameSite: "None",
         });
         toast.success("Google login successful!");
-        navigate("/");
+
+        navigateBasedOnRole(decoded.role);
       } else {
         throw new Error(
           response.data?.message || "Google login failed. Please try again."
