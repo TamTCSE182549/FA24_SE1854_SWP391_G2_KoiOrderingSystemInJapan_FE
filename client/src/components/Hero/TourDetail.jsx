@@ -30,7 +30,7 @@ const TourDetail = () => {
 
   const [paymentMethod, setPaymentMethod] = useState("CASH");
   const [participants, setParticipants] = useState(1);
-  const [isLoading, setIsLoading] = useState(false); 
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const fetchBookingData = async () => {
@@ -144,7 +144,7 @@ const TourDetail = () => {
   };
 
   return (
-    <div className="p-10 max-w-7xl mx-auto backdrop-filter backdrop-blur-3xl rounded-2xl shadow-lg mt-40 relative">
+    <div className="p-10 max-w-7xl mx-auto backdrop-filter backdrop-blur-3xl rounded-2xl shadow-2xl mt-40 relative bg-white">
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center bg-black opacity-50 z-10">
           <span className="text-white text-xl">Processing...</span>
@@ -156,30 +156,34 @@ const TourDetail = () => {
           <img
             src={tour.tourImg} // Display the first image from tour.tourImg
             alt="Tour Image"
-            className="w-full h-[530px] object-cover rounded-lg"
+            className="w-full h-[530px] object-cover rounded-lg shadow-lg transition-transform duration-300 hover:scale-105"
           />
         </div>
 
         {/* Tour Info */}
         <div className="md:w-1/2 relative">
-          <h2 className="text-4xl text-black font-bold mb-4">{tour.tourName}</h2>
-          <div className="tour-details text-lg text-black space-y-4">
+          <h2 className="text-4xl text-blue-800 font-bold mb-4">
+            {tour.tourName}
+          </h2>
+          <div className="tour-details text-lg text-gray-800 space-y-4">
             <p>
-              <strong>Start Time: </strong>{" "}
+              <strong>Start Time: </strong>
               {format(new Date(tour.startTime), "yyyy-MM-dd HH:mm:ss")}
             </p>
             <p>
-              <strong>End Time: </strong>{" "}
+              <strong>End Time: </strong>
               {format(new Date(tour.endTime), "yyyy-MM-dd HH:mm:ss")}
             </p>
             <p>
-              <strong>Max Participants: </strong> {tour.maxParticipants}
+              <strong>Max Participants: </strong>
+              {tour.maxParticipants}
             </p>
-            {/* Hardcoded Transportation Label */}
           </div>
           <div className="tour-description mt-10">
-            <h3 className="text-2xl font-semibold mb-4">Tour Description</h3>
-            <p className="text-lg text-black leading-relaxed">
+            <h3 className="text-2xl font-semibold mb-4 text-blue-600">
+              Tour Description
+            </h3>
+            <p className="text-lg text-gray-700 leading-relaxed">
               {tour.description}
             </p>
           </div>
@@ -187,17 +191,17 @@ const TourDetail = () => {
           {/* Tour Options */}
           <div className="mt-10 grid grid-cols-3 gap-4 mb-5">
             <div>
-              <h4 className="text-xl font-semibold text-black mb-2">
+              <h4 className="text-xl font-semibold text-gray-800 mb-2">
                 Remaning of Tour
               </h4>
               <input
                 value={tour.remaining} // Hiển thị tên tour
                 readOnly
-                className="border border-gray-300 rounded-md p-2 w-full h-8 bg-gray-100 text-black"
+                className="border border-blue-300 rounded-md p-2 w-full h-8 bg-gray-100 text-black"
               />
             </div>
             <div>
-              <h4 className="text-xl font-semibold text-black mb-2">
+              <h4 className="text-xl font-semibold text-gray-800 mb-2">
                 Number of Guests
               </h4>
               <InputNumber
@@ -211,13 +215,13 @@ const TourDetail = () => {
               />
             </div>
             <div>
-              <p className="flex flex-col text-xl ">
+              <p className="flex flex-col text-xl text-gray-800">
                 <strong>Transportation</strong>
-                <FaPlane className="ml-2 mt-3 " />
+                <FaPlane className="ml-2 mt-3 text-blue-600" />
               </p>
             </div>
             <div>
-              <h4 className="text-xl font-semibold text-black mb-2">
+              <h4 className="text-xl font-semibold text-gray-800 mb-2">
                 Payment method
               </h4>
               <Select
@@ -225,6 +229,7 @@ const TourDetail = () => {
                 value={paymentMethod}
                 className="w-[50vh]"
                 onChange={(value) => setPaymentMethod(value)}
+                dropdownStyle={{ backgroundColor: '#f0f8ff' }}
               >
                 <Option value="CASH">Cash</Option>
                 <Option value="VISA">Visa</Option>
@@ -242,7 +247,7 @@ const TourDetail = () => {
               Back
             </button>
             <button
-              className="bg-green-900 text-white rounded-md px-4 py-2 transition duration-300 ease-in-out hover:bg-green-700"
+              className="bg-blue-600 text-white rounded-md px-4 py-2 transition duration-300 ease-in-out hover:bg-blue-500"
               onClick={handleBooking}
             >
               Book Now
@@ -259,7 +264,7 @@ const TourDetail = () => {
               key={item.id}
               src={item.img}
               alt={`Koi Image ${item.id}`}
-              className="w-[400px] h-[300px] object-cover rounded-lg"
+              className="w-[400px] h-[300px] object-cover rounded-lg shadow-lg"
             />
           ))}
         </div>
