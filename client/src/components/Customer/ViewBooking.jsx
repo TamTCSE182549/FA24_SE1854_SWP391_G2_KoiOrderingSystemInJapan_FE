@@ -5,7 +5,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useCookies } from "react-cookie"; // Thêm useCookies để lấy token từ cookie
 import { jwtDecode } from "jwt-decode";
-import { Button, Row, Col, Pagination } from "antd"; // Import Ant Design components
+import { Button, Row, Col, Pagination, Tag, Tooltip } from "antd"; // Import Ant Design components
 
 const BookingInformation = () => {
   const [cookies] = useCookies(["token"]);
@@ -112,6 +112,38 @@ const BookingInformation = () => {
     setCurrentPage(page);
   };
 
+  const getPaymentStatusColor = (status) => {
+    switch (status) {
+      case "pending":
+        return "orange";
+      case "processing":
+        return "blue";
+      case "delivery":
+        return "purple";
+      case "cancelled":
+        return "red";
+      case "complete":
+        return "green";
+      case "shipped":
+        return "cyan";
+      default:
+        return "default"; // Màu mặc định nếu không có trạng thái phù hợp
+    }
+  };
+
+  const getPaymentMethodColor = (method) => {
+    switch (method) {
+      case "CASH":
+        return "green";
+      case "VISA":
+        return "blue";
+      case "TRANSFER":
+        return "gold";
+      default:
+        return "default"; // Màu mặc định nếu không có phương thức phù hợp
+    }
+  };
+
   return (
     <div className="container mt-20 text-black">
       <section className="text-center">
@@ -121,7 +153,7 @@ const BookingInformation = () => {
               <div
                 style={{
                   display: "flex",
-                  padding: "12px",
+                  padding: "5px",
                   borderRadius: "10px",
                   boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
                   backgroundColor: "#fff",
@@ -134,6 +166,15 @@ const BookingInformation = () => {
                     src="https://asiatourist.vn/wp-content/uploads/2021/04/khu-du-lich-la-phong-da-lat-5.jpg"
                     style={{ width: 150, borderRadius: "8px" }}
                   />
+                  <div className="mt-4">
+                    {currentBookings.some(
+                      (booking) => booking.paymentStatus === "pending"
+                    ) && (
+                      <Tag color="yellow" className="font-bold text-sm">
+                        Note: Wait for Contact
+                      </Tag>
+                    )}
+                  </div>
                 </div>
 
                 {/* Middle Column: Information */}
@@ -142,7 +183,7 @@ const BookingInformation = () => {
                     <strong>Booking Information</strong>
                   </h5>
                   <Row gutter={[10, 8]}>
-                    <Col span={12}>
+                    <Col span={12} className="mt-2">
                       <p style={{ textAlign: "left" }}>
                         VAT: <strong>{booking.vat}</strong>
                       </p>
@@ -155,14 +196,32 @@ const BookingInformation = () => {
                       </p>
                     </Col>
                     <Col span={12}>
+                      <div className="flex items-center mt-2">
+                        <p className="text-left text-gray-700 mr-2">Time:</p>
+                        <Tooltip title="Booking Created Date">
+                          <Tag
+                            color="blue"
+                            className="text-white bg-blue-500 hover:bg-blue-300 transition duration-200 ease-in-out"
+                          >
+                            {formatDateTime(booking.createdDate)}
+                          </Tag>
+                        </Tooltip>
+                      </div>
                       <p style={{ textAlign: "left" }}>
-                        Time: {formatDateTime(booking.createdDate)}
+                        Payment Status:{" "}
+                        <Tag
+                          color={getPaymentStatusColor(booking.paymentStatus)}
+                        >
+                          <strong>{booking.paymentStatus}</strong>
+                        </Tag>
                       </p>
                       <p style={{ textAlign: "left" }}>
-                        Payment Status: <strong>{booking.paymentStatus}</strong>
-                      </p>
-                      <p style={{ textAlign: "left" }}>
-                        Payment Method: <strong>{booking.paymentMethod}</strong>
+                        Payment Method:{" "}
+                        <Tag
+                          color={getPaymentMethodColor(booking.paymentMethod)}
+                        >
+                          <strong>{booking.paymentMethod}</strong>
+                        </Tag>
                       </p>
                     </Col>
                   </Row>

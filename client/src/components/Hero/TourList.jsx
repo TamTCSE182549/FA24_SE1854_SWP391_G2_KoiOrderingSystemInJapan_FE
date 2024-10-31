@@ -1,18 +1,24 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
-// import Navbar from "../Navbar/Navbar";
-// import Footer from "../Footer/Footer";
 import { ToastContainer, toast } from "react-toastify";
 import { useCookies } from "react-cookie";
-// import {Select} from 'react-select';
-import { jwtDecode } from "jwt-decode"; // Để decode JWT
-// import { q } from "framer-motion/client";
-// import Navbar from "../Navbar/Navbar";
-// import Footer from "../Footer/Footer";
+import { jwtDecode } from "jwt-decode";
+import {
+  Pagination,
+  Button,
+  Select,
+  InputNumber,
+  DatePicker,
+  Card,
+} from "antd";
+import moment from "moment";
+import { format } from "date-fns";
+
+const { RangePicker } = DatePicker;
+const { Option } = Select;
 
 const Tour = () => {
-  window.scrollTo({ top: 0, behavior: "smooth" });
   const [tours, setTours] = useState([]); // State to store tour data
   const [farms, setFarms] = useState([]);
   const [kois, setKois] = useState([]);
@@ -47,18 +53,15 @@ const Tour = () => {
       endDate: endDate || null,
     };
 
-    // Điều kiện hợp lệ cho giá và ngày tháng
-    const isPriceValid = minPrice == 0 || (minPrice > 0 && maxPrice > minPrice);
     const isDateValid = (startDate && endDate) || (!startDate && !endDate);
 
-    // Kiểm tra điều kiện
-    if (!isPriceValid) {
-      toast.warn("Please input MAX UNIT PRICE larger than MIN UNIT PRICE");
+    if (!isDateValid) {
+      toast.warn("Please choose both Start Date and End Date.");
       return;
     }
 
-    if (!isDateValid) {
-      toast.warn("Please choose both START DATE and END DATE.");
+    if (minPrice > 0 && (maxPrice == null || maxPrice <= minPrice)) {
+      toast.warn("Max Price must be larger than Min Price");
       return;
     }
 
@@ -251,208 +254,139 @@ const Tour = () => {
   };
 
   return (
-    // <div className="mt-40 ml-20 mr-20 mb-20">
-    //   <div className="flex-grow">
-    //     <div className="container mx-auto">
-    <div className="mt-40">
-      {/* Tour List */}
-      <div className="ml-4 backdrop-blur-2xl p-10 shadow-2xl">
-        {/* ------------------------------ */}
-        <form
-          onSubmit={handleSubmit}
-          className="bg-white p-6 mb-20 rounded-xl shadow-lg border border-gray-200"
-        >
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+    <div className="bg-gray-100 min-h-screen flex flex-col items-center py-10 px-4">
+      <div className="bg-white w-full max-w-5xl p-8 rounded-lg shadow-lg">
+        <h1 className="text-3xl font-bold text-center mb-6">Find Your Tour</h1>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-gray-700">Farm</label>
-              <select
+              <label className="text-gray-600">Farm</label>
+              <Select
                 value={farm}
-                onChange={(e) => setFarm(e.target.value)}
-                // onChange={handleChangeTour}
-                className="w-full p-2 border border-gray-300 rounded text-black"
+                onChange={(value) => setFarm(value)}
+                className="w-full"
+                placeholder="Select Farm"
               >
-                <option value="">Choose Farm</option>
+                <Option value="">All Farms</Option>
                 {farms.map((farm) => (
-                  <option key={farm.id} value={farm.id}>
+                  <Option key={farm.id} value={farm.id}>
                     {farm.farmName}
-                  </option>
+                  </Option>
                 ))}
-              </select>
+              </Select>
             </div>
-
             <div>
-              <label className="block text-gray-700">Koi</label>
-              <select
+              <label className="text-gray-600">Koi</label>
+              <Select
                 value={koi}
-                onChange={(e) => setKoi(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded text-black"
+                onChange={(value) => setKoi(value)}
+                className="w-full"
+                placeholder="Select Koi"
               >
-                <option value="">Koi Name</option>
+                <Option value="">All Kois</Option>
                 {kois.map((koi) => (
-                  <option key={koi.id} value={koi.id}>
+                  <Option key={koi.id} value={koi.id}>
                     {koi.koiName}
-                  </option>
+                  </Option>
                 ))}
-              </select>
+              </Select>
+            </div>
+            <div className="flex items-center space-x-2">
+              <label className="text-gray-700 font-medium">Price Range (USD)</label>
+              <InputNumber
+                placeholder="Min Price"
+                min="0"
+                value={minPrice}
+                onChange={(value) => setMinPrice(value)}
+                className="w-full"
+              />
+              <span className="mx-1">-</span>
+              <InputNumber
+                placeholder="Max Price"
+                value={maxPrice}
+                onChange={(value) => setMaxPrice(value)}
+                className="w-full"
+              />
             </div>
 
             <div>
-              <label className="block text-gray-700">
-                Unit Price Domain (USD)
-              </label>
-              <div className="flex gap-2">
-                <input
-                  type="number"
-                  placeholder="Min Unit Price"
-                  value={minPrice}
-                  onChange={(e) => setMinPrice(e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded text-black"
-                />
-                <input
-                  type="number"
-                  placeholder="Max Unit Price"
-                  value={maxPrice}
-                  onChange={(e) => setMaxPrice(e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded text-black"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-gray-700">
-                Start Date - End Date
-              </label>
-              <div className="flex gap-2">
-                <input
-                  type="date"
-                  value={startDate}
-                  onChange={handleStartDateChange}
-                  min={minStartDate} // Giới hạn ngày bắt đầu
-                  className="w-full p-2 border border-gray-300 rounded text-black"
-                />
-                <input
-                  type="date"
-                  value={endDate}
-                  onChange={handleEndDateChange}
-                  min={startDate} // Giới hạn ngày kết thúc phải sau ngày bắt đầu
-                  className="w-full p-2 border border-gray-300 rounded text-black"
-                  disabled={!startDate} // Vô hiệu hóa nếu chưa chọn start date
-                />
-              </div>
+              <label className="text-gray-600">Select Date Range</label>
+              <RangePicker
+                onChange={(dates) => {
+                  setStartDate(dates ? dates[0].startOf('day') : null);
+                  setEndDate(dates ? dates[1].endOf('day') : null);
+                }}
+                className="w-full"
+                disabledDate={(current) => {
+                  // Ngăn chọn các ngày cách ngày hiện tại ít hơn 5 ngày
+                  return (
+                    current && current < moment().add(5, "days").startOf("day")
+                  );
+                }}
+              />
             </div>
           </div>
 
-          <button
-            type="submit"
-            className="mt-4 w-full bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600 transition"
-          >
+          <Button type="primary" htmlType="submit" className="w-full mt-4">
             Search
-          </button>
+          </Button>
         </form>
-        <div className="flex flex-wrap -mx-4 gap-10">
-          {tours.map((tour) => (
-            <div
-              key={tour.id}
-              className="bg-slate-300 shadow-lg rounded-lg overflow-hidden flex flex-col justify-between w-full sm:w-1/2 md:w-1/3 mb-10"
-            >
-              <img
-                src={
-                  tour.tourImg
-                    ? tour.tourImg
-                    : `https://via.placeholder.com/400x200?text=No+image`
-                }
-                alt={tour.tourName}
-                className="w-full h-64 object-cover shadow-2xl"
-              />
-              <div className="p-4 flex-grow">
-                <h3 className="text-xl font-bold mb-2 text-black">
-                  {tour.tourName}
-                </h3>
-                <p className="text-gray-700 mb-2">{tour.description}</p>
-                <p className="text-sm text-gray-500">
-                  Price: {tour.unitPrice} USD
-                </p>
-                <p className="text-sm text-gray-500">
-                  Max Participants: {tour.maxParticipants}
-                </p>
-                <p className="text-sm text-gray-500">
-                  Remaining: {tour.remaining}
-                </p>
-                <p className="text-sm text-gray-500">
-                  Start Time: {new Date(tour.startTime).toLocaleString()}
-                </p>
-                <p className="text-sm text-gray-500">
-                  End Time: {new Date(tour.endTime).toLocaleString()}
-                </p>
-              </div>
-
-              {(role === "CUSTOMER" || !token) && (
-                <div className="p-4 flex">
-                  <button
-                    className="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-                    onClick={() => handleBooking(tour)}
-                  >
-                    View Detail
-                  </button>
-                  {tour.paymentStatus === "pending" && (
-                    <button
-                      className="w-full bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-900"
-                      onClick={() => handleDeleteBooking(tour.id)}
-                    >
-                      Delete
-                    </button>
-                  )}
-                </div>
-              )}
-              {role === "MANAGER" && (
-                <div className="flex p-4 gap-2">
-                  <button
-                    className="w-full bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-700"
-                    onClick={() => handleBooking(tour)}
-                  >
-                    Update Tour
-                  </button>
-                  <button
-                    className="w-full bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-700"
-                    onClick={() => handleBooking(tour)}
-                  >
-                    Delete Tour
-                  </button>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-        {/* Pagination Buttons */}
-        <div className="flex justify-between mt-4">
-          <button
-            className={`px-4 py-2 bg-blue-500 rounded-lg ${
-              currentPage === 0 ? "cursor-not-allowed" : "hover:bg-blue-400"
-            }`}
-            onClick={handlePreviousPage}
-            disabled={currentPage === 0}
-          >
-            Previous
-          </button>
-          <button
-            className={`px-4 py-2 bg-blue-500 rounded-lg ${
-              currentPage === totalPage - 1
-                ? "cursor-not-allowed"
-                : "hover:bg-blue-400"
-            }`}
-            onClick={handleNextPage}
-            disabled={currentPage === totalPage - 1}
-          >
-            Next
-          </button>
-        </div>
       </div>
-      <ToastContainer />
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-10 w-full max-w-5xl">
+        {tours.map((tour) => (
+          <Card
+            key={tour.id}
+            hoverable
+            cover={
+              <img
+                alt={tour.tourName}
+                src={tour.tourImg || "https://via.placeholder.com/400x200"}
+                className="object-cover h-48 w-full"
+              />
+            }
+            className="shadow-lg rounded-lg"
+          >
+            <Card.Meta
+              title={<h3 className="text-xl font-semibold">{tour.tourName}</h3>}
+              description={
+                <>
+                  <p className="text-gray-700 text-base mb-4">{tour.description}</p>
+                  <p className="text-sm text-gray-500">
+                    From{" "}
+                    <strong className="text-red-500">
+                      {format(new Date(tour.startTime), "dd/MM/yyyy")}
+                    </strong>
+                    {" "}To{" "}
+                    <strong className="text-red-500">
+                      {format(new Date(tour.endTime), "dd/MM/yyyy")}
+                    </strong>
+                  </p>
+                  <p className="text-blue-500 text-lg font-semibold mt-3">{tour.unitPrice} USD</p>
+                </>
+              }
+            />
+            <Button
+              type="primary"
+              className="w-full mt-4"
+              onClick={() => handleBooking(tour)}
+            >
+              View Detail
+            </Button>
+          </Card>
+        ))}
+      </div>
+
+      <Pagination
+        current={currentPage + 1}
+        total={totalPage * 10}
+        pageSize={10}
+        onChange={(page) => setCurrentPage(page - 1)}
+        className="mt-8"
+      />
+      <ToastContainer/>
     </div>
-    //     </div>
-    //   </div>
-    //   <ToastContainer />
-    // </div>
   );
 };
 

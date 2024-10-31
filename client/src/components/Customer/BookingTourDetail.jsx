@@ -3,6 +3,7 @@ import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import { useLocation } from "react-router-dom";
 import { useCookies } from "react-cookie";
+import { Table, Button } from "antd";
 
 const BookingTourDetail = () => {
   const [bookingTourDetails, setBookingTourDetails] = useState([]);
@@ -43,37 +44,52 @@ const BookingTourDetail = () => {
     return <div>Loading...</div>;
   }
 
+  const columns = [
+    {
+      title: "Tour Name",
+      dataIndex: "tourName",
+      key: "tourName",
+      align: "center",
+    },
+    {
+      title: "Participant",
+      dataIndex: "participant",
+      key: "participant",
+      align: "center",
+    },
+    {
+      title: "Total Amount",
+      dataIndex: "totalAmount",
+      key: "totalAmount",
+      render: (text) => <span>${text.toFixed(2)}</span>,
+      align: "center",
+    },
+  ];
+
   return (
-    <div className="pt-32 pl-80 pr-80">
-      <h2 className="text-3xl font-bold text-center mb-8 bg-black">
-        Booking Tour Details
-      </h2>
+    <div className="flex flex-col items-center pt-32 px-6">
+      <div className="bg-white shadow-md rounded-lg p-8 mb-8 w-full max-w-3xl">
+        <h2 className="text-3xl font-bold text-center text-blue-600">
+          Booking Tour Details
+        </h2>
+        <p className="mt-2 text-center text-gray-600">
+          Explore the details of your bookings and get ready for an amazing experience!
+        </p>
+      </div>
+      
       {bookingTourDetails.length === 0 ? (
-        <p>No details found for this booking.</p>
+        <div className="text-center text-gray-500">No details found for this booking.</div>
       ) : (
-        <table className="min-w-full bg-white rounded-2xl mb-20">
-          <thead>
-            <tr>
-              <th className="py-2 px-4 text-center text-black">Tour Name</th>
-              <th className="py-2 px-4 text-center text-black">Participant</th>
-              <th className="py-2 px-4 text-center text-black">Total Amount</th>
-            </tr>
-          </thead>
-          <tbody>
-            {bookingTourDetails.map((detail) => (
-              <tr
-                key={detail.bookingTourDetailID}
-                className="hover:bg-gray-100"
-              >
-                <td className="py-2 px-4 text-black text-center">{detail.tourName}</td>
-                <td className="py-2 px-4 text-black text-center">{detail.participant}</td>
-                <td className="py-2 px-4 text-black text-center">
-                  ${detail.totalAmount.toFixed(2)}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <Table
+          columns={columns}
+          dataSource={bookingTourDetails}
+          rowKey="bookingTourDetailID"
+          pagination={false}
+          className="w-full rounded-2xl shadow-lg"
+          locale={{
+            emptyText: <span className="text-center">No details found.</span>,
+          }}
+        />
       )}
       <ToastContainer />
     </div>
