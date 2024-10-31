@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Typography, message } from "antd";
 import { useCookies } from "react-cookie";
+
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -10,6 +11,7 @@ import Select from 'react-select';
 const { Title } = Typography;
 
 const BookingKoi = () => {
+
     const { bookingId } = useParams(); 
     const [farms, setFarms] = useState([]);
     const [selectedFarmId, setSelectedFarmId] = useState(null);
@@ -23,175 +25,183 @@ const BookingKoi = () => {
     const [discountAmount, setDiscountAmount] = useState(0);
     const navigate = useNavigate();
 
+  const [cookies] = useCookies();
+  const token = cookies.token;
+  useEffect(() => {
+    fetchFarms();
+  }, []);
 
-    const [cookies] = useCookies();
-    const token = cookies.token;
-    useEffect(() => {
-        fetchFarms();
-    }, []);
-
-    const fetchFarms = async () => {
-        try {
-            const response = await axios.get('http://localhost:8080/koi-farm/list-farm-active', {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-            setFarms(response.data);
-        } catch (error) {
-            console.error('Error fetching farms:', error);
+  const fetchFarms = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:8080/koi-farm/list-farm-active",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
-    };
+      );
+      setFarms(response.data);
+    } catch (error) {
+      console.error("Error fetching farms:", error);
+    }
+  };
 
-    
-
-    const handleFarmChange = async (farmId) => {
-        setSelectedFarmId(farmId);
-        try {
-            const response = await axios.get(`http://localhost:8080/koi-farm/get/${farmId}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-            setKois(response.data.koiResponses);
-        } catch (error) {
-            console.error('Error fetching Koi:', error);
+  const handleFarmChange = async (farmId) => {
+    setSelectedFarmId(farmId);
+    try {
+      const response = await axios.get(
+        `http://localhost:8080/koi-farm/get/${farmId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
-    };
+      );
+      setKois(response.data.koiResponses);
+    } catch (error) {
+      console.error("Error fetching Koi:", error);
+    }
+  };
 
-    const [selectedKoiOption, setSelectedKoiOption] = useState(null);
+  const handleKoiChange = (event) => {
+    const koiId = event.target.value;
+    setSelectedKoiId(koiId);
+    console.log("Selected Koi ID:", koiId);
+  };
 
-    const koiOptions = kois.map(koi => ({
-        value: koi.id,
-        label: koi.koiName
-    }));
+  const handleAddKoi = () => {
+    const numericQuantity = parseInt(quantity, 10);
+    const numericUnitPrice = parseFloat(unitPrice);
 
-    const handleKoiChange = (selectedOption) => {
-        setSelectedKoiOption(selectedOption);
-        setSelectedKoiId(selectedOption ? selectedOption.value : '');
-    };
+    if (selectedKoiId && numericQuantity > 0 && numericUnitPrice > 0) {
+      const selectedKoi = kois.find((koi) => koi.id === Number(selectedKoiId));
+      console.log("Selected Koi ID:", selectedKoiId);
+      console.log("Kois:", kois);
+      console.log("Selected Koi:", selectedKoi);
 
-    const handleAddKoi = () => {
-        const numericQuantity = parseInt(quantity, 10);
-        const numericUnitPrice = parseFloat(unitPrice);
-    
-        if (selectedKoiId && numericQuantity > 0 && numericUnitPrice > 0) {
-            const selectedKoi = kois.find(koi => koi.id === Number(selectedKoiId));
-;
-    
-            console.log('Selected Koi ID:', selectedKoiId); 
-            console.log('Kois:', kois); 
-            console.log('Selected Koi:', selectedKoi); 
-    
-            if (!selectedKoi) {
-                message.error('Koi not found!');
-                return;
-            }
-    
-            const existingDetail = bookingDetails.find(detail => detail.koiId === selectedKoiId);
-    
-            if (existingDetail) {
-                setBookingDetails(prevDetails =>
-                    prevDetails.map(detail =>
-                        detail.koiId === selectedKoiId
-                            ? { ...detail, quantity: numericQuantity, unitPrice: numericUnitPrice }
-                            : detail
-                    )
-                );
-            } else {
-                // Thêm Koi mới vào danh sách
-                setBookingDetails(prevDetails => [
-                    ...prevDetails,
-                    { koiId: selectedKoiId, koiName: selectedKoi.koiName, quantity: numericQuantity, unitPrice: numericUnitPrice }
-                ]);
-            }
-            
-            // Reset form sau khi thêm Koi
-            setSelectedKoiId('');
-            setQuantity('');
-            setUnitPrice('');
-        } else {
-            message.error('Please select a Koi, enter quantity and unit price.');
-        }
-    };
-    const handleRemoveKoi = (koiId) => {
-        setBookingDetails(prevDetails => prevDetails.filter(detail => detail.koiId !== koiId));
-    };
-    const resetForm = () => {
-        setSelectedFarmId(null);
-        setKois([]);
-        setBookingDetails([]);
-        setPaymentMethod('');
-        setSelectedKoiId('');
-        setQuantity('');
-        setUnitPrice('');
-        setQuantity('');
-        setUnitPrice('');
-        setVat("");
-        setDiscountAmount("");
-    };
+      if (!selectedKoi) {
+        message.error("Koi not found!");
+        return;
+      }
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-    
-        
-        if (!selectedFarmId) {
-            console.warn('Please select a farm.');
-            return; 
-        }
-    
-        
-        if (!paymentMethod) {
-            console.warn('Please select a payment method.');
-            return; 
-        }
-    
-        
-        if (bookingDetails.length === 0) {
-            console.warn('Please add at least one Koi to the booking list.');
-            return; 
-        }
-    
-        const bookingKoiRequest = {
-            farmId: selectedFarmId,
-            paymentMethod,
-            vat,
-            discountAmount,
-            details: bookingDetails.map(detail => ({
-                koiId: detail.koiId,
-                quantity: detail.quantity,
-                unitPrice: detail.unitPrice,
-            })),
-        };
-        console.log("Booking Request:", bookingKoiRequest);
-        try {
-            const response = await axios.post(`http://localhost:8080/bookings/koi/create/${bookingId}`, bookingKoiRequest, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-            toast.success("Booking successful!", {
-                autoClose: 1000,
-                onClose: () => {
-                    navigate('/booking-detail', {
-                        state: {
-                            bookingId: response.data.id,
-                            selectedFarmId: selectedFarmId
-                        }
-                    });
+      const existingDetail = bookingDetails.find(
+        (detail) => detail.koiId === selectedKoiId
+      );
+
+      if (existingDetail) {
+        setBookingDetails((prevDetails) =>
+          prevDetails.map((detail) =>
+            detail.koiId === selectedKoiId
+              ? {
+                  ...detail,
+                  quantity: numericQuantity,
+                  unitPrice: numericUnitPrice,
                 }
-            });
-            console.log('Booking created successfully:', response.data);
-            resetForm(); 
-        } catch (error) {
-            toast.error("Booking Failed");
-            console.error('Error creating booking:', error);
-        }
-    };
-    
-    
+              : detail
+          )
+        );
+      } else {
+        // Thêm Koi mới vào danh sách
+        setBookingDetails((prevDetails) => [
+          ...prevDetails,
+          {
+            koiId: selectedKoiId,
+            koiName: selectedKoi.koiName,
+            quantity: numericQuantity,
+            unitPrice: numericUnitPrice,
+          },
+        ]);
+      }
 
-    return (
+
+      // Reset form sau khi thêm Koi
+      setSelectedKoiId("");
+      setQuantity("");
+      setUnitPrice("");
+    } else {
+      message.error("Please select a Koi, enter quantity and unit price.");
+    }
+  };
+  const handleRemoveKoi = (koiId) => {
+    setBookingDetails((prevDetails) =>
+      prevDetails.filter((detail) => detail.koiId !== koiId)
+    );
+  };
+  const resetForm = () => {
+    setSelectedFarmId(null);
+    setKois([]);
+    setBookingDetails([]);
+    setPaymentMethod("");
+    setSelectedKoiId("");
+    setQuantity("");
+    setUnitPrice("");
+    setQuantity("");
+    setUnitPrice("");
+    setVat("");
+    setDiscountAmount("");
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!selectedFarmId) {
+      console.warn("Please select a farm.");
+      return;
+    }
+
+    if (!paymentMethod) {
+      console.warn("Please select a payment method.");
+      return;
+    }
+
+    if (bookingDetails.length === 0) {
+      console.warn("Please add at least one Koi to the booking list.");
+      return;
+    }
+
+    const bookingKoiRequest = {
+      farmId: selectedFarmId,
+      paymentMethod,
+      vat,
+      discountAmount,
+      details: bookingDetails.map((detail) => ({
+        koiId: detail.koiId,
+        quantity: detail.quantity,
+        unitPrice: detail.unitPrice,
+      })),
+    };
+    console.log("Booking Request:", bookingKoiRequest);
+    try {
+      const response = await axios.post(
+        `http://localhost:8080/bookings/koi/create/${bookingId}`,
+        bookingKoiRequest,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      toast.success("Booking successful!", {
+        autoClose: 1000,
+        onClose: () => {
+          navigate("/booking-detail", {
+            state: {
+              bookingId: response.data.id,
+              selectedFarmId: selectedFarmId,
+            },
+          });
+        },
+      });
+      console.log("Booking created successfully:", response.data);
+      resetForm();
+    } catch (error) {
+      toast.error("Booking Failed");
+      console.error("Error creating booking:", error);
+    }
+  };
+
+   return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 py-12 px-4 sm:px-6 lg:px-8 pt-40">
             {/* Header Section */}
             <div className="max-w-5xl mx-auto text-center mb-12">
@@ -458,7 +468,7 @@ const BookingKoi = () => {
             </div>
             <ToastContainer />
         </div>
-    );
+  );
 };
 
 export default BookingKoi;

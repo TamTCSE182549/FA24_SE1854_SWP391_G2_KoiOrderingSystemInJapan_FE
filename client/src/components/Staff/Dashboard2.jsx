@@ -40,17 +40,6 @@ const Dashboard = () => {
 
   useEffect(() => {
     // Fetch booking data
-    axios
-      .get("http://localhost:8080/bookings/admin/dashboard", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((response) => {
-        setColumn(columns);
-        setBookings(response.data);
-      })
-      .catch((error) => console.error("Error fetching booking data:", error));
 
     // Fetch monthly revenue data
     axios
@@ -289,10 +278,6 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
-      </div>
-      <div className="mt-6">
-        <h3 className="text-xl font-bold mb-4">Recent Transactions</h3>
-        <Table columns={column} dataSource={bookings} />
       </div>
     </div>
   );

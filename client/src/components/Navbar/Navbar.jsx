@@ -113,7 +113,9 @@ const Navbar = () => {
       <div className="flex flex-col justify-between items-center">
         <div className="flex items-center">
           <img src={Logo} alt="Logo" className="w-16 h-auto pr-4" />
-          <span className="text-white font-serif text-xl">KOIBOOKING</span>
+          <span className="text-white font-serif text-xl">
+            Koi Ordering System
+          </span>
         </div>
 
         {login ? (
@@ -191,7 +193,7 @@ const Navbar = () => {
               onClick={onHomeClick}
             />
             <div className="text-black font-serif text-2xl ml-2">
-              KOIBOOKING
+              Koi Ordering System
             </div>
           </div>
 
