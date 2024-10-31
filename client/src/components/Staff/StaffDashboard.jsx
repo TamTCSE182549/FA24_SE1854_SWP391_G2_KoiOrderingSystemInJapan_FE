@@ -7,6 +7,9 @@ import Quotation from "./Quotation";
 import BookingListForStaff from "./BookingListForStaff";
 import CheckinService from "../SaleStaff/CheckinService";
 import ViewCheckin from "../Customer/ViewCheckin";
+import BookingForKoiList from "./BookingForKoiList";
+import DepositList from "./DepositList";
+
 const { Header, Content } = Layout;
 
 const StaffDashboard = () => {
@@ -29,6 +32,8 @@ const StaffDashboard = () => {
             />
             <Route path="checkin-service" element={<CheckinService />} />
             <Route path="view-checkin" element={<ViewCheckin />} />
+            <Route path="booking-for-koi-list" element={<BookingForKoiList/>}/>
+            <Route path="deposit-list" element={<DepositList/>}/>
           </Routes>
         </Content>
       </Layout>

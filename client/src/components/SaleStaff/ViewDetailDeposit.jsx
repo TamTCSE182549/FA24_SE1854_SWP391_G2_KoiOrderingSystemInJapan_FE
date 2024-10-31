@@ -1,195 +1,77 @@
-// import React, { useEffect, useState } from 'react';
-// import axios from 'axios';
-// import { useParams } from 'react-router-dom';
-// import { ToastContainer, toast } from 'react-toastify';
-// import 'react-toastify/dist/ReactToastify.css';
-// import { useCookies } from 'react-cookie';
-// import { useNavigate } from 'react-router-dom'; 
-
-
-// const ViewDetailDeposit = () => {
-//   const { bookingId } = useParams();
-//   const [deposit, setDeposit] = useState(null);
-//   const [BookingDetails, setBookingDetails] = useState(null);
-//   const [errorMessage, setErrorMessage] = useState('');
-//   const [cookies] = useCookies();
-//   const token = cookies.token;
-//   const navigate = useNavigate();
-//   useEffect(() => {
-//     // Hàm để lấy dữ liệu deposit
-//     const fetchDepositData = async () => {
-//         try {
-//           const response = await axios.get(`http://localhost:8080/deposit/${bookingId}`, {
-//             headers: {
-//               Authorization: `Bearer ${token}`,
-//             },
-//           });
-//           console.log("Deposit Response Data:", response.data); // In ra dữ liệu deposit nhận được
-          
-//           // Kiểm tra xem response.data có phải là mảng và có ít nhất một phần tử không
-//           if (Array.isArray(response.data) && response.data.length > 0) {
-//             // Lấy phần tử đầu tiên
-//             setDeposit(response.data[0]);
-//             console.log("Deposit Data:", response.data[0]); // In ra dữ liệu deposit đầu tiên
-//           } else {
-//             console.warn("No deposit data found.");
-//             setDeposit(null); // Hoặc có thể thiết lập một giá trị mặc định
-//           }
-//         } catch (error) {
-//           console.error("Error fetching deposit data:", error);
-//           toast.error("Failed to fetch deposit data");
-//         }
-//       };
-      
-//     // Hàm để lấy dữ liệu booking
-//     const fetchBookingData = async () => {
-//       try {
-//                 const response = await axios.get(`http://localhost:8080/bookings/ViewDetail/${bookingId}`, {
-//                     headers: {
-//                         Authorization: `Bearer ${token}`,
-//                     },
-//                 });
-//                 console.log("Booking Response Data:", response.data); 
-//                 setBookingDetails(response.data);
-//       } catch (error) {
-//         console.error("Error fetching booking data:", error);
-//         toast.error("Failed to fetch booking data");
-//       }
-//     };
-
-//     fetchDepositData();
-//     fetchBookingData();
-//   }, [bookingId]);
-
-//   if (!deposit || !BookingDetails) {
-//     return <div>Loading...</div>; // Hoặc có thể hiển thị spinner/loading
-//   }
-
-//   return (
-//     <div className="p-4 max-w-2xl mx-auto bg-white shadow-md rounded-lg mt-40 text-black">
-//       <ToastContainer />
-//       <h2 className="text-2xl font-semibold mb-4 text-black">Deposit Details</h2>
-//       <div className="mb-4">
-//         <h3 className="font-semibold">Deposit Information</h3>
-//         <p><strong>Deposit Amount:</strong> {deposit.depositAmount}</p>
-//         <p><strong>Remain Amount:</strong> {deposit.remainAmount}</p>
-//         <p><strong>Shipping Fee:</strong> {deposit.shippingFee}</p>
-//         <p><strong>Deposit Date:</strong> {deposit.depositDate}</p>
-//         <p><strong>Expected Delivery Date:</strong> {deposit.deliveryExpectedDate}</p>
-//         <p><strong>Shipping Address:</strong> {deposit.shippingAddress}</p>
-//         <p><strong>Deposit Percentage:</strong> {deposit.depositPercentage}</p>
-//         <p><strong>Deposit Status:</strong> {deposit.depositStatus}</p>
-//         <p><strong>Booking ID:</strong> {deposit.bookingId}</p>
-//       </div>
-
-//       <h2 className="text-2xl font-semibold mb-4 text-black">Booking Information</h2>
-//       <div className="mb-4">
-//         <p><strong>Booking ID:</strong> {BookingDetails.id}</p>
-//         <p><strong>Customer ID:</strong> {BookingDetails.customerID}</p>
-//         <p><strong>Name:</strong> {BookingDetails.nameCus}</p>
-//         <p><strong>Total Amount:</strong> {BookingDetails.totalAmount}</p>
-//         <p><strong>VAT:</strong> {BookingDetails.vat}</p>
-//         <p><strong>VAT Amount:</strong> {BookingDetails.vatAmount}</p>
-//         <p><strong>Discount Amount:</strong> {BookingDetails.discountAmount}</p>
-//         <p><strong>Total Amount with VAT:</strong> {BookingDetails.totalAmountWithVAT}</p>
-//         <p><strong>Booking Type:</strong> {BookingDetails.bookingType}</p>
-//         <p><strong>Payment Method:</strong> {BookingDetails.paymentMethod}</p>
-//         <p><strong>Payment Status:</strong> {BookingDetails.paymentStatus}</p>
-//       </div>
-
-//       <h3 className="font-semibold">Koi Details</h3>
-//       <ul>
-//         {BookingDetails.koiDetails.map((koi) => (
-//           <li key={koi.id}>
-//             <p><strong>Koi ID:</strong> {koi.id}</p>
-//             <p><strong>Quantity:</strong> {koi.quantity}</p>
-//             <p><strong>Total Amount:</strong> {koi.totalAmount}</p>
-//             <p><strong>Unit Price:</strong> {koi.unitPrice}</p>
-//           </li>
-//         ))}
-//       </ul>
-
-//       <button 
-//         onClick={() => navigate('/booking-for-koi-list')} // Sử dụng navigate ở đây
-//         className="bg-green-500 text-white p-2 rounded-md hover:bg-green-600 mt-4"
-//       >
-//         View Booking For Koi List
-//       </button>
-//     </div>
-//   );
-// };
-
-// export default ViewDetailDeposit;
-
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import { useCookies } from 'react-cookie';
+import { Card, Typography, Button, Input, DatePicker, Divider, Descriptions, Tag, Switch } from 'antd';
+import { ArrowLeftOutlined, SaveOutlined, DollarOutlined, CalendarOutlined, HomeOutlined, PercentageOutlined } from '@ant-design/icons';
+import dayjs from 'dayjs';
+import { useCookies } from "react-cookie";
+const { Title, Text } = Typography;
 
 const ViewDetailDeposit = () => {
   const { bookingId } = useParams();
   const [deposit, setDeposit] = useState(null);
   const [BookingDetails, setBookingDetails] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
-  const [cookies] = useCookies();
-  const token = cookies.token;
   const navigate = useNavigate();
 
+  const [cookies] = useCookies();
+  const token = cookies.token;
   // State for editable fields
   const [editableDeposit, setEditableDeposit] = useState({
     shippingFee: '',
     deliveryExpectedDate: '',
     shippingAddress: '',
     depositPercentage: '',
+    depositStatus: 'processing'
   });
 
+  // Tách fetchDepositData ra để tái sử dụng
+  const fetchDepositData = async () => {
+    try {
+      const response = await axios.get(`http://localhost:8080/deposit/${bookingId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (Array.isArray(response.data) && response.data.length > 0) {
+        const depositData = response.data[0];
+        setDeposit(depositData);
+        setEditableDeposit({
+          shippingFee: depositData.shippingFee,
+          deliveryExpectedDate: depositData.deliveryExpectedDate,
+          shippingAddress: depositData.shippingAddress,
+          depositPercentage: Math.round(depositData.depositPercentage * 100),
+          depositStatus: depositData.depositStatus || 'processing'
+        });
+      } else {
+        console.warn("No deposit data found.");
+        setDeposit(null);
+      }
+    } catch (error) {
+      console.error("Error fetching deposit data:", error);
+      toast.error("Failed to fetch deposit data");
+    }
+  };
+
   useEffect(() => {
-    // Fetch deposit and booking data
-    const fetchDepositData = async () => {
-      try {
-        const response = await axios.get(`http://localhost:8080/deposit/${bookingId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        if (Array.isArray(response.data) && response.data.length > 0) {
-          const depositData = response.data[0];
-          setDeposit(depositData);
-          setEditableDeposit({
-            shippingFee: depositData.shippingFee,
-            deliveryExpectedDate: depositData.deliveryExpectedDate,
-            shippingAddress: depositData.shippingAddress,
-            depositPercentage: depositData.depositPercentage,
-          });
-        } else {
-          console.warn("No deposit data found.");
-          setDeposit(null);
-        }
-      } catch (error) {
-        console.error("Error fetching deposit data:", error);
-        toast.error("Failed to fetch deposit data");
-      }
-    };
-
-    const fetchBookingData = async () => {
-      try {
-        const response = await axios.get(`http://localhost:8080/bookings/ViewDetail/${bookingId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        setBookingDetails(response.data);
-      } catch (error) {
-        console.error("Error fetching booking data:", error);
-        toast.error("Failed to fetch booking data");
-      }
-    };
-
     fetchDepositData();
     fetchBookingData();
   }, [bookingId, token]);
+
+  const fetchBookingData = async () => {
+    try {
+      const response = await axios.get(`http://localhost:8080/bookings/ViewDetail/${bookingId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setBookingDetails(response.data);
+    } catch (error) {
+      console.error("Error fetching booking data:", error);
+      toast.error("Failed to fetch booking data");
+    }
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -197,22 +79,32 @@ const ViewDetailDeposit = () => {
   };
 
   const handleUpdate = async () => {
-    if (!deposit) return; // Ensure deposit exists
+    if (!deposit) return;
 
     try {
-      // Use the deposit's own ID for the update
-      await axios.put(`http://localhost:8080/deposit/${deposit.id}`, editableDeposit, {
+      const updateData = {
+        ...editableDeposit,
+        depositPercentage: parseFloat(editableDeposit.depositPercentage) / 100,
+        depositStatus: editableDeposit.depositStatus
+      };
+
+      await axios.put(`http://localhost:8080/deposit/${deposit.id}`, updateData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-      toast.success("Deposit updated successfully!", {
-        autoClose: 2000,
-      });
+      
+      toast.success("Deposit updated successfully!");
+      await fetchDepositData();
     } catch (error) {
       console.error("Error updating deposit:", error);
-      toast.error("Failed to update deposit");
+      toast.error(error.response?.data?.message || "Failed to update deposit");
     }
+  };
+
+  // Validation cho ngày
+  const disabledDate = (current) => {
+    return current && current < dayjs().startOf('day');
   };
 
   if (!deposit || !BookingDetails) {
@@ -220,99 +112,186 @@ const ViewDetailDeposit = () => {
   }
 
   return (
-    <div className="p-4 max-w-2xl mx-auto bg-white shadow-md rounded-lg mt-40 text-black">
+    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 pt-40">
       <ToastContainer />
-      <h2 className="text-2xl font-semibold mb-4 text-black">Deposit Details</h2>
       
-      <div className="mb-4">
-        <h3 className="font-semibold">Deposit Information</h3>
-        <p><strong>Deposit Amount:</strong> {deposit.depositAmount}</p>
-        <p><strong>Remain Amount:</strong> {deposit.remainAmount}</p>
-        <p><strong>Deposit Date:</strong> {deposit.depositDate}</p>
-        <p><strong>Booking ID:</strong> {deposit.bookingId}</p>
-        
-        {/* Editable Fields */}
-        <label className="block mb-4">
-          <span className="text-gray-700">Shipping Fee:</span>
-          <input 
-            type="number" 
-            name="shippingFee" 
-            value={editableDeposit.shippingFee} 
-            onChange={handleInputChange} 
-            className="mt-1 block w-full border border-gray-300 rounded-md p-2 text-black" 
-          />
-        </label>
-        <label className="block mb-4">
-          <span className="text-gray-700">Expected Delivery Date:</span>
-          <input 
-            type="date" 
-            name="deliveryExpectedDate" 
-            value={editableDeposit.deliveryExpectedDate} 
-            onChange={handleInputChange} 
-            className="mt-1 block w-full border border-gray-300 rounded-md p-2 text-black" 
-          />
-        </label>
-        <label className="block mb-4">
-          <span className="text-gray-700">Shipping Address:</span>
-          <input 
-            type="text" 
-            name="shippingAddress" 
-            value={editableDeposit.shippingAddress} 
-            onChange={handleInputChange} 
-            className="mt-1 block w-full border border-gray-300 rounded-md p-2 text-black" 
-          />
-        </label>
-        <label className="block mb-4">
-          <span className="text-gray-700">Deposit Percentage:</span>
-          <input 
-            type="number" 
-            name="depositPercentage" 
-            value={editableDeposit.depositPercentage} 
-            onChange={handleInputChange} 
-            className="mt-1 block w-full border border-gray-300 rounded-md p-2 text-black" 
-          />
-        </label>
-        <button 
-          onClick={handleUpdate} 
-          className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition mt-4"
+      {/* Header */}
+      <div className="max-w-7xl mx-auto mb-8">
+        <Button 
+          icon={<ArrowLeftOutlined />} 
+          onClick={() => navigate('/staff/booking-for-koi-list')}
+          className="mb-4"
         >
-          Update Deposit
-        </button>
+          Back to List
+        </Button>
+        <Title level={2}>Deposit Details</Title>
+        <Text type="secondary" className="text-lg">
+          Booking #{bookingId}
+        </Text>
       </div>
 
-      <h2 className="text-2xl font-semibold mb-4 text-black">Booking Information</h2>
-      <div className="mb-4">
-      <p><strong>Booking ID:</strong> {BookingDetails.id}</p>
-         <p><strong>Customer ID:</strong> {BookingDetails.customerID}</p>
-         <p><strong>Name:</strong> {BookingDetails.nameCus}</p>
-         <p><strong>Total Amount:</strong> {BookingDetails.totalAmount}</p>
-        <p><strong>VAT:</strong> {BookingDetails.vat}</p>
-         <p><strong>VAT Amount:</strong> {BookingDetails.vatAmount}</p>
-         <p><strong>Discount Amount:</strong> {BookingDetails.discountAmount}</p>
-        <p><strong>Total Amount with VAT:</strong> {BookingDetails.totalAmountWithVAT}</p>
-        <p><strong>Booking Type:</strong> {BookingDetails.bookingType}</p>
-         <p><strong>Payment Method:</strong> {BookingDetails.paymentMethod}</p>
-         <p><strong>Payment Status:</strong> {BookingDetails.paymentStatus}</p>
+      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Deposit Information Card */}
+        <Card className="col-span-2 shadow-md rounded-lg">
+          <Title level={4} className="mb-6">Deposit Information</Title>
+          
+          <Descriptions bordered column={1} className="mb-6">
+            <Descriptions.Item label="Deposit Amount">
+              <Tag color="green" className="text-lg px-3 py-1">
+                ${deposit?.depositAmount}
+              </Tag>
+            </Descriptions.Item>
+            <Descriptions.Item label="Remain Amount">
+              <Tag color="orange" className="text-lg px-3 py-1">
+                ${deposit?.remainAmount}
+              </Tag>
+            </Descriptions.Item>
+            <Descriptions.Item label="Deposit Date">
+              {deposit?.depositDate}
+            </Descriptions.Item>
+          </Descriptions>
+
+          <Divider />
+
+          <div className="space-y-4">
+            <div>
+              <Text strong className="mb-2 block">Shipping Fee</Text>
+              <Input
+                prefix={<DollarOutlined className="text-gray-400" />}
+                type="number"
+                name="shippingFee"
+                value={editableDeposit.shippingFee}
+                onChange={handleInputChange}
+                className="w-full"
+              />
+            </div>
+
+            <div>
+              <Text strong className="mb-2 block">Expected Delivery Date</Text>
+              <DatePicker
+                name="deliveryExpectedDate"
+                value={editableDeposit.deliveryExpectedDate ? dayjs(editableDeposit.deliveryExpectedDate) : null}
+                onChange={(date, dateString) => handleInputChange({
+                  target: { name: 'deliveryExpectedDate', value: dateString }
+                })}
+                disabledDate={disabledDate}
+                className="w-full"
+                format="YYYY-MM-DD"
+              />
+            </div>
+
+            <div>
+              <Text strong className="mb-2 block">Shipping Address</Text>
+              <Input.TextArea
+                name="shippingAddress"
+                value={editableDeposit.shippingAddress}
+                onChange={handleInputChange}
+                rows={4}
+                className="w-full"
+              />
+            </div>
+
+            <div>
+              <Text strong className="mb-2 block">Deposit Percentage</Text>
+              <Input
+                suffix="%"
+                type="number"
+                name="depositPercentage"
+                value={editableDeposit.depositPercentage}
+                onChange={handleInputChange}
+                className="w-full"
+                min={1}
+                max={100}
+                step={1} // Chỉ cho phép nhập số nguyên
+                placeholder="Enter whole number (1-100)"
+              />
+            </div>
+
+            <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-center justify-between">
+                    <Text strong>Mark as Complete</Text>
+                    <div className="flex items-center space-x-2">
+                        <Switch
+                            checked={editableDeposit.depositStatus === 'complete'}
+                            onChange={(checked) => {
+                                setEditableDeposit(prev => ({
+                                    ...prev,
+                                    depositStatus: checked ? 'complete' : 'processing'
+                                }));
+                            }}
+                            className={`${
+                                editableDeposit.depositStatus === 'complete' ? 'bg-green-500' : 'bg-gray-200'
+                            }`}
+                        />
+                        <Tag color={editableDeposit.depositStatus === 'complete' ? 'success' : 'default'}>
+                            {editableDeposit.depositStatus}
+                        </Tag>
+                    </div>
+                </div>
+                <Text type="secondary" className="mt-2 block text-sm">
+                    Toggle this switch to mark the deposit as complete
+                </Text>
+            </div>
+
+            <Button 
+              type="primary"
+              icon={<SaveOutlined />}
+              onClick={handleUpdate}
+              size="large"
+              className="w-full bg-blue-500 hover:bg-blue-600"
+            >
+              Update Deposit
+            </Button>
+          </div>
+        </Card>
+
+        {/* Booking Information Card */}
+        <Card className="shadow-md rounded-lg">
+          <Title level={4} className="mb-6">Booking Information</Title>
+          
+          <Descriptions bordered column={1} size="small">
+            <Descriptions.Item label="Customer Name">
+              {BookingDetails?.nameCus}
+            </Descriptions.Item>
+            <Descriptions.Item label="Total Amount">
+              ${BookingDetails?.totalAmount}
+            </Descriptions.Item>
+            <Descriptions.Item label="VAT">
+              {BookingDetails?.vat}%
+            </Descriptions.Item>
+            <Descriptions.Item label="VAT Amount">
+              ${BookingDetails?.vatAmount}
+            </Descriptions.Item>
+            <Descriptions.Item label="Discount">
+              ${BookingDetails?.discountAmount}
+            </Descriptions.Item>
+            <Descriptions.Item label="Total with VAT">
+              <Text strong className="text-lg">
+                ${BookingDetails?.totalAmountWithVAT}
+              </Text>
+            </Descriptions.Item>
+            <Descriptions.Item label="Payment Status">
+              <Tag color={BookingDetails?.paymentStatus === 'PAID' ? 'green' : 'orange'}>
+                {BookingDetails?.paymentStatus}
+              </Tag>
+            </Descriptions.Item>
+          </Descriptions>
+
+          <Divider />
+
+          <Title level={5} className="mb-4">Koi Details</Title>
+          {BookingDetails?.koiDetails.map((koi) => (
+            <Card key={koi.id} size="small" className="mb-2">
+              <Descriptions size="small" column={1}>
+                <Descriptions.Item label="Koi ID">{koi.id}</Descriptions.Item>
+                <Descriptions.Item label="Quantity">{koi.quantity}</Descriptions.Item>
+                <Descriptions.Item label="Unit Price">${koi.unitPrice}</Descriptions.Item>
+                <Descriptions.Item label="Total">${koi.totalAmount}</Descriptions.Item>
+              </Descriptions>
+            </Card>
+          ))}
+        </Card>
       </div>
-
-      <h3 className="font-semibold">Koi Details</h3>
-      <ul>
-        {BookingDetails.koiDetails.map((koi) => (
-          <li key={koi.id}>
-            <p><strong>Koi ID:</strong> {koi.id}</p>
-            <p><strong>Quantity:</strong> {koi.quantity}</p>
-            <p><strong>Total Amount:</strong> {koi.totalAmount}</p>
-            <p><strong>Unit Price:</strong> {koi.unitPrice}</p>
-          </li>
-        ))}
-      </ul>
-
-      <button 
-        onClick={() => navigate('/booking-for-koi-list')} 
-        className="bg-green-500 text-white p-2 rounded-md hover:bg-green-600 mt-4"
-      >
-        View Booking For Koi List
-      </button>
     </div>
   );
 };
