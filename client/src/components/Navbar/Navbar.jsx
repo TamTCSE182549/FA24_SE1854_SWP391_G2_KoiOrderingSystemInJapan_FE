@@ -82,21 +82,22 @@ const Navbar = () => {
       <Menu.Item key="2">
         <Link to="/ViewBooking">Bookings & Trips</Link>
       </Menu.Item>
-      <Menu.Item key="3">
-        <Link to="/Quotation">Quotations</Link>
-      </Menu.Item>
-      <Menu.Item key="3">
-        <Link to="/loyalty">Genius loyalty programme</Link>
+      <Menu.Item key="3" >
+        <Link to="/customer/booking-for-koi-list">Booking Koi</Link>
       </Menu.Item>
       <Menu.Item key="4">
-        <Link to="/reviews">Reviews</Link>
+        <Link to="/Quotation">Quotations</Link>
       </Menu.Item>
       <Menu.Item key="5">
+        <Link to="/reviews">Reviews</Link>
+      </Menu.Item>
+      <Menu.Item key="6">
         <Link to="/ViewCheckin">Check-in</Link>
       </Menu.Item>
-      <Menu.Item key="6" onClick={handleSignOut}>
+      <Menu.Item key="7" onClick={handleSignOut}>
         Sign out
       </Menu.Item>
+      
     </Menu>
   );
 

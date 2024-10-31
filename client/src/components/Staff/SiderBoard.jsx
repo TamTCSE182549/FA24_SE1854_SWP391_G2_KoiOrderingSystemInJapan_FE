@@ -57,7 +57,26 @@ const menuItems = [
       </Link>
     ),
   },
+  {
+    key: "6",
+    icon: <FileSearchOutlined style={{ color: "black" }} />,
+    label: (
+      <Link style={{ color: "black" }} to="/staff/booking-for-koi-list">
+        Booking For Koi List
+      </Link>
+    ),
+  },
+  {
+    key: "7",
+    icon: <FileSearchOutlined style={{ color: "black" }} />,
+    label: (
+      <Link style={{ color: "black" }} to="/staff/deposit-list">
+        Deposit List
+      </Link>
+    ),
+  },
 ];
+
 
 const SiderBoard = () => {
   return (

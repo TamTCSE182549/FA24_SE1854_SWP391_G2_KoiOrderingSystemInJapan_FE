@@ -38,7 +38,7 @@ import CreateQuotation from "./components/Admin/CreateQuotation";
 import UpdateQuotation from "./components/Admin/UpdateQuotation";
 import StaffRoutes from "./components/Staff/StaffRoutes";
 import ViewDetailDeposit from "./components/SaleStaff/ViewDetailDeposit";
-import BookingForKoiList from "./components/SaleStaff/BookingForKoiList";
+import BookingForKoiList from "./components/Staff/BookingForKoiList";
 import QuotationService from "./components/SaleStaff/QuotationService";
 import BookingListForStaff from "./components/Staff/BookingListForStaff";
 import CheckinService from "./components/SaleStaff/CheckinService";
