@@ -10,7 +10,7 @@ const AdminRoutes = () => {
       {/* Sử dụng PrivateRoute để bảo vệ các route admin */}
       <Route element={<PrivateRoute allowedRoles={["MANAGER"]} />}>
         {/* AdminDashboard là trang chính với các route con */}
-        <Route path="/admin/*" element={<AdminDashboard />} /> {/* Thêm * */}
+        <Route path="/*" element={<AdminDashboard />} /> {/* Thêm * */}
       </Route>
     </Routes>
     //
