@@ -30,7 +30,8 @@ const BookingListForStaff = () => {
       );
 
       if (response.status === 200) {
-        setBookingList(response.data);
+        const sortedBookings = [...response.data].sort((a, b) => b.id - a.id);
+        setBookingList(sortedBookings);
       }
     } catch (error) {
       console.error("Error fetching Booking data:", error);
@@ -61,10 +62,6 @@ const BookingListForStaff = () => {
     // Khi nhấn vào nút, người dùng sẽ được chuyển đến trang CreateCheckin với bookingId tương ứng
     // CreateCheckin component sẽ nhận bookingId từ URL params và sử dụng nó để tạo checkin mới
 
-  const handleCreateBookingKoi = (bookingId) => {
-    navigate(`/booking-koi/${bookingId}`);
-  };
-
   const columns = [
     {
       title: 'Booking ID',
@@ -88,9 +85,9 @@ const BookingListForStaff = () => {
       key: 'paymentStatus',
       render: (status) => (
         <Tag color={
-          status === 'PAID' ? 'green' :
-          status === 'PENDING' ? 'gold' :
-          status === 'PROCESSING' ? 'blue' :  // Changed to blue for processing
+          status === 'pending' ? 'gold' :
+          status === 'complete' ? 'green' :
+          status === 'processing' ? 'blue' :  // Changed to blue for processing
           'red'
         }>
           {status}
@@ -115,15 +112,6 @@ const BookingListForStaff = () => {
           >
             Create Checkin
           </Button>
-          {record.paymentStatus === 'complete' && (
-            <Button
-              type="primary"
-              onClick={() => handleCreateBookingKoi(record.id)}
-              style={{ backgroundColor: '#10B981' }}
-            >
-              Create Koi Booking
-            </Button>
-          )}
         </Space>
       ),
     },
@@ -136,14 +124,14 @@ const BookingListForStaff = () => {
         <Space>
           <Button 
             type="primary"
-            onClick={() => navigate('/QuotationService')}
+            onClick={() => navigate('/staff/Quotation')}
             style={{ zIndex: 1000 }}
           >
             View Quotations
           </Button>
           <Button 
             type="primary"
-            onClick={() => navigate('/CheckinService')}
+            onClick={() => navigate('/staff/checkin-service')}
             style={{ zIndex: 1000 }}
           >
             View Check-ins

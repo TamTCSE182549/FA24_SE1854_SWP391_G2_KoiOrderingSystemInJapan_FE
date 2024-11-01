@@ -6,7 +6,7 @@ import SiderBoard from "./SiderBoard"; // Reuse or create a new Sider component 
 import Quotation from "./Quotation";
 import BookingListForStaff from "./BookingListForStaff";
 import CheckinService from "../SaleStaff/CheckinService";
-import ViewCheckin from "../Customer/ViewCheckin";
+// import ViewCheckin from "../Customer/ViewCheckin";
 import BookingForKoiList from "./BookingForKoiList";
 import DepositList from "./DepositList";
 
@@ -31,7 +31,7 @@ const StaffDashboard = () => {
               element={<BookingListForStaff />}
             />
             <Route path="checkin-service" element={<CheckinService />} />
-            <Route path="view-checkin" element={<ViewCheckin />} />
+            {/* <Route path="view-checkin" element={<ViewCheckin />} /> */}
             <Route path="booking-for-koi-list" element={<BookingForKoiList/>}/>
             <Route path="deposit-list" element={<DepositList/>}/>
           </Routes>

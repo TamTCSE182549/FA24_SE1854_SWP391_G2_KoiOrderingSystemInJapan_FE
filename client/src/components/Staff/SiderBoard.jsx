@@ -48,17 +48,17 @@ const menuItems = [
       </Link>
     ),
   },
+  // {
+  //   key: "5",
+  //   icon: <FileSearchOutlined style={{ color: "black" }} />,
+  //   label: (
+  //     <Link style={{ color: "black" }} to="/staff/view-checkin">
+  //       View Checkin
+  //     </Link>
+  //   ),
+  // },
   {
     key: "5",
-    icon: <FileSearchOutlined style={{ color: "black" }} />,
-    label: (
-      <Link style={{ color: "black" }} to="/staff/view-checkin">
-        View Checkin
-      </Link>
-    ),
-  },
-  {
-    key: "6",
     icon: <FileSearchOutlined style={{ color: "black" }} />,
     label: (
       <Link style={{ color: "black" }} to="/staff/booking-for-koi-list">
@@ -67,7 +67,7 @@ const menuItems = [
     ),
   },
   {
-    key: "7",
+    key: "6",
     icon: <FileSearchOutlined style={{ color: "black" }} />,
     label: (
       <Link style={{ color: "black" }} to="/staff/deposit-list">

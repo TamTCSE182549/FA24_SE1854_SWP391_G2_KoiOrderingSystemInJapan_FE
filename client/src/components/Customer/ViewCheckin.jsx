@@ -15,7 +15,7 @@ const ViewCheckin = () => {
     const fetchCheckins = async () => {
         setLoading(true);
         try {
-            const response = await axios.get('http://localhost:8080/checkins/all', {
+            const response = await axios.get('http://localhost:8080/checkins/account', {
                 headers: {
                     Authorization: `Bearer ${cookies.token}`,
                 },
