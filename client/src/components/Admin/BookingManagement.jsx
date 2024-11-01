@@ -2,25 +2,45 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useCookies } from "react-cookie";
 import { useNavigate } from "react-router-dom";
-import { Table, Button, Space, Tag } from "antd";
+import { Table, Button, Space, Tag, Select } from "antd";
+
+const { Option } = Select;
 
 const BookingManagement = () => {
   const [cookies] = useCookies(["token"]);
   const token = cookies.token;
   const [bookings, setBookings] = useState([]);
+  const [bookingType, setBookingType] = useState("All");
+  const [paymentStatus, setPaymentStatus] = useState("All");
   const navigate = useNavigate();
 
-  // Fetch bookings data from the API
-  useEffect(() => {
+  const fetchBookings = () => {
+    let url = "http://localhost:8080/bookings";
+
+    if (bookingType === "All" && paymentStatus === "All") {
+      url += "/AllBooking";
+    } else if (bookingType === "All") {
+      url += `/AllBookingStatus/${paymentStatus}`;
+    } else if (paymentStatus === "All") {
+      url += `/${bookingType}`;
+    } else {
+      url += `/${bookingType}Status/${paymentStatus}`;
+    }
+
     axios
-      .get("http://localhost:8080/bookings/BookingForTour", {
+      .get(url, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      }) // Adjust API endpoint if needed
+      })
       .then((response) => setBookings(response.data))
-      .catch((error) => console.error("Error fetching booking data:", error));
-  }, []);
+      .catch((error) => console.error("Lỗi khi lấy dữ liệu bookings:", error));
+  };
+
+  // Gọi API khi thay đổi bookingType hoặc paymentStatus
+  useEffect(() => {
+    fetchBookings();
+  }, [bookingType, paymentStatus]);
 
   // Handle delete action
   const handleDelete = (booking) => {
@@ -81,6 +101,12 @@ const BookingManagement = () => {
           case "pending":
             color = "orange";
             break;
+          case "processing":
+            color = "blue";
+            break;
+          case "delivery":
+            color = "cyan";
+            break;
           case "cancelled":
             color = "red";
             break;
@@ -138,158 +164,54 @@ const BookingManagement = () => {
           >
             Delete
           </Button>
-          <Button
-            onClick={() => handleCreateBookingKoi(record.id)}
-            className="bg-green-500 hover:bg-green-600 text-white w-full"
-          >
-            Create Booking Koi
-          </Button>
+          {record.bookingType === "BookingForTour" && record.role === 'CONSULTING_STAFF' && ( // Điều kiện kiểm tra bookingType
+            <Button
+              onClick={() => handleCreateBookingKoi(record.id)}
+              className="bg-green-500 hover:bg-green-600 text-white w-full"
+            >
+              Create Booking Koi
+            </Button>
+          )}
         </Space>
       ),
     },
   ];
 
   return (
-    // <div className="p-6">
-    //   <h2 className="text-2xl font-semibold mb-4">Booking Table</h2>
-    //   <div className="overflow-x-auto">
-    //     <table className="min-w-full bg-white border border-gray-200">
-    //       <thead>
-    //         <tr>
-    //           <th className="py-2 px-4 border-b font-semibold text-gray-700">
-    //             ID
-    //           </th>
-    //           {/* <th className="py-2 px-4 border-b font-semibold text-gray-700">
-    //             Customer ID
-    //           </th> */}
-    //           <th className="py-2 px-4 border-b font-semibold text-gray-700">
-    //             Customer Name
-    //           </th>
-    //           {/* <th className="py-2 px-4 border-b font-semibold text-gray-700">
-    //             Total Amount
-    //           </th>
-    //           <th className="py-2 px-4 border-b font-semibold text-gray-700">
-    //             VAT
-    //           </th>
-    //           <th className="py-2 px-4 border-b font-semibold text-gray-700">
-    //             VAT Amount
-    //           </th>
-    //           <th className="py-2 px-4 border-b font-semibold text-gray-700">
-    //             Discount Amount
-    //           </th> */}
-    //           <th className="py-2 px-4 border-b font-semibold text-gray-700">
-    //             Total Amount with VAT
-    //           </th>
-    //           <th className="py-2 px-4 border-b font-semibold text-gray-700">
-    //             Booking Type
-    //           </th>
-    //           <th className="py-2 px-4 border-b font-semibold text-gray-700">
-    //             Payment Method
-    //           </th>
-    //           <th className="py-2 px-4 border-b font-semibold text-gray-700">
-    //             Payment Status
-    //           </th>
-    //           <th className="py-2 px-4 border-b font-semibold text-gray-700">
-    //             Payment Date
-    //           </th>
-    //           <th className="py-2 px-4 border-b font-semibold text-gray-700">
-    //             Created By
-    //           </th>
-    //           <th className="py-2 px-4 border-b font-semibold text-gray-700">
-    //             Created Date
-    //           </th>
-    //           <th className="py-2 px-4 border-b font-semibold text-gray-700">
-    //             Updated By
-    //           </th>
-    //           <th className="py-2 px-4 border-b font-semibold text-gray-700">
-    //             Updated Date
-    //           </th>
-    //           <th className="py-2 px-4 border-b font-semibold text-gray-700">
-    //             Action
-    //           </th>
-    //         </tr>
-    //       </thead>
-    //       <tbody>
-    //         {bookings.map((booking) => (
-    //           <tr key={booking.id} className="hover:bg-gray-100">
-    //             <td className="py-2 px-4 border-b text-gray-600">
-    //               {booking.id}
-    //             </td>
-    //             {/* <td className="py-2 px-4 border-b text-gray-600">
-    //               {booking.customerID}
-    //             </td> */}
-    //             <td className="py-2 px-4 border-b text-gray-600">
-    //               {booking.nameCus}
-    //             </td>
-    //             {/* <td className="py-2 px-4 border-b text-gray-600">
-    //               {booking.totalAmount}
-    //             </td>
-    //             <td className="py-2 px-4 border-b text-gray-600">
-    //               {booking.vat}
-    //             </td>
-    //             <td className="py-2 px-4 border-b text-gray-600">
-    //               {booking.vatAmount}
-    //             </td>
-    //             <td className="py-2 px-4 border-b text-gray-600">
-    //               {booking.discountAmount}
-    //             </td> */}
-    //             <td className="py-2 px-4 border-b text-gray-600">
-    //               {booking.totalAmountWithVAT}
-    //             </td>
-    //             <td className="py-2 px-4 border-b text-gray-600">
-    //               {booking.bookingType}
-    //             </td>
-    //             <td className="py-2 px-4 border-b text-gray-600">
-    //               {booking.paymentMethod}
-    //             </td>
-    //             <td className="py-2 px-4 border-b text-gray-600">
-    //               {booking.paymentStatus}
-    //             </td>
-    //             <td className="py-2 px-4 border-b text-gray-600">
-    //               {booking.paymentDate}
-    //             </td>
-    //             <td className="py-2 px-4 border-b text-gray-600">
-    //               {booking.createdBy}
-    //             </td>
-    //             <td className="py-2 px-4 border-b text-gray-600">
-    //               {booking.createdDate}
-    //             </td>
-    //             <td className="py-2 px-4 border-b text-gray-600">
-    //               {booking.updatedBy}
-    //             </td>
-    //             <td className="py-2 px-4 border-b text-gray-600">
-    //               {booking.updatedDate}
-    //             </td>
-    //             <td className="py-2 px-4 border">
-    //               <div className="gap-y-10">
-    //                 <button
-    //                   onClick={() => handleUpdate(booking)}
-    //                   className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-3 rounded mr-2 w-full"
-    //                 >
-    //                   Update
-    //                 </button>
-    //                 <button
-    //                   onClick={() => handleDelete(booking)}
-    //                   className="bg-red-500 hover:bg-red-600 text-white font-semibold py-1 px-3 rounded w-full"
-    //                 >
-    //                   Delete
-    //                 </button>
-    //                 <button
-    //                   onClick={() => handleCreateBookingKoi(booking.id)}
-    //                   className="bg-green-500 hover:bg-green-600 text-white font-semibold py-1 px-3 rounded w-fll"
-    //                 >
-    //                   Create Booking Koi
-    //                 </button>
-    //               </div>
-    //             </td>
-    //           </tr>
-    //         ))}
-    //       </tbody>
-    //     </table>
-    //   </div>
-    // </div>
     <div className="p-6">
-      <h2 className="text-2xl font-semibold mb-4">Booking Table</h2>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-2xl font-semibold mb-4">Booking Table</h2>
+        <div className="flex gap-4">
+          <Select
+            defaultValue="All"
+            onChange={(value) => {
+              setBookingType(value);
+              fetchBookings();
+            }}
+            className="w-40"
+          >
+            <Option value="All">All</Option>
+            <Option value="BookingForTour">Booking Tour</Option>
+            <Option value="BookingForKoi">Booking Koi</Option>
+          </Select>
+          <Select
+            defaultValue="All"
+            onChange={(value) => {
+              setPaymentStatus(value);
+              fetchBookings();
+            }}
+            className="w-40"
+          >
+            <Option value="All">All</Option>
+            <Option value="pending">pending</Option>
+            <Option value="processing">processing</Option>
+            <Option value="delivery">delivery</Option>
+            <Option value="cancelled">cancelled</Option>
+            <Option value="complete">complete</Option>
+            <Option value="shipped">shipped</Option>
+          </Select>
+        </div>
+      </div>
       <div className="overflow-x-auto">
         <Table
           columns={columns}
