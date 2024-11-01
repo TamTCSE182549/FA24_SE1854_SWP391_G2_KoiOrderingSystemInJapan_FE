@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Card, Button, Tag, Space, DatePicker, Select, Row, Col, Pagination, Modal, Form, Input } from "antd";
+import { Card, Button, Tag, Space, DatePicker, Select, Row, Col, Pagination, Modal, Form, Input, message } from "antd";
 import { useLocation } from 'react-router-dom';
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -21,20 +21,25 @@ const Quotation = () => {
   const [selectedQuotation, setSelectedQuotation] = useState(null);
   const [cookies] = useCookies(["token"]);
   const token = cookies.token;
+  const [isPaymentModalVisible, setIsPaymentModalVisible] = useState(false);
+  const [paymentForm] = Form.useForm();
+  const [completedPayments, setCompletedPayments] = useState(new Set());
 
   const fetchQuotations = async () => {
     setLoading(true);
     try {
       const response = await axios.get("http://localhost:8080/quotations/all", {
         headers: {
-          'Authorization': `Bearer ${token}` // Add token to request headers
+          'Authorization': `Bearer ${token}`
         }
       });
-      // Ensure that the response data is an array
-      setQuotations(Array.isArray(response.data) ? response.data : []);
+      const sortedQuotations = Array.isArray(response.data) 
+        ? [...response.data].sort((a, b) => b.id - a.id)  // Sắp xếp ngược theo ID
+        : [];
+      setQuotations(sortedQuotations);
     } catch (error) {
       console.error("Error when getting Quotation List:", error);
-      setQuotations([]); // Set to empty array in case of error
+      setQuotations([]);
     } finally {
       setLoading(false);
     }
@@ -56,10 +61,10 @@ const Quotation = () => {
     return true;
   }) : [];
 
-  const paginatedQuotations = filteredQuotations.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize
-  );
+  const paginatedQuotations = filteredQuotations
+    .slice()  // Tạo bản sao để không ảnh hưởng đến mảng gốc
+    .sort((a, b) => b.id - a.id)  // Sắp xếp ngược theo ID
+    .slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const handleViewDetails = async (id) => {
     try {
@@ -88,9 +93,60 @@ const Quotation = () => {
     return { formattedDate, formattedTime };
   };
 
+  const handleSendPayment = (quotation) => {
+    if (quotation.isApprove === "FINISH") {
+      setSelectedQuotation(quotation);
+      setIsPaymentModalVisible(true);
+    }
+  };
+
+  const handlePaymentSubmit = async (values) => {
+    try {
+      const response = await axios.put(
+        "http://localhost:8080/bookings/admin/updateResponseFormStaff",
+        {
+          bookingID: selectedQuotation.bookingId,
+          paymentStatus: "processing",
+          paymentMethod: values.paymentMethod,
+          vat: parseFloat(values.vat) / 100,
+          discountAmount: parseFloat(values.discountAmount),
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        }
+      );
+      
+      // Add the quotation ID to completed payments
+      setCompletedPayments(prev => new Set([...prev, selectedQuotation.id]));
+      
+      // Show success message
+      message.success('Payment sent successfully!');
+      
+      // Close modal and reset
+      setIsPaymentModalVisible(false);
+      paymentForm.resetFields();
+      fetchQuotations();
+      
+    } catch (error) {
+      console.error("Error updating payment:", error);
+      message.error('Failed to send payment. Please try again.');
+    }
+  };
+
   return (
     <div className="container mx-auto py-4" style={{ paddingLeft: '100px', paddingRight: '100px', paddingTop: '100px' }}>
-      <h1 className="text-2xl font-bold mb-4">Quotations List</h1>
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold">Quotations List</h1>
+        <Button 
+          onClick={() => navigate('/staff/booking-list-for-staff')}
+          type="primary"
+        >
+          Back to Booking List
+        </Button>
+      </div>
+
       <Space className="mb-4">
         <Select
           defaultValue="ALL"
@@ -130,6 +186,14 @@ const Quotation = () => {
                 <Button onClick={() => handleViewDetails(quotation.id)}>
                   View Detail
                 </Button>
+                {quotation.isApprove === "FINISH" && !completedPayments.has(quotation.id) && (
+                  <Button 
+                    onClick={() => handleSendPayment(quotation)}
+                    type="primary"
+                  >
+                    Send Payment
+                  </Button>
+                )}
               </Space>
             </Card>
           </Col>
@@ -192,6 +256,34 @@ const Quotation = () => {
             )}
           </div>
         )}
+      </Modal>
+
+      <Modal
+        title="Send Payment"
+        visible={isPaymentModalVisible}
+        onCancel={() => setIsPaymentModalVisible(false)}
+        footer={null}
+      >
+        <Form form={paymentForm} onFinish={handlePaymentSubmit} layout="vertical">
+          <Form.Item name="paymentMethod" label="Payment Method" rules={[{ required: true }]}>
+            <Select>
+              <Option value="CASH">Cash</Option>
+              <Option value="CREDIT_CARD">Credit Card</Option>
+              <Option value="BANK_TRANSFER">Bank Transfer</Option>
+            </Select>
+          </Form.Item>
+          <Form.Item name="vat" label="VAT (%)" rules={[{ required: true }]}>
+            <Input type="number" step="0.01" min="0" max="100" />
+          </Form.Item>
+          <Form.Item name="discountAmount" label="Discount Amount" rules={[{ required: true }]}>
+            <Input type="number" step="0.01" min="0" />
+          </Form.Item>
+          <Form.Item>
+            <Button type="primary" htmlType="submit">
+              Send Payment
+            </Button>
+          </Form.Item>
+        </Form>
       </Modal>
     </div>
   );
