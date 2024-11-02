@@ -216,61 +216,105 @@ const Navbar = () => {
       </div>
     </nav>
   ) : (
-    <div className="fixed top-0 left-0 w-full z-20 mb-20">
-      <div className="bg-white shadow-md border-b border-gray-300 w-full fixed z-10">
-        {/* upper Navbar */}
-
-        <div className="flex justify-between items-center w-full px-6 lg:px-12 py-1">
-          {/* Logo and site name */}
-          <div className="flex items-center">
-            <img
-              src={Logo}
-              alt="Logo"
-              className="w-14 h-auto cursor-pointer"
-              onClick={onHomeClick}
-            />
-            <div className="text-black font-serif text-2xl ml-2">
-              Koi Ordering System
+    <div className="fixed top-0 left-0 w-full z-20">
+      {/* Gradient background overlay */}
+      <div className="bg-gradient-to-r from-white via-gray-50 to-white backdrop-blur-sm border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex justify-between items-center h-24">
+            {/* Logo Section - Enhanced */}
+            <div className="flex-shrink-0 flex items-center group">
+              <div className="relative overflow-hidden rounded-xl">
+                <img
+                  src={Logo}
+                  alt="Logo"
+                  className="h-14 w-auto cursor-pointer transition-transform duration-500 group-hover:scale-110"
+                  onClick={onHomeClick}
+                />
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-400/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              </div>
+              <span className="ml-4 text-gray-800 font-bold text-xl tracking-tight group-hover:text-blue-600 transition-colors duration-300">
+                Koi Ordering System
+              </span>
             </div>
-          </div>
 
-          {/* Navigation menu */}
-          <div className="hidden md:flex flex-grow justify-center rounded-3xl">
-            <ul className="flex justify-between w-[70%] rounded-3xl ">
-              {MenuItems.map((data) => (
-                <li
-                  key={data.id}
-                  className="flex-1 flex justify-center text-center items-center"
+            {/* Navigation Links - Enhanced */}
+            <div className="hidden md:flex items-center space-x-1">
+              {MenuItems.map((item) => (
+                <Link
+                  key={item.id}
+                  to={item.link}
+                  className="relative px-4 py-2 text-gray-700 font-medium text-sm tracking-wide group"
                 >
-                  <Link
-                    to={data.link}
-                    className="text-black font-serif text-lg transition duration-500
-                             hover:text-gray-700 hover:shadow-2xl hover:rounded-3xl hover:font-bold w-full h-[50px]
-                            flex justify-center items-center"
-                  >
-                    {data.name}
-                  </Link>
-                </li>
+                  <span className="relative z-10 transition-colors duration-300 group-hover:text-blue-600">
+                    {item.name}
+                  </span>
+                  <div className="absolute inset-0 h-full w-full bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg scale-0 group-hover:scale-100 transition-transform duration-300 ease-out" />
+                </Link>
               ))}
-            </ul>
-          </div>
+            </div>
 
-          {/* Search bar and Icons */}
-          <div className="flex items-center space-x-6">
-            {login ? (
-              <Dropdown overlay={userMenu} trigger={["click"]}>
-                <div className="flex items-center cursor-pointer text-black">
-                  <Avatar icon={<UserOutlined />} />
-                  <span className="ml-2 text-black">{`${firstName} ${lastName}`}</span>
-                  <DownOutlined className="ml-2" />
-                </div>
-              </Dropdown>
-            ) : (
-              <UserOutlined
-                className="text-black text-2xl cursor-pointer"
-                onClick={onMenuClick}
-              />
-            )}
+            {/* User Section - Redesigned with Tailwind only */}
+            <div className="flex items-center space-x-6">
+              <div className="hidden md:flex items-center">
+                {login ? (
+                  <Dropdown overlay={userMenu} trigger={["click"]}>
+                    <div className="flex items-center gap-3 px-4 py-2.5 cursor-pointer group relative bg-white hover:bg-gray-50 rounded-xl transition-all duration-300">
+                      {/* Avatar Container */}
+                      <div className="relative">
+                        <div className="relative p-[2px] rounded-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500">
+                          <Avatar 
+                            icon={<UserOutlined />} 
+                            className="!flex items-center justify-center !bg-white !text-gray-700 border-2 border-white"
+                            size={45}
+                          />
+                        </div>
+                        {/* Online Status Indicator */}
+                        <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-white rounded-full"></div>
+                      </div>
+
+                      {/* User Info */}
+                      <div className="flex flex-col items-start">
+                        <span className="text-sm font-semibold text-gray-800 group-hover:text-blue-600 transition-colors duration-300">
+                          {`${firstName} ${lastName}`}
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          Premium Member
+                        </span>
+                      </div>
+
+                      {/* Dropdown Icon */}
+                      <div className="flex items-center">
+                        <DownOutlined className="text-gray-400 text-xs transform transition-transform duration-300 group-hover:-rotate-180" />
+                      </div>
+
+                      {/* Hover Effect Border */}
+                      <div className="absolute inset-0 rounded-xl border border-transparent group-hover:border-gray-200 transition-colors duration-300"></div>
+                    </div>
+                  </Dropdown>
+                ) : (
+                  <button
+                    onClick={onMenuClick}
+                    className="relative group px-6 py-2.5 rounded-xl overflow-hidden bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 transition-all duration-300 transform hover:scale-105"
+                  >
+                    <div className="relative flex items-center gap-2">
+                      <UserOutlined className="text-white text-lg" />
+                      <span className="text-white font-medium">Login</span>
+                    </div>
+                    
+                    {/* Shine effect on hover */}
+                    <div className="absolute top-0 -inset-full h-full w-1/2 z-5 block transform -skew-x-12 bg-gradient-to-r from-transparent to-white opacity-20 group-hover:animate-shine" />
+                  </button>
+                )}
+              </div>
+
+              {/* Mobile Menu Button */}
+              <button
+                onClick={onOpenDrawer}
+                className="md:hidden relative p-2.5 rounded-xl text-gray-700 hover:text-gray-900 hover:bg-gray-100 focus:outline-none transition-all duration-300"
+              >
+                <MenuOutlined className="h-6 w-6 transform transition-transform duration-300 hover:scale-110" />
+              </button>
+            </div>
           </div>
         </div>
       </div>

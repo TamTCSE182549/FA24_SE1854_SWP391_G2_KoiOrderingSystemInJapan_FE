@@ -144,129 +144,133 @@ const TourDetail = () => {
   };
 
   return (
-    <div className="p-10 max-w-7xl mx-auto backdrop-filter backdrop-blur-3xl rounded-2xl shadow-2xl mt-40 relative bg-white">
+    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      {/* Loading Overlay */}
       {isLoading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black opacity-50 z-10">
-          <span className="text-white text-xl">Processing...</span>
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
         </div>
       )}
-      <div className="flex flex-col md:flex-row space-y-8 md:space-y-0 md:space-x-12">
-        {/* Single Image for Tour */}
-        <div className="md:w-1/2">
+
+      <div className="max-w-7xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
+        {/* Header Section */}
+        <div className="relative h-96">
           <img
-            src={tour.tourImg} // Display the first image from tour.tourImg
-            alt="Tour Image"
-            className="w-full h-[530px] object-cover rounded-lg shadow-lg transition-transform duration-300 hover:scale-105"
+            src={tour.tourImg}
+            alt={tour.tourName}
+            className="w-full h-full object-cover"
           />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent">
+            <div className="absolute bottom-8 left-8">
+              <h1 className="text-5xl font-bold text-white mb-4">{tour.tourName}</h1>
+              <div className="flex items-center space-x-4 text-white">
+                <FaPlane className="text-2xl" />
+                <span className="text-lg">Premium Tour Experience</span>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Tour Info */}
-        <div className="md:w-1/2 relative">
-          <h2 className="text-4xl text-blue-800 font-bold mb-4">
-            {tour.tourName}
-          </h2>
-          <div className="tour-details text-lg text-gray-800 space-y-4">
-            <p>
-              <strong>Start Time: </strong>
-              {format(new Date(tour.startTime), "yyyy-MM-dd HH:mm:ss")}
-            </p>
-            <p>
-              <strong>End Time: </strong>
-              {format(new Date(tour.endTime), "yyyy-MM-dd HH:mm:ss")}
-            </p>
-            <p>
-              <strong>Max Participants: </strong>
-              {tour.maxParticipants}
-            </p>
-          </div>
-          <div className="tour-description mt-10">
-            <h3 className="text-2xl font-semibold mb-4 text-blue-600">
-              Tour Description
-            </h3>
-            <p className="text-lg text-gray-700 leading-relaxed">
-              {tour.description}
-            </p>
-          </div>
+        {/* Main Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 p-8">
+          {/* Tour Information */}
+          <div className="lg:col-span-2 space-y-8">
+            <div className="bg-gray-50 p-6 rounded-xl">
+              <h2 className="text-2xl font-semibold text-gray-800 mb-4">Tour Details</h2>
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <p className="text-gray-600">Start Time</p>
+                  <p className="text-lg font-medium">
+                    {format(new Date(tour.startTime), "MMM dd, yyyy HH:mm")}
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <p className="text-gray-600">End Time</p>
+                  <p className="text-lg font-medium">
+                    {format(new Date(tour.endTime), "MMM dd, yyyy HH:mm")}
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <p className="text-gray-600">Max Participants</p>
+                  <p className="text-lg font-medium">{tour.maxParticipants}</p>
+                </div>
+                <div className="space-y-2">
+                  <p className="text-gray-600">Remaining Spots</p>
+                  <p className="text-lg font-medium text-green-600">{tour.remaining}</p>
+                </div>
+              </div>
+            </div>
 
-          {/* Tour Options */}
-          <div className="mt-10 grid grid-cols-3 gap-4 mb-5">
-            <div>
-              <h4 className="text-xl font-semibold text-gray-800 mb-2">
-                Remaning of Tour
-              </h4>
-              <input
-                value={tour.remaining} // Hiển thị tên tour
-                readOnly
-                className="border border-blue-300 rounded-md p-2 w-full h-8 bg-gray-100 text-black"
-              />
+            <div className="bg-gray-50 p-6 rounded-xl">
+              <h2 className="text-2xl font-semibold text-gray-800 mb-4">Description</h2>
+              <p className="text-gray-700 leading-relaxed">{tour.description}</p>
             </div>
-            <div>
-              <h4 className="text-xl font-semibold text-gray-800 mb-2">
-                Number of Guests
-              </h4>
-              <InputNumber
-                min={1}
-                max={1000}
-                defaultValue={1}
-                onChange={(value) => setParticipants(value)}
-                className="w-full"
-                size="middle"
-                style={{ width: "60 %" }}
-              />
-            </div>
-            <div>
-              <p className="flex flex-col text-xl text-gray-800">
-                <strong>Transportation</strong>
-                <FaPlane className="ml-2 mt-3 text-blue-600" />
-              </p>
-            </div>
-            <div>
-              <h4 className="text-xl font-semibold text-gray-800 mb-2">
-                Payment method
-              </h4>
-              <Select
-                placeholder="Select payment method"
-                value={paymentMethod}
-                className="w-[50vh]"
-                onChange={(value) => setPaymentMethod(value)}
-                dropdownStyle={{ backgroundColor: '#f0f8ff' }}
-              >
-                <Option value="CASH">Cash</Option>
-                <Option value="VISA">Visa</Option>
-                <Option value="TRANSFER">Transfer</Option>
-              </Select>
+
+            {/* Image Gallery */}
+            <div className="space-y-4">
+              <h2 className="text-2xl font-semibold text-gray-800">Gallery</h2>
+              <div className="grid grid-cols-3 gap-4">
+                {Img.map((item) => (
+                  <img
+                    key={item.id}
+                    src={item.img}
+                    alt={`Tour Image ${item.id}`}
+                    className="rounded-lg h-48 w-full object-cover hover:opacity-90 transition duration-300"
+                  />
+                ))}
+              </div>
             </div>
           </div>
 
-          {/* Positioned "Book Now" Button */}
-          <div className="absolute bottom-0 right-0 mt-4 mr-4 -my-10">
-            <button
-              className="bg-red-600 hover:bg-red-800 active:bg-red-900 rounded-md px-4 py-2 transition duration-300 ease-in-out mr-5"
-              onClick={handleBack}
-            >
-              Back
-            </button>
-            <button
-              className="bg-blue-600 text-white rounded-md px-4 py-2 transition duration-300 ease-in-out hover:bg-blue-500"
-              onClick={handleBooking}
-            >
-              Book Now
-            </button>
-          </div>
-        </div>
-      </div>
+          {/* Booking Section */}
+          <div className="lg:col-span-1">
+            <div className="sticky top-8 bg-gray-50 p-6 rounded-xl">
+              <h2 className="text-2xl font-semibold text-gray-800 mb-6">Book This Tour</h2>
+              
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-gray-700 mb-2">Number of Guests</label>
+                  <InputNumber
+                    min={1}
+                    max={tour.remaining}
+                    defaultValue={1}
+                    onChange={(value) => setParticipants(value)}
+                    className="w-full"
+                    size="large"
+                  />
+                </div>
 
-      {/* Koi Fish Carousel */}
-      <div className="overflow-hidden group mt-10">
-        <div className="flex justify-center space-x-16 animate-loop-scroll mt-10 group-hover:paused">
-          {Img.map((item) => (
-            <img
-              key={item.id}
-              src={item.img}
-              alt={`Koi Image ${item.id}`}
-              className="w-[400px] h-[300px] object-cover rounded-lg shadow-lg"
-            />
-          ))}
+                <div>
+                  <label className="block text-gray-700 mb-2">Payment Method</label>
+                  <Select
+                    value={paymentMethod}
+                    onChange={(value) => setPaymentMethod(value)}
+                    className="w-full"
+                    size="large"
+                  >
+                    <Option value="CASH">💵 Cash</Option>
+                    <Option value="VISA">💳 Visa</Option>
+                    <Option value="TRANSFER">🏦 Transfer</Option>
+                  </Select>
+                </div>
+
+                <div className="space-y-4">
+                  <button
+                    onClick={handleBooking}
+                    className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition duration-300"
+                  >
+                    Book Now
+                  </button>
+                  <button
+                    onClick={handleBack}
+                    className="w-full bg-gray-200 text-gray-800 py-3 rounded-lg font-medium hover:bg-gray-300 transition duration-300"
+                  >
+                    Go Back
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       <ToastContainer />

@@ -1,16 +1,20 @@
 /** @type {import('tailwindcss').Config} */
-export default {
+module.exports = {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   darkMode: "class",
   theme: {
     extend: {
       animation: {
         "loop-scroll": "loop-scroll 50s linear infinite",
+        'shine': 'shine 1s',
       },
       keyframes: {
         "loop-scroll": {
           "0%": { transform: "translateX(100%)" },
           "100%": { transform: "translateX(-100%)" },
+        },
+        shine: {
+          '100%': { left: '125%' },
         },
       },
       colors: {
