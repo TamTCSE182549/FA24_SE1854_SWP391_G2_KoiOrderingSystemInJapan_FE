@@ -172,13 +172,49 @@ const Navbar = () => {
   );
 
   return location.pathname === "/" ? (
-    <>
-      <MenuOutlined
-        className="text-black text-2xl cursor-pointer z-50 fixed top-3 left-3"
-        onClick={onOpenDrawer}
-      />
-      <Sidebar />
-    </>
+    <nav className="absolute top-0 left-0 right-0 z-50 bg-transparent">
+      <div className="container mx-auto px-6 py-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center text-white cursor-pointer" onClick={onHomeClick}>
+            <img 
+              src={Logo} 
+              alt="Koi Ordering System" 
+              className="h-12 w-auto mr-3"
+            />
+            <span className="text-xl font-bold whitespace-nowrap">
+              Koi Ordering System
+            </span>
+          </div>
+          <div className="flex items-center space-x-8">
+            <div className="flex space-x-8">
+              {MenuItems.map((data) => (
+                <Link
+                  key={data.id}
+                  to={data.link}
+                  className="text-white hover:text-red-500 transition cursor-pointer"
+                >
+                  {data.name}
+                </Link>
+              ))}
+            </div>
+            {login ? (
+              <Dropdown overlay={userMenu} trigger={["click"]}>
+                <div className="flex items-center cursor-pointer text-white">
+                  <Avatar icon={<UserOutlined />} />
+                  <span className="ml-2">{`${firstName} ${lastName}`}</span>
+                  <DownOutlined className="ml-2" />
+                </div>
+              </Dropdown>
+            ) : (
+              <UserOutlined
+                className="text-white text-2xl cursor-pointer"
+                onClick={onMenuClick}
+              />
+            )}
+          </div>
+        </div>
+      </div>
+    </nav>
   ) : (
     <div className="fixed top-0 left-0 w-full z-20 mb-20">
       <div className="bg-white shadow-md border-b border-gray-300 w-full fixed z-10">
