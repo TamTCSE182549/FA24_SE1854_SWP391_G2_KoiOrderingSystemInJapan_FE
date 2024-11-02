@@ -135,7 +135,7 @@ const Profile = () => {
   };
 
   return (
-    <div className="p-6 min-h-screen flex justify-center">
+    <div className="p-6 min-h-screen flex justify-center mt-40">
       <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-4xl">
         <div className="flex items-center space-x-4 mb-6">
           <Avatar size={64} icon={<UserOutlined />} />

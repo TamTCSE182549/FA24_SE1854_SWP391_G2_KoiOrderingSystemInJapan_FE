@@ -121,7 +121,7 @@ const CheckinService = () => {
                 <h2 className="text-2xl font-semibold text-black">Check-in Management</h2>
                 <Button 
                     type="primary"
-                    onClick={() => navigate('/booking-list-for-staff')}
+                    onClick={() => navigate('/staff/booking-list-for-staff')}
                 >
                     View Bookings
                 </Button>
