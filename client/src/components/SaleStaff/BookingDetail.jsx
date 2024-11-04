@@ -33,13 +33,9 @@ const BookingDetail = () => {
     const [bookingDetails, setBookingDetails] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [depositDetail, setDepositDetail] = useState(null);
     const [cookies] = useCookies();
     const token = cookies.token;
-
-    const [depositDetail, setDepositDetail] = useState(null);
-
-    // Thêm state để kiểm tra xem có deposit hay không
-    const [hasDeposit, setHasDeposit] = useState(false);
 
     const fetchBookingDetails = async () => {
         try {
@@ -56,36 +52,51 @@ const BookingDetail = () => {
         }
     };
 
+    const fetchDepositDetails = async () => {
+        try {
+            console.log("Fetching deposit details for bookingId:", bookingId);
+            const response = await axios.get(`http://localhost:8080/deposit/${bookingId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            })
+            
+            if (response.data) {
+                // Nếu response.data là array
+                if (Array.isArray(response.data)) {
+                    if (response.data.length > 0) {
+                        console.log("Setting deposit detail from array:", response.data[0]);
+                        setDepositDetail(response.data[0]);
+                    } else {
+                        console.log("No deposit found in array");
+                        setDepositDetail(null);
+                    }
+                } 
+                // Nếu response.data là object
+                else {
+                    console.log("Setting deposit detail from object:", response.data);
+                    setDepositDetail(response.data);
+                }
+            } else {
+                console.log("No deposit data received");
+                setDepositDetail(null);
+            }
+        } catch (err) {
+            console.error("Error fetching deposit details:", err);
+            setDepositDetail(null);
+        }
+    };
+
     useEffect(() => {
         if (bookingId) {
             fetchBookingDetails();
+            fetchDepositDetails();
         }
     }, [bookingId, token]);
 
     useEffect(() => {
-        const fetchDepositDetail = async () => {
-            if (bookingId) {
-                try {
-                    const response = await axios.get(`http://localhost:8080/deposit/${bookingId}`, {
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                        },
-                    });
-                    if (response.data && response.data.length > 0) {
-                        setDepositDetail(response.data[0]);
-                        setHasDeposit(true);
-                    } else {
-                        setHasDeposit(false);
-                    }
-                } catch (err) {
-                    console.error("Error fetching deposit details:", err);
-                    setHasDeposit(false);
-                }
-            }
-        };
-
-        fetchDepositDetail();
-    }, [bookingId, token]);
+        console.log("Current depositDetail:", depositDetail);
+    }, [depositDetail]);
 
     const handleInputChange = (e, koiDetailId = null) => {
         const { name, value } = e.target;
@@ -236,12 +247,10 @@ const BookingDetail = () => {
         navigate(`/create-deposit/${bookingId}`);
     };
 
-    // Thêm hàm xử lý view deposit
     const handleViewDeposit = () => {
         navigate(`/view-detail-deposit/${bookingId}`);
     };
 
-    // Thêm style chung cho input và select
     const inputClasses = "w-full px-3 py-2 rounded-lg border focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900";
     const readOnlyClasses = "w-full px-3 py-2 rounded-lg bg-gray-50 border text-gray-900";
 
@@ -252,7 +261,6 @@ const BookingDetail = () => {
         <div className="container mx-auto py-6 px-4 max-w-7xl pt-40">
             <ToastContainer />
             
-            {/* Header với breadcrumb */}
             <div className="mb-8">
                 <div className="flex items-center gap-2 text-gray-500 mb-4">
                     <span onClick={() => navigate('/staff/booking-for-koi-list')} className="cursor-pointer hover:text-blue-600">
@@ -273,7 +281,6 @@ const BookingDetail = () => {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Customer Info Card */}
                 <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
                     <h3 className="text-lg font-semibold text-gray-800 mb-4">Customer Information</h3>
                     <div className="space-y-4">
@@ -288,7 +295,6 @@ const BookingDetail = () => {
                     </div>
                 </div>
 
-                {/* Booking Summary Card */}
                 <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 lg:col-span-2">
                     <h3 className="text-lg font-semibold text-gray-800 mb-4">Booking Summary</h3>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -312,7 +318,6 @@ const BookingDetail = () => {
                 </div>
             </div>
 
-            {/* Koi Details Section */}
             <div className="mt-8 bg-white rounded-xl shadow-sm p-6 border border-gray-100">
                 <h3 className="text-lg font-semibold text-gray-800 mb-6">Koi Details</h3>
                 <div className="space-y-4">
@@ -366,7 +371,6 @@ const BookingDetail = () => {
                 </div>
             </div>
 
-            {/* Additional Details Form */}
             <div className="mt-8 bg-white rounded-xl shadow-sm p-6 border border-gray-100">
                 <h3 className="text-lg font-semibold text-gray-800 mb-6">Additional Details</h3>
                 <form onSubmit={handleUpdateBooking} className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -454,44 +458,36 @@ const BookingDetail = () => {
                             </button>
                         )}
                         
-                        {bookingDetails?.paymentStatus?.toLowerCase() === 'processing' && (
+                        {(bookingDetails?.paymentStatus?.toLowerCase() === 'processing') && (
                             <div className="flex space-x-4">
-                                {hasDeposit ? (
-                                    <button 
-                                        type="button" 
-                                        onClick={handleViewDeposit} 
-                                        className="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors flex items-center space-x-2"
-                                    >
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                                            <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
-                                        </svg>
-                                        <span>View Deposit</span>
-                                    </button>
-                                ) : (
-                                    <button 
-                                        type="button" 
-                                        onClick={handleCreateDeposit} 
-                                        className="px-6 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors flex items-center space-x-2"
-                                    >
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <button 
+                                    type="button" 
+                                    onClick={depositDetail ? handleViewDeposit : handleCreateDeposit} 
+                                    className={`px-6 py-2 ${depositDetail ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-purple-600 hover:bg-purple-700'} text-white rounded-md transition-colors flex items-center space-x-2`}
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                        {depositDetail ? (
+                                            <>
+                                                <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                                                <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
+                                            </>
+                                        ) : (
                                             <path fillRule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
-                                        </svg>
-                                        <span>Create Deposit</span>
-                                    </button>
-                                )}
+                                        )}
+                                    </svg>
+                                    <span>{depositDetail ? 'View Deposit' : 'Create Deposit'}</span>
+                                </button>
                             </div>
                         )}
                     </div>
                 </form>
             </div>
 
-            {/* Thêm phần Deposit Detail khi status là shipping */}
-            {bookingDetails?.paymentStatus && 
-                bookingDetails.paymentStatus.toLowerCase() === 'shipping' && 
-                depositDetail && (
+            {bookingDetails?.paymentStatus?.toLowerCase() === 'shipping' && depositDetail && (
                 <div className="mt-8 bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-6">Deposit Information</h3>
+                    <div className="flex justify-between items-center mb-6">
+                        <h3 className="text-lg font-semibold text-gray-800">Deposit Information</h3>
+                    </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         <div>
                             <label className="text-sm text-gray-500">Deposit Amount</label>
@@ -518,38 +514,21 @@ const BookingDetail = () => {
                             </p>
                         </div>
                         <div>
-                            <label className="text-sm text-gray-500">Deposit Date</label>
-                            <p className="text-gray-900 font-medium mt-1">
-                                {new Date(depositDetail.depositDate).toLocaleDateString()}
-                            </p>
-                        </div>
-                        <div>
                             <label className="text-sm text-gray-500">Expected Delivery Date</label>
                             <p className="text-gray-900 font-medium mt-1">
                                 {new Date(depositDetail.deliveryExpectedDate).toLocaleDateString()}
                             </p>
                         </div>
-                    </div>
-                    
-                    <div className="mt-6">
-                        <label className="text-sm text-gray-500">Shipping Address</label>
-                        <p className="text-gray-900 font-medium mt-1">
-                            {depositDetail.shippingAddress}
-                        </p>
-                    </div>
-
-                    <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-                        <p className="text-sm text-blue-600 flex items-center">
-                            <span className="font-medium mr-2">Status:</span>
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                depositDetail.depositStatus && 
-                                depositDetail.depositStatus.toLowerCase() === 'complete'
-                                    ? 'bg-green-100 text-green-800' 
+                        <div>
+                            <label className="text-sm text-gray-500">Status</label>
+                            <p className={`mt-1 px-3 py-1 rounded-full text-sm font-medium inline-block ${
+                                depositDetail.depositStatus?.toLowerCase() === 'complete'
+                                    ? 'bg-green-100 text-green-800'
                                     : 'bg-yellow-100 text-yellow-800'
                             }`}>
-                                {depositDetail.depositStatus?.toUpperCase() || 'PENDING'}
-                            </span>
-                        </p>
+                                {depositDetail.depositStatus?.toUpperCase() || 'PROCESSING'}
+                            </p>
+                        </div>
                     </div>
                 </div>
             )}

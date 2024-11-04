@@ -34,19 +34,22 @@ const ViewDetailDeposit = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      if (Array.isArray(response.data) && response.data.length > 0) {
-        const depositData = response.data[0];
+      
+      // Kiểm tra nếu response.data là object
+      if (response.data && typeof response.data === 'object') {
+        // Nếu response.data là object trực tiếp
+        const depositData = Array.isArray(response.data) ? response.data[0] : response.data;
         setDeposit(depositData);
         setEditableDeposit({
-          shippingFee: depositData.shippingFee,
-          deliveryExpectedDate: depositData.deliveryExpectedDate,
-          shippingAddress: depositData.shippingAddress,
-          depositPercentage: Math.round(depositData.depositPercentage * 100),
+          shippingFee: depositData.shippingFee || 0,
+          deliveryExpectedDate: depositData.deliveryExpectedDate || null,
+          shippingAddress: depositData.shippingAddress || '',
+          depositPercentage: depositData.depositPercentage ? Math.round(depositData.depositPercentage * 100) : 0,
           depositStatus: depositData.depositStatus || 'processing'
         });
       } else {
-        console.warn("No deposit data found.");
-        setDeposit(null);
+        console.error("Invalid deposit data format:", response.data);
+        toast.error("Error loading deposit data");
       }
     } catch (error) {
       console.error("Error fetching deposit data:", error);

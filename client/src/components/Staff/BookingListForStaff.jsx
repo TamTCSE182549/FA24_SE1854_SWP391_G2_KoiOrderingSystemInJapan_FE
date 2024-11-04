@@ -57,11 +57,14 @@ const BookingListForStaff = () => {
   const handleCreateCheckin = (bookingId) => {
     navigate(`/create-checkin/${bookingId}`);  // Updated path with hyphen
   };
+  const handleCreateBookingKoi = (bookingId) => {
+    navigate(`/booking-koi/${bookingId}`);
+  };
     // Mỗi booking sẽ có nút Create Checkin
     // Nút sẽ bị vô hiệu hóa nếu booking chưa được thanh toán
     // Khi nhấn vào nút, người dùng sẽ được chuyển đến trang CreateCheckin với bookingId tương ứng
     // CreateCheckin component sẽ nhận bookingId từ URL params và sử dụng nó để tạo checkin mới
-
+    
   const columns = [
     {
       title: 'Booking ID',
@@ -112,6 +115,16 @@ const BookingListForStaff = () => {
           >
             Create Checkin
           </Button>
+
+          {record.paymentStatus === 'complete' && (
+            <Button
+              type="primary"
+              onClick={() => handleCreateBookingKoi(record.id)}
+              style={{ backgroundColor: '#10B981' }}
+            >
+              Create Koi Booking
+            </Button>
+          )}
         </Space>
       ),
     },
