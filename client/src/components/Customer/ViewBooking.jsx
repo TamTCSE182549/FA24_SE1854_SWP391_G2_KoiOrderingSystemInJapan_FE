@@ -80,8 +80,8 @@ const BookingInformation = () => {
 
   const handleDeleteBooking = async (booking) => {
     try {
-      if (booking.paymentStatus !== "pending") {
-        toast.warn("You only can delete if Payment Status is PENDING");
+      if (booking.paymentStatus === "complete") {
+        toast.warn("You only can delete if Payment Status is not COMPLETE");
         return;
       }
       await axios.put(
