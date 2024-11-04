@@ -1,6 +1,20 @@
 import React, { useState, useEffect } from "react";
-import { Card, Button, Tag, Space, DatePicker, Select, Row, Col, Pagination, Modal, Form, Input, message } from "antd";
-import { useLocation } from 'react-router-dom';
+import {
+  Card,
+  Button,
+  Tag,
+  Space,
+  DatePicker,
+  Select,
+  Row,
+  Col,
+  Pagination,
+  Modal,
+  Form,
+  Input,
+  message,
+} from "antd";
+import { useLocation } from "react-router-dom";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useCookies } from "react-cookie";
@@ -30,11 +44,11 @@ const Quotation = () => {
     try {
       const response = await axios.get("http://localhost:8080/quotations/all", {
         headers: {
-          'Authorization': `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
-      const sortedQuotations = Array.isArray(response.data) 
-        ? [...response.data].sort((a, b) => b.id - a.id)  // Sắp xếp ngược theo ID
+      const sortedQuotations = Array.isArray(response.data)
+        ? [...response.data].sort((a, b) => b.id - a.id) // Sắp xếp ngược theo ID
         : [];
       setQuotations(sortedQuotations);
     } catch (error) {
@@ -45,7 +59,6 @@ const Quotation = () => {
     }
   };
 
-  
   useEffect(() => {
     fetchQuotations();
   }, [newQuotationId]);
@@ -55,24 +68,34 @@ const Quotation = () => {
   };
 
   // Add a check before filtering
-  const filteredQuotations = Array.isArray(quotations) ? quotations.filter(quotation => {
-    if (statusFilter !== "ALL" && quotation.isApprove !== statusFilter) return false;
-    if (dateFilter && !quotation.approveTime.startsWith(dateFilter.format("YYYY-MM-DD"))) return false;
-    return true;
-  }) : [];
+  const filteredQuotations = Array.isArray(quotations)
+    ? quotations.filter((quotation) => {
+        if (statusFilter !== "ALL" && quotation.isApprove !== statusFilter)
+          return false;
+        if (
+          dateFilter &&
+          !quotation.approveTime.startsWith(dateFilter.format("YYYY-MM-DD"))
+        )
+          return false;
+        return true;
+      })
+    : [];
 
   const paginatedQuotations = filteredQuotations
-    .slice()  // Tạo bản sao để không ảnh hưởng đến mảng gốc
-    .sort((a, b) => b.id - a.id)  // Sắp xếp ngược theo ID
+    .slice() // Tạo bản sao để không ảnh hưởng đến mảng gốc
+    .sort((a, b) => b.id - a.id) // Sắp xếp ngược theo ID
     .slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const handleViewDetails = async (id) => {
     try {
-      const response = await axios.get(`http://localhost:8080/quotations/${id}`, {
-        headers: {
-          'Authorization': `Bearer ${token}` // Add token to request headers
+      const response = await axios.get(
+        `http://localhost:8080/quotations/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // Add token to request headers
+          },
         }
-      });
+      );
       console.log("Quotation data:", response.data); // Log d liệu nhận được
       setSelectedQuotation(response.data);
       setIsModalVisible(true);
@@ -88,8 +111,8 @@ const Quotation = () => {
 
   const formatDateTime = (dateTimeString) => {
     const date = new Date(dateTimeString);
-    const formattedDate = date.toISOString().split('T')[0]; // Lấy phần ngày
-    const formattedTime = date.toTimeString().split(' ')[0]; // Lấy phần thời gian
+    const formattedDate = date.toISOString().split("T")[0]; // Lấy phần ngày
+    const formattedTime = date.toTimeString().split(" ")[0]; // Lấy phần thời gian
     return { formattedDate, formattedTime };
   };
 
@@ -110,37 +133,44 @@ const Quotation = () => {
           paymentMethod: values.paymentMethod,
           vat: parseFloat(values.vat) / 100,
           discountAmount: parseFloat(values.discountAmount),
+          amount: selectedQuotation.amount,
         },
         {
           headers: {
-            'Authorization': `Bearer ${token}`
-          }
+            Authorization: `Bearer ${token}`,
+          },
         }
       );
-      
+
       // Add the quotation ID to completed payments
-      setCompletedPayments(prev => new Set([...prev, selectedQuotation.id]));
-      
+      setCompletedPayments((prev) => new Set([...prev, selectedQuotation.id]));
+
       // Show success message
-      message.success('Payment sent successfully!');
-      
+      message.success("Payment sent successfully!");
+
       // Close modal and reset
       setIsPaymentModalVisible(false);
       paymentForm.resetFields();
       fetchQuotations();
-      
     } catch (error) {
       console.error("Error updating payment:", error);
-      message.error('Failed to send payment. Please try again.');
+      message.error("Failed to send payment. Please try again.");
     }
   };
 
   return (
-    <div className="container mx-auto py-4" style={{ paddingLeft: '100px', paddingRight: '100px', paddingTop: '100px' }}>
+    <div
+      className="container mx-auto py-4"
+      style={{
+        paddingLeft: "100px",
+        paddingRight: "100px",
+        paddingTop: "100px",
+      }}
+    >
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Quotations List</h1>
-        <Button 
-          onClick={() => navigate('/staff/booking-list-for-staff')}
+        <Button
+          onClick={() => navigate("/staff/booking-list-for-staff")}
           type="primary"
         >
           Back to Booking List
@@ -172,28 +202,38 @@ const Quotation = () => {
             <Card
               title={`Booking ID: ${quotation.bookingId}`}
               extra={
-                <Tag color={
-                  quotation.isApprove === "PROCESS" ? "blue" :
-                  quotation.isApprove === "FINISH" ? "green" : "red"
-                }>
+                <Tag
+                  color={
+                    quotation.isApprove === "PROCESS"
+                      ? "blue"
+                      : quotation.isApprove === "FINISH"
+                      ? "green"
+                      : "red"
+                  }
+                >
                   {quotation.isApprove}
                 </Tag>
               }
             >
-              <p><strong>Amount:</strong> ${quotation.amount}</p>
-              <p><strong>Staff:</strong> {quotation.staffName}</p>
+              <p>
+                <strong>Amount:</strong> ${quotation.amount}
+              </p>
+              <p>
+                <strong>Staff:</strong> {quotation.staffName}
+              </p>
               <Space className="mt-2">
                 <Button onClick={() => handleViewDetails(quotation.id)}>
                   View Detail
                 </Button>
-                {quotation.isApprove === "FINISH" && !completedPayments.has(quotation.id) && (
-                  <Button 
-                    onClick={() => handleSendPayment(quotation)}
-                    type="primary"
-                  >
-                    Send Payment
-                  </Button>
-                )}
+                {quotation.isApprove === "FINISH" &&
+                  !completedPayments.has(quotation.id) && (
+                    <Button
+                      onClick={() => handleSendPayment(quotation)}
+                      type="primary"
+                    >
+                      Send Payment
+                    </Button>
+                  )}
               </Space>
             </Card>
           </Col>
@@ -207,22 +247,22 @@ const Quotation = () => {
         pageSize={pageSize}
         onChange={(page) => setCurrentPage(page)}
         itemRender={(_, type, originalElement) => {
-          if (type === 'next' || type === 'prev') {
+          if (type === "next" || type === "prev") {
             return (
-              <Button 
-                style={{ 
-                  color: 'white', 
-                  backgroundColor: '#1890ff', 
-                  border: 'none',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  width: '32px',  // Đảm bảo kích thước đồng nhất
-                  height: '32px', // Đảm bảo kích thước đồng nhất
-                  fontSize: '14px' // Điều chỉnh kích thước chữ nếu cần
+              <Button
+                style={{
+                  color: "white",
+                  backgroundColor: "#1890ff",
+                  border: "none",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: "32px", // Đảm bảo kích thước đồng nhất
+                  height: "32px", // Đảm bảo kích thước đồng nhất
+                  fontSize: "14px", // Điều chỉnh kích thước chữ nếu cần
                 }}
               >
-                {type === 'next' ? '>' : '<'}
+                {type === "next" ? ">" : "<"}
               </Button>
             );
           }
@@ -237,21 +277,39 @@ const Quotation = () => {
         footer={[
           <Button key="close" onClick={handleModalClose}>
             Close
-          </Button>
+          </Button>,
         ]}
       >
         {selectedQuotation && (
           <div>
-            <p><strong>Booking ID:</strong> {selectedQuotation.bookingId}</p>
-            <p><strong>Amount:</strong> ${selectedQuotation.amount}</p>
-            <p><strong>Description:</strong> {selectedQuotation.description}</p>
-            <p><strong>Staff Name:</strong> {selectedQuotation.staffName}</p>
-            <p><strong>Manager Name:</strong> {selectedQuotation.managerName}</p>
-            <p><strong>Status:</strong> {selectedQuotation.isApprove}</p>
+            <p>
+              <strong>Booking ID:</strong> {selectedQuotation.bookingId}
+            </p>
+            <p>
+              <strong>Amount:</strong> ${selectedQuotation.amount}
+            </p>
+            <p>
+              <strong>Description:</strong> {selectedQuotation.description}
+            </p>
+            <p>
+              <strong>Staff Name:</strong> {selectedQuotation.staffName}
+            </p>
+            <p>
+              <strong>Manager Name:</strong> {selectedQuotation.managerName}
+            </p>
+            <p>
+              <strong>Status:</strong> {selectedQuotation.isApprove}
+            </p>
             {selectedQuotation.approveTime && (
               <>
-                <p><strong>Approve Date:</strong> {formatDateTime(selectedQuotation.approveTime).formattedDate}</p>
-                <p><strong>Approve Time:</strong> {formatDateTime(selectedQuotation.approveTime).formattedTime}</p>
+                <p>
+                  <strong>Approve Date:</strong>{" "}
+                  {formatDateTime(selectedQuotation.approveTime).formattedDate}
+                </p>
+                <p>
+                  <strong>Approve Time:</strong>{" "}
+                  {formatDateTime(selectedQuotation.approveTime).formattedTime}
+                </p>
               </>
             )}
           </div>
@@ -264,8 +322,16 @@ const Quotation = () => {
         onCancel={() => setIsPaymentModalVisible(false)}
         footer={null}
       >
-        <Form form={paymentForm} onFinish={handlePaymentSubmit} layout="vertical">
-          <Form.Item name="paymentMethod" label="Payment Method" rules={[{ required: true }]}>
+        <Form
+          form={paymentForm}
+          onFinish={handlePaymentSubmit}
+          layout="vertical"
+        >
+          <Form.Item
+            name="paymentMethod"
+            label="Payment Method"
+            rules={[{ required: true }]}
+          >
             <Select>
               <Option value="CASH">Cash</Option>
               <Option value="CREDIT_CARD">Credit Card</Option>
@@ -275,7 +341,11 @@ const Quotation = () => {
           <Form.Item name="vat" label="VAT (%)" rules={[{ required: true }]}>
             <Input type="number" step="0.01" min="0" max="100" />
           </Form.Item>
-          <Form.Item name="discountAmount" label="Discount Amount" rules={[{ required: true }]}>
+          <Form.Item
+            name="discountAmount"
+            label="Discount Amount"
+            rules={[{ required: true }]}
+          >
             <Input type="number" step="0.01" min="0" />
           </Form.Item>
           <Form.Item>
