@@ -39,7 +39,7 @@ const Delivery = () => {
   const token = cookies.token;
   const decodedToken = jwtDecode(token);
   const role = decodedToken.role;
-  const [isModalVisible, setIsModalVisible] = useState(false);
+
   const [selectedDelivery, setSelectedDelivery] = useState(null);
   const [newRoute, setNewRoute] = useState("");
   const [newDescription, setNewDescription] = useState("");
@@ -56,6 +56,7 @@ const Delivery = () => {
   const [isUpdateCheckoutModalVisible, setIsUpdateCheckoutModalVisible] =
     useState(false);
   const [checkoutReason, setCheckoutReason] = useState("");
+  const [isUpdateModalVisible, setIsUpdateModalVisible] = useState(false);
 
   const navigate = useNavigate();
 
@@ -105,7 +106,7 @@ const Delivery = () => {
     setSelectedDelivery(delivery);
     setNewRoute(delivery.route);
     setNewDescription(delivery.healthKoiDescription);
-    setIsModalVisible(true);
+    setIsUpdateModalVisible(true);
   };
 
   const handleUpdate = async () => {
@@ -127,7 +128,7 @@ const Delivery = () => {
         )
       );
       message.success("Delivery updated successfully");
-      setIsModalVisible(false);
+      setIsUpdateModalVisible(false);
     } catch (error) {
       console.error("Error updating delivery:", error);
       setError("Failed to update delivery data.");
@@ -318,7 +319,7 @@ const Delivery = () => {
                   },
                 ]}
               />
-              {role === "DELIVERING_STAFF" && (
+              {role === "DELIVERING_STAFF" && !checkoutInfo && (
                 <div
                   style={{
                     display: "flex",
@@ -531,6 +532,27 @@ const Delivery = () => {
         <Input.TextArea
           value={newDeliveryDescription}
           onChange={(e) => setNewDeliveryDescription(e.target.value)}
+          placeholder="Health Koi Description"
+          rows={4}
+          style={{ marginBottom: 16 }}
+        />
+      </Modal>
+
+      <Modal
+        title="Update Delivery"
+        visible={isUpdateModalVisible}
+        onOk={handleUpdate}
+        onCancel={() => setIsUpdateModalVisible(false)}
+      >
+        <Input
+          value={newRoute}
+          onChange={(e) => setNewRoute(e.target.value)}
+          placeholder="Delivery Route"
+          style={{ marginBottom: 16 }}
+        />
+        <Input.TextArea
+          value={newDescription}
+          onChange={(e) => setNewDescription(e.target.value)}
           placeholder="Health Koi Description"
           rows={4}
           style={{ marginBottom: 16 }}
