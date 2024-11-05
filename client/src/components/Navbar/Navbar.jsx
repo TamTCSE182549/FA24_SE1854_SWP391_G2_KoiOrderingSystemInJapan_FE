@@ -29,6 +29,7 @@ const Navbar = () => {
   const [lastName, setLastName] = useState(null);
   const [cookies, setCookie, removeCookie] = useCookies(["token"]);
   const [drawerVisible, setDrawerVisible] = useState(false);
+  const [role, setRole] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -40,6 +41,7 @@ const Navbar = () => {
         setEmail(decodedToken.email);
         setFirstName(decodedToken.firstName);
         setLastName(decodedToken.lastName);
+        setRole(decodedToken.role);
         setLogin(true);
       } catch (error) {
         console.log("Invalid token", error);
@@ -74,6 +76,9 @@ const Navbar = () => {
     navigate("/");
   };
 
+  const isStaff = role === "SALES_STAFF" || role === "DELIVERING_STAFF" || role === "CONSULTING_STAFF";
+  const isManager = role === "MANAGER";
+
   const userMenu = (
     <Menu>
       <Menu.Item key="1">
@@ -82,7 +87,7 @@ const Navbar = () => {
       <Menu.Item key="2">
         <Link to="/ViewBooking">Bookings & Trips</Link>
       </Menu.Item>
-      <Menu.Item key="3" >
+      <Menu.Item key="3">
         <Link to="/customer/booking-for-koi-list">Booking Koi</Link>
       </Menu.Item>
       <Menu.Item key="4">
@@ -94,10 +99,19 @@ const Navbar = () => {
       <Menu.Item key="6">
         <Link to="/ViewCheckin">Check-in</Link>
       </Menu.Item>
+      {isStaff && (
+        <Menu.Item key="staff-dashboard">
+          <Link to="/staff/dashboard">Staff Dashboard</Link>
+        </Menu.Item>
+      )}
+      {isManager && (
+        <Menu.Item key="admin-dashboard">
+          <Link to="/admin/dashboard">Admin Dashboard</Link>
+        </Menu.Item>
+      )}
       <Menu.Item key="7" onClick={handleSignOut}>
         Sign out
       </Menu.Item>
-      
     </Menu>
   );
 
@@ -218,7 +232,7 @@ const Navbar = () => {
   ) : (
     <div className="fixed top-0 left-0 w-full z-20">
       {/* Gradient background overlay */}
-      <div className="bg-gradient-to-r from-white via-gray-50 to-white backdrop-blur-sm border-b border-gray-100">
+      <div className="bg-gradient-to-r from-white via-gray-50 to-white backdrop-blur-sm border-b border-gray-300">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex justify-between items-center h-24">
             {/* Logo Section - Enhanced */}

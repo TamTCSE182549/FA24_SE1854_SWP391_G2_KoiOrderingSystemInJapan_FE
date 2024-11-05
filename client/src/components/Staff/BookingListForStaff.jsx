@@ -3,7 +3,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import { useCookies } from "react-cookie";
-import { Table, Modal, Button, Tag, Space } from 'antd';
+import { Table, Modal, Button, Tag, Space, Select } from 'antd';
 
 const BookingListForStaff = () => {
   const [cookies] = useCookies(["token"]);
@@ -12,6 +12,19 @@ const BookingListForStaff = () => {
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
+  const [filteredStatus, setFilteredStatus] = useState('all');
+
+  const statusOptions = [
+    { value: 'all', label: 'All Status' },
+    { value: 'pending', label: 'Pending' },
+    { value: 'processing', label: 'Processing' },
+    { value: 'complete', label: 'Complete' },
+    { value: 'cancelled', label: 'Cancelled' },
+  ];
+
+  const filteredBookings = bookingList.filter(booking => 
+    filteredStatus === 'all' ? true : booking.paymentStatus.toLowerCase() === filteredStatus
+  );
 
   const formatDateTime = (dateTimeString) => {
     const date = new Date(dateTimeString);
@@ -135,6 +148,15 @@ const BookingListForStaff = () => {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Booking List</h1>
         <Space>
+          <div style={{ marginRight: '16px' }}>
+            <span style={{ marginRight: '8px' }}>Payment Status:</span>
+            <Select
+              defaultValue="all"
+              style={{ width: 200 }}
+              onChange={(value) => setFilteredStatus(value)}
+              options={statusOptions}
+            />
+          </div>
           <Button 
             type="primary"
             onClick={() => navigate('/staff/Quotation')}
@@ -154,7 +176,7 @@ const BookingListForStaff = () => {
       
       <Table 
         columns={columns}
-        dataSource={bookingList}
+        dataSource={filteredBookings}
         rowKey="id"
         pagination={{ pageSize: 10 }}
       />
