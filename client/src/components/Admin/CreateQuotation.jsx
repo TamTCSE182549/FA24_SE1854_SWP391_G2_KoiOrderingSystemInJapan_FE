@@ -14,6 +14,7 @@ const CreateQuotation = () => {
     const [decodedToken, setDecodedToken] = useState(null);
     const [cookies] = useCookies(["token"]);
     const token = cookies.token;
+    const [amountError, setAmountError] = useState("");
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -33,8 +34,30 @@ const CreateQuotation = () => {
         }
       }, [token]);
 
+    const validateAmount = (value) => {
+        if (isNaN(value) || value <= 0) {
+            setAmountError("Amount must be a positive number");
+            return false;
+        }
+        if (value > 100000) {
+            setAmountError("Amount cannot exceed 100,000");
+            return false;
+        }
+        setAmountError("");
+        return true;
+    };
+
+    const handleAmountChange = (e) => {
+        const value = e.target.value;
+        setAmount(value);
+        validateAmount(parseFloat(value));
+    };
+
     const handleCreateQuotation = async (e) => {
         e.preventDefault();
+        if (!validateAmount(parseFloat(amount))) {
+            return;
+        }
         setLoading(true);
         const quotationData = { 
             bookingId: parseInt(bookingId, 10),
@@ -87,10 +110,15 @@ const CreateQuotation = () => {
                         <input 
                             type="number" 
                             value={amount} 
-                            onChange={(e) => setAmount(e.target.value)}
-                            className="w-full p-2 border rounded bg-white text-gray-800"
+                            onChange={handleAmountChange}
+                            className={`w-full p-2 border rounded bg-white text-gray-800 ${
+                                amountError ? 'border-red-500' : ''
+                            }`}
                             required
                         />
+                        {amountError && (
+                            <p className="text-red-500 text-sm mt-1">{amountError}</p>
+                        )}
                     </div>
                     <div>
                         <label className="block mb-1 text-gray-700 font-semibold">Description:</label>
