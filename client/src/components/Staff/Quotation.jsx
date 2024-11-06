@@ -38,6 +38,7 @@ const Quotation = () => {
   const [isPaymentModalVisible, setIsPaymentModalVisible] = useState(false);
   const [paymentForm] = Form.useForm();
   const [completedPayments, setCompletedPayments] = useState(new Set());
+  const [bookingDetails, setBookingDetails] = useState(null);
 
   const fetchQuotations = async () => {
     setLoading(true);
@@ -82,7 +83,7 @@ const Quotation = () => {
     : [];
 
   const paginatedQuotations = filteredQuotations
-    .slice() // Tạo bản sao để không ảnh hưởng đến mảng gốc
+    .slice() // Tạo bản sao đ không ảnh hưởng đến mảng gốc
     .sort((a, b) => b.id - a.id) // Sắp xếp ngược theo ID
     .slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
@@ -116,9 +117,38 @@ const Quotation = () => {
     return { formattedDate, formattedTime };
   };
 
-  const handleSendPayment = (quotation) => {
+  const fetchBookingDetails = async (bookingId) => {
+    try {
+      const response = await axios.get(`http://localhost:8080/bookings/BookingForTour/${bookingId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      setBookingDetails(response.data);
+      
+      // Convert VAT to nearest allowed value (0, 5, or 10)
+      const vatPercentage = response.data.vat * 100;
+      let normalizedVat;
+      if (vatPercentage <= 0) normalizedVat = "0";
+      else if (vatPercentage <= 5) normalizedVat = "5";
+      else normalizedVat = "10";
+
+      // Pre-fill the form with initial values
+      paymentForm.setFieldsValue({
+        paymentMethod: response.data.paymentMethod,
+        vat: normalizedVat,
+        discountAmount: response.data.discountAmount
+      });
+    } catch (error) {
+      console.error("Error fetching booking details:", error);
+      message.error("Failed to fetch booking details");
+    }
+  };
+
+  const handleSendPayment = async (quotation) => {
     if (quotation.isApprove === "FINISH") {
       setSelectedQuotation(quotation);
+      await fetchBookingDetails(quotation.bookingId);
       setIsPaymentModalVisible(true);
     }
   };
@@ -131,7 +161,7 @@ const Quotation = () => {
           bookingID: selectedQuotation.bookingId,
           paymentStatus: "processing",
           paymentMethod: values.paymentMethod,
-          vat: parseFloat(values.vat) / 100,
+          vat: Number(values.vat) / 100,
           discountAmount: parseFloat(values.discountAmount),
           amount: selectedQuotation.amount,
         },
@@ -142,13 +172,8 @@ const Quotation = () => {
         }
       );
 
-      // Add the quotation ID to completed payments
       setCompletedPayments((prev) => new Set([...prev, selectedQuotation.id]));
-
-      // Show success message
       message.success("Payment sent successfully!");
-
-      // Close modal and reset
       setIsPaymentModalVisible(false);
       paymentForm.resetFields();
       fetchQuotations();
@@ -319,9 +344,41 @@ const Quotation = () => {
       <Modal
         title="Send Payment"
         visible={isPaymentModalVisible}
-        onCancel={() => setIsPaymentModalVisible(false)}
+        onCancel={() => {
+          setIsPaymentModalVisible(false);
+          setBookingDetails(null);
+          paymentForm.resetFields();
+        }}
         footer={null}
+        width={700}
       >
+        {bookingDetails && (
+          <div className="mb-6 p-4 bg-gray-50 rounded">
+            <h3 className="text-lg font-bold mb-4">Booking Information</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="mb-2"><strong>Customer Name:</strong> {bookingDetails.nameCus}</p>
+                <p className="mb-2"><strong>Email:</strong> {bookingDetails.email}</p>
+                <p className="mb-2"><strong>Phone:</strong> {bookingDetails.phone}</p>
+                <p className="mb-2"><strong>Booking Type:</strong> {bookingDetails.bookingType}</p>
+              </div>
+              <div>
+                <p className="mb-2"><strong>Total Amount:</strong> ${bookingDetails.totalAmount}</p>
+                <p className="mb-2"><strong>VAT (%):</strong> {bookingDetails.vat * 100}%</p>
+                <p className="mb-2"><strong>VAT Amount:</strong> ${bookingDetails.vatAmount}</p>
+                <p className="mb-2"><strong>Discount Amount:</strong> ${bookingDetails.discountAmount}</p>
+                <p className="mb-2"><strong>Total with VAT:</strong> ${bookingDetails.totalAmountWithVAT}</p>
+              </div>
+              <div className="col-span-2">
+                <p className="mb-2"><strong>Payment Method:</strong> {bookingDetails.paymentMethod}</p>
+                <p className="mb-2"><strong>Payment Status:</strong> {bookingDetails.paymentStatus}</p>
+                <p className="mb-2"><strong>Created Date:</strong> {bookingDetails.createdDate && new Date(bookingDetails.createdDate).toLocaleString()}</p>
+                <p className="mb-2"><strong>Updated Date:</strong> {bookingDetails.updatedDate && new Date(bookingDetails.updatedDate).toLocaleString()}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         <Form
           form={paymentForm}
           onFinish={handlePaymentSubmit}
@@ -330,7 +387,7 @@ const Quotation = () => {
           <Form.Item
             name="paymentMethod"
             label="Payment Method"
-            rules={[{ required: true }]}
+            rules={[{ required: true, message: 'Please select payment method' }]}
           >
             <Select>
               <Option value="CASH">Cash</Option>
@@ -338,20 +395,57 @@ const Quotation = () => {
               <Option value="BANK_TRANSFER">Bank Transfer</Option>
             </Select>
           </Form.Item>
-          <Form.Item name="vat" label="VAT (%)" rules={[{ required: true }]}>
-            <Input type="number" step="0.01" min="0" max="100" />
+          <Form.Item 
+            name="vat" 
+            label="VAT" 
+            rules={[
+              { required: true, message: 'Please select VAT rate' }
+            ]}
+          >
+            <Select placeholder="Select VAT rate">
+              <Option value="0">NO VAT (0%)</Option>
+              <Option value="5">5%</Option>
+              <Option value="10">10%</Option>
+            </Select>
           </Form.Item>
           <Form.Item
             name="discountAmount"
             label="Discount Amount"
-            rules={[{ required: true }]}
+            rules={[
+              { required: true, message: 'Please input discount amount' },
+              {
+                validator: (_, value) => {
+                  if (value < 0) {
+                    return Promise.reject('Discount amount cannot be negative');
+                  }
+                  if (selectedQuotation && value > selectedQuotation.amount) {
+                    return Promise.reject('Discount cannot exceed total amount');
+                  }
+                  return Promise.resolve();
+                }
+              }
+            ]}
           >
-            <Input type="number" step="0.01" min="0" />
+            <Input 
+              type="number" 
+              step="0.01" 
+              min="0"
+              placeholder="Enter discount amount" 
+            />
           </Form.Item>
-          <Form.Item>
-            <Button type="primary" htmlType="submit">
-              Send Payment
-            </Button>
+          <Form.Item className="flex justify-end">
+            <Space>
+              <Button onClick={() => {
+                setIsPaymentModalVisible(false);
+                setBookingDetails(null);
+                paymentForm.resetFields();
+              }}>
+                Cancel
+              </Button>
+              <Button type="primary" htmlType="submit">
+                Confirm Payment
+              </Button>
+            </Space>
           </Form.Item>
         </Form>
       </Modal>

@@ -49,11 +49,11 @@ const Login = () => {
     if (role === "CUSTOMER") {
       navigate("/");
     } else if (role === "MANAGER") {
-      navigate("/admin");
+      navigate("/admin/dashboard");
     } else if (
       ["SALES_STAFF", "DELIVERING_STAFF", "CONSULTING_STAFF"].includes(role)
     ) {
-      navigate("/staff");
+      navigate("/staff/dashboard");
     } else {
       toast.error("Unauthorized role");
     }

@@ -137,10 +137,13 @@ const BookingListForStaff = () => {
           >
             View Details
           </Button>
-          <Button onClick={() => handleCreateQuotation(record)}>
-            Create Quotation
-          </Button>
-          <Button
+
+          {record.paymentStatus.toLowerCase() !== 'complete' && (
+            <Button onClick={() => handleCreateQuotation(record)}>
+              Create Quotation
+            </Button>
+          )}
+          <Button 
             type="default"
             onClick={() => handleCreateCheckin(record.id)}
             disabled={record.paymentStatus.toLowerCase() !== "processing"}
