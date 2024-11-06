@@ -6,6 +6,14 @@ import {
   ShoppingCartOutlined,
   DownOutlined,
   MenuOutlined,
+  CalendarOutlined,
+  BookOutlined,
+  FileTextOutlined,
+  StarOutlined,
+  CheckCircleOutlined,
+  DashboardOutlined,
+  LogoutOutlined,
+  ShopOutlined
 } from "@ant-design/icons";
 import Logo from "../../assets/bg_f8f8f8-flat_750x_075_f-pad_750x1000_f8f8f8-removebg-preview.png";
 import { useCookies } from "react-cookie";
@@ -82,35 +90,63 @@ const Navbar = () => {
   const userMenu = (
     <Menu>
       <Menu.Item key="1">
-        <Link to="/profile">View Profile</Link>
+        <Link to="/profile" className="flex items-center space-x-2">
+          <UserOutlined className="text-blue-500" />
+          <span>View Profile</span>
+        </Link>
       </Menu.Item>
       <Menu.Item key="2">
-        <Link to="/ViewBooking">Bookings & Trips</Link>
+        <Link to="/ViewBooking" className="flex items-center space-x-2">
+          <CalendarOutlined className="text-green-500" />
+          <span>Bookings & Trips</span>
+        </Link>
       </Menu.Item>
       <Menu.Item key="3">
-        <Link to="/customer/booking-for-koi-list">Booking Koi</Link>
+        <Link to="/customer/booking-for-koi-list" className="flex items-center space-x-2">
+          <ShopOutlined className="text-orange-500" />
+          <span>Booking Koi</span>
+        </Link>
       </Menu.Item>
       <Menu.Item key="4">
-        <Link to="/Quotation">Quotations</Link>
+        <Link to="/Quotation" className="flex items-center space-x-2">
+          <FileTextOutlined className="text-purple-500" />
+          <span>Quotations</span>
+        </Link>
       </Menu.Item>
       <Menu.Item key="5">
-        <Link to="/reviews">Reviews</Link>
+        <Link to="/reviews" className="flex items-center space-x-2">
+          <StarOutlined className="text-yellow-500" />
+          <span>Reviews</span>
+        </Link>
       </Menu.Item>
       <Menu.Item key="6">
-        <Link to="/ViewCheckin">Check-in</Link>
+        <Link to="/ViewCheckin" className="flex items-center space-x-2">
+          <CheckCircleOutlined className="text-cyan-500" />
+          <span>Check-in</span>
+        </Link>
       </Menu.Item>
       {isStaff && (
         <Menu.Item key="staff-dashboard">
-          <Link to="/staff/dashboard">Staff Dashboard</Link>
+          <Link to="/staff/dashboard" className="flex items-center space-x-2">
+            <DashboardOutlined className="text-blue-600" />
+            <span>Staff Dashboard</span>
+          </Link>
         </Menu.Item>
       )}
       {isManager && (
         <Menu.Item key="admin-dashboard">
-          <Link to="/admin/dashboard">Admin Dashboard</Link>
+          <Link to="/admin/dashboard" className="flex items-center space-x-2">
+            <DashboardOutlined className="text-red-600" />
+            <span>Admin Dashboard</span>
+          </Link>
         </Menu.Item>
       )}
-      <Menu.Item key="7" onClick={handleSignOut}>
-        Sign out
+      <Menu.Divider />
+      <Menu.Item key="7" onClick={handleSignOut} danger>
+        <div className="flex items-center space-x-2 text-red-500">
+          <LogoutOutlined />
+          <span>Sign out</span>
+        </div>
       </Menu.Item>
     </Menu>
   );
@@ -292,7 +328,7 @@ const Navbar = () => {
                           {`${firstName} ${lastName}`}
                         </span>
                         <span className="text-xs text-gray-500">
-                          Premium Member
+                          {isManager ? 'Admin' : isStaff ? 'Staff' : 'Member'}
                         </span>
                       </div>
 
