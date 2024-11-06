@@ -6,6 +6,12 @@ import "react-toastify/dist/ReactToastify.css";
 import { useCookies } from "react-cookie"; // Thêm useCookies để lấy token từ cookie
 import { jwtDecode } from "jwt-decode";
 import { Button, Row, Col, Pagination, Tag, Tooltip } from "antd"; // Import Ant Design components
+import { 
+  EyeOutlined, 
+  CreditCardOutlined, 
+  FileTextOutlined, 
+  CloseCircleOutlined 
+} from '@ant-design/icons';
 
 const BookingInformation = () => {
   const [cookies] = useCookies(["token"]);
@@ -145,162 +151,168 @@ const BookingInformation = () => {
   };
 
   return (
-    <div className="container mt-20 text-black">
-      <section className="text-center">
-        <Row gutter={[16, 16]}>
+    <div className="container mx-auto px-4 mt-40 pt-10 min-h-screen bg-gradient-to-b from-blue-50 to-white">
+      <div className="text-center mb-8">
+        <h1 className="text-3xl font-bold text-blue-800 mb-2">My Koi Bookings</h1>
+        <p className="text-gray-600">Track and manage your Koi fish purchases</p>
+      </div>
+
+      <section>
+        <Row gutter={[24, 24]}>
           {currentBookings.map((booking, index) => (
-            <Col key={index} span={12} style={{ margin: "10px auto" }}>
-              <div
-                style={{
-                  display: "flex",
-                  padding: "5px",
-                  borderRadius: "10px",
-                  boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-                  backgroundColor: "#fff",
-                }}
-              >
-                {/* Left Column: Image */}
-                <div style={{ marginRight: 20 }}>
-                  <img
-                    alt="Koi Fish"
-                    src="https://asiatourist.vn/wp-content/uploads/2021/04/khu-du-lich-la-phong-da-lat-5.jpg"
-                    style={{ width: 150, borderRadius: "8px" }}
-                  />
-                  <div className="mt-4">
-                    {currentBookings.some(
-                      (booking) => booking.paymentStatus === "pending"
-                    ) && (
-                      <Tag color="yellow" className="font-bold text-sm">
-                        Note: Wait for Contact
-                      </Tag>
-                    )}
-                  </div>
+            <Col key={index} xs={24} lg={12}>
+              <div className="bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden border border-gray-100">
+                {/* Header with curved design */}
+                <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-3 text-white">
+                  <h3 className="text-lg font-semibold">Booking #{booking.id}</h3>
+                  <p className="text-sm opacity-90">{formatDateTime(booking.createdDate)}</p>
                 </div>
 
-                {/* Middle Column: Information */}
-                <div style={{ flex: 1, marginRight: 20 }}>
-                  <h5 className="mb-2">
-                    <strong>Booking Information</strong>
-                  </h5>
-                  <Row gutter={[10, 8]}>
-                    <Col span={12} className="mt-2">
-                      <p style={{ textAlign: "left" }}>
-                        VAT: <strong>{booking.vat}</strong>
-                      </p>
-                      <p style={{ textAlign: "left" }}>
-                        VAT Amount: <strong>{booking.vatAmount}</strong>
-                      </p>
-                      <p style={{ textAlign: "left" }}>
-                        Discount Amount:{" "}
-                        <strong>{booking.discountAmount}</strong>
-                      </p>
-                    </Col>
-                    <Col span={12}>
-                      <div className="flex items-center mt-2">
-                        <p className="text-left text-gray-700 mr-2">Time:</p>
-                        <Tooltip title="Booking Created Date">
-                          <Tag
-                            color="blue"
-                            className="text-white bg-blue-500 hover:bg-blue-300 transition duration-200 ease-in-out"
-                          >
-                            {formatDateTime(booking.createdDate)}
+                <div className="p-6 flex flex-col md:flex-row gap-6">
+                  {/* Left: Koi Image Section */}
+                  <div className="md:w-1/4">
+                    <div className="relative group">
+                      <img
+                        src="https://asiatourist.vn/wp-content/uploads/2021/04/khu-du-lich-la-phong-da-lat-5.jpg"
+                        alt="Koi Fish"
+                        className="w-full h-40 object-cover rounded-lg shadow-sm group-hover:opacity-90 transition-opacity duration-300"
+                      />
+                      {booking.paymentStatus === "pending" && (
+                        <div className="absolute bottom-2 left-2">
+                          <Tag color="orange" className="font-semibold text-xs">
+                            Awaiting Confirmation
                           </Tag>
-                        </Tooltip>
-                      </div>
-                      <p style={{ textAlign: "left" }}>
-                        Payment Status:{" "}
-                        <Tag
-                          color={getPaymentStatusColor(booking.paymentStatus)}
-                        >
-                          <strong>{booking.paymentStatus}</strong>
-                        </Tag>
-                      </p>
-                      <p style={{ textAlign: "left" }}>
-                        Payment Method:{" "}
-                        <Tag
-                          color={getPaymentMethodColor(booking.paymentMethod)}
-                        >
-                          <strong>{booking.paymentMethod}</strong>
-                        </Tag>
-                      </p>
-                    </Col>
-                  </Row>
-                </div>
-
-                {/* Right Column: Additional Information and Buttons */}
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "flex-end",
-                  }}
-                >
-                  <div style={{ marginBottom: "10px", textAlign: "left" }}>
-                    <p style={{ textAlign: "left" }}>
-                      Total Amount:{" "}
-                      <strong className="text-red-500">
-                        {booking.totalAmount}
-                      </strong>
-                    </p>
-                    <p style={{ textAlign: "left" }}>
-                      Total Amount With VAT:{" "}
-                      <strong className="text-red-500">
-                        {booking.totalAmountWithVAT}
-                      </strong>
-                    </p>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <Button
-                    type="primary"
-                    className="me-2"
-                    onClick={() => handleViewDetailBooking(booking)}
-                    style={{ width: "100%" }}
-                  >
-                    View Detail
-                  </Button>
-                  {booking.paymentStatus !== "complete" && (
-                    <Button
-                      type="primary"
-                      danger
-                      color="danger"
-                      className="me-2 bg-red-500"
-                      onClick={() => handleDeleteBooking(booking)}
-                      style={{ width: "100%" }}
-                    >
-                      Cancel Booking
-                    </Button>
-                  )}
-                  {booking.paymentStatus === "pending" &&
-                    userRole === "SALES_STAFF" && (
-                      <Button
-                        type="secondary"
-                        className="me-2"
-                        onClick={() => handleCreateQuotation(booking)}
-                        style={{ width: "100%" }}
-                      >
-                        Create Quotation
-                      </Button>
-                    )}
-                  {booking.paymentStatus === "processing" && (
-                    <Button
-                      type="primary"
-                      className="bg-green-500 hover:bg-green-600"
-                      onClick={() => handlePayment(booking)}
-                      style={{ width: "100%" }}
-                    >
-                      Pay
-                    </Button>
-                  )}
+
+                  {/* Middle: Booking Details */}
+                  <div className="md:w-2/4 space-y-4">
+                    {/* Price Information */}
+                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                      <div className="grid grid-cols-2 gap-x-8 gap-y-3">
+                        {/* Original Price */}
+                        <div className="bg-blue-50 p-2 rounded-lg">
+                          <p className="text-gray-600 text-sm">Original Price</p>
+                          <p className="font-semibold text-lg text-blue-700">${booking.totalAmount}</p>
+                        </div>
+
+                        {/* Discount */}
+                        <div className="bg-green-50 p-2 rounded-lg">
+                          <p className="text-gray-600 text-sm">Discount</p>
+                          <p className="font-semibold text-lg text-green-600">
+                            - ${booking.discountAmount}
+                          </p>
+                        </div>
+
+                        {/* VAT Rate */}
+                        <div className="bg-purple-50 p-2 rounded-lg border-t">
+                          <div className="flex items-center gap-2">
+                            <p className="text-gray-600 text-sm pb-1">VAT percent</p>
+                          </div>
+                          <Tag color="purple">{booking.vat * 100}%</Tag>
+                        </div>
+
+                        {/* Final Total */}
+                        <div className="bg-indigo-50 p-2 rounded-lg border-t">
+                          <p className="text-gray-600 text-sm">Total (Inc. VAT)</p>
+                          <p className="font-bold text-lg text-indigo-600">
+                            ${booking.totalAmountWithVAT}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Status and Payment Method */}
+                    <div className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+                      <div>
+                        <p className="text-gray-500 text-sm mb-1">Status</p>
+                        <Tag color={getPaymentStatusColor(booking.paymentStatus)} className="text-sm">
+                          {booking.paymentStatus.toUpperCase()}
+                        </Tag>
+                      </div>
+                      <div>
+                        <p className="text-gray-500 text-sm mb-1">Payment Method</p>
+                        <Tag color={getPaymentMethodColor(booking.paymentMethod)} className="text-sm">
+                          {booking.paymentMethod}
+                        </Tag>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right: Actions */}
+                  <div className="md:w-1/4 flex flex-col justify-between">
+                    {/* Total Amount Display */}
+                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-100">
+                      <div className="text-center mb-3">
+                        <p className="text-gray-600 text-sm">Total Payment</p>
+                        <p className="text-2xl font-bold text-blue-700">
+                          ${booking.totalAmountWithVAT}
+                        </p>
+                      </div>
+                      <div className="text-sm bg-white p-3 rounded-lg shadow-sm">
+                        <div className="flex justify-between mb-2 text-gray-600">
+                          <span>Subtotal:</span>
+                          <span className="font-medium">${booking.totalAmount}</span>
+                        </div>
+                        <div className="flex justify-between mb-2 text-gray-600">
+                          <span>VAT:</span>
+                          <span className="font-medium text-purple-600">${booking.vatAmount}</span>
+                        </div>
+                        <div className="flex justify-between text-gray-600">
+                          <span>Discount:</span>
+                          <span className="font-medium text-green-600">- ${booking.discountAmount}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="grid grid-cols-3 gap-1 mt-4">
+                      <Tooltip title="View booking details">
+                        <Button
+                          type="primary"
+                          onClick={() => handleViewDetailBooking(booking)}
+                          className="!bg-blue-500 hover:!bg-blue-600 flex items-center justify-center"
+                          icon={<EyeOutlined />}
+                        />
+                      </Tooltip>
+
+                      {booking.paymentStatus === "processing" && (
+                        <Tooltip title="Proceed to payment">
+                          <Button
+                            type="primary"
+                            onClick={() => handlePayment(booking)}
+                            className="!bg-green-500 hover:!bg-green-600 flex items-center justify-center"
+                            icon={<CreditCardOutlined />}
+                          />
+                        </Tooltip>
+                      )}
+
+                      {booking.paymentStatus !== "complete" && (
+                        <Tooltip title="Cancel this booking">
+                          <Button
+                            danger
+                            onClick={() => handleDeleteBooking(booking)}
+                            className="hover:!bg-red-600 hover:!text-white flex items-center justify-center"
+                            icon={<CloseCircleOutlined />}
+                          />
+                        </Tooltip>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             </Col>
           ))}
         </Row>
+
         <Pagination
           current={currentPage}
           pageSize={bookingsPerPage}
           total={bookingList.length}
           onChange={onPageChange}
-          style={{ marginTop: "20px" }}
+          className="text-center mt-8 mb-12"
         />
       </section>
       <ToastContainer />
