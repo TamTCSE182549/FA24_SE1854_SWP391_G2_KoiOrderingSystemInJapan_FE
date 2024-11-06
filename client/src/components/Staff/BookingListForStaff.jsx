@@ -74,7 +74,7 @@ const BookingListForStaff = () => {
     navigate(`/booking-koi/${bookingId}`);
   };
     // Mỗi booking sẽ có nút Create Checkin
-    // Nút sẽ bị vô hiệu hóa nếu booking ch��a được thanh toán
+    // Nút sẽ bị vô hiệu hóa nếu booking chưa được thanh toán
     // Khi nhấn vào nút, người dùng sẽ được chuyển đến trang CreateCheckin với bookingId tương ứng
     // CreateCheckin component sẽ nhận bookingId từ URL params và sử dụng nó để tạo checkin mới
     
@@ -118,9 +118,11 @@ const BookingListForStaff = () => {
           <Button type="primary" onClick={() => handleViewDetailBooking(record)}>
             View Details
           </Button>
-          <Button onClick={() => handleCreateQuotation(record)}>
-            Create Quotation
-          </Button>
+          {record.paymentStatus.toLowerCase() !== 'complete' && (
+            <Button onClick={() => handleCreateQuotation(record)}>
+              Create Quotation
+            </Button>
+          )}
           <Button 
             type="default"
             onClick={() => handleCreateCheckin(record.id)}

@@ -86,14 +86,19 @@ const SiderBoard = () => {
       width={280}
       style={{
         overflow: 'auto',
-        height: 'calc(100vh - 96px)',
+        height: '100vh',
         position: 'fixed',
         left: 0,
-        top: 96,
+        top: 0,
         bottom: 0,
       }}
-      className="bg-[#111827]"
+      className="bg-[#111827] pt-24"
     >
+      {/* Title */}
+      <div className="px-6 py-4 border-b border-gray-700">
+        <h1 className="text-xl font-bold text-white">Admin Dashboard</h1>
+      </div>
+
       {/* Navigation Menu */}
       <div className="px-4 pt-6">
         {menuItems.map((item) => (

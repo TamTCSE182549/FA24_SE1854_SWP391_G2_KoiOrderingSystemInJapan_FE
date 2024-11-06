@@ -10,6 +10,8 @@ import { useNavigate } from "react-router-dom"; // Use navigate to go to the det
 const Farm = () => {
   const [farm, setFarm] = useState([]);
   const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1); // Thêm state cho trang hiện tại
+  const farmsPerPage = 8; // Số farm mỗi trang
 
   const navigate = useNavigate(); // Initialize navigate for redirection
 
@@ -39,6 +41,21 @@ const Farm = () => {
     navigate(`/farmdetail/${farmId}`); // Redirect to the farm details page using the farm ID
   };
 
+  // Tính toán farms cho trang hiện tại
+  const indexOfLastFarm = currentPage * farmsPerPage;
+  const indexOfFirstFarm = indexOfLastFarm - farmsPerPage;
+  const currentFarms = Array.isArray(farm) ? farm.slice(indexOfFirstFarm, indexOfLastFarm) : [];
+
+  // Xử lý thay đổi trang
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    // Scroll to top of the page smoothly
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-10 sm:py-16 lg:py-20">
       <div className="container mx-auto px-4 mt-16 sm:mt-20 lg:mt-24">
@@ -61,7 +78,7 @@ const Farm = () => {
           )}
           
           {Array.isArray(farm) && farm.length > 0 ? (
-            farm.map((farmItem, index) => {
+            currentFarms.map((farmItem, index) => {
               const mainImage = farmItem.koiFarmImages?.[0]?.imageUrl || "default-image-url";
 
               return (
@@ -162,8 +179,10 @@ const Farm = () => {
         {/* Modern Pagination */}
         <div className="flex justify-center mt-10 sm:mt-12 lg:mt-16">
           <Pagination 
-            defaultCurrent={1} 
-            total={500}
+            current={currentPage}
+            onChange={handlePageChange}
+            total={Array.isArray(farm) ? farm.length : 0}
+            pageSize={farmsPerPage}
             className="[&_.ant-pagination-item-active]:!bg-indigo-600 
                        [&_.ant-pagination-item-active]:!border-none
                        [&_.ant-pagination-item]:!rounded-lg
