@@ -1,15 +1,13 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useParams, useNavigate } from "react-router-dom"; // Import useNavigate
-import { Spin, Alert, Carousel, Card, Button } from "antd"; // Import Button
+import { useParams } from "react-router-dom"; // Import useParams
+import { Spin, Alert, Carousel, Card } from "antd"; // Removed Button
 
 const FarmDetail = () => {
   const { id } = useParams(); // Get the farm ID from URL parameters
   const [farmDetail, setFarmDetail] = useState(null); // Initialize as null
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  const navigate = useNavigate(); // Initialize navigate for redirection
 
   useEffect(() => {
     const fetchFarmDetail = async () => {
@@ -92,13 +90,6 @@ const FarmDetail = () => {
                   {farmDetail.description || "No description available."}
                 </p>
               </div>
-              <Button
-                type="primary"
-                className="mt-4"
-                onClick={() => navigate("/tour")} // Navigate to the tour page
-              >
-                Book Tour
-              </Button>
             </div>
           </div>
 
@@ -155,7 +146,6 @@ const FarmDetail = () => {
                         className="object-cover rounded-t-lg w-full"
                       />
                     }
-                    onClick={() => navigate(`/koi/${fish.id}`)} // Navigate to KoiDetail with koiId
                   >
                     <Card.Meta
                       title={

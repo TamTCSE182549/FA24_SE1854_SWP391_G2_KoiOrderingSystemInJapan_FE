@@ -25,6 +25,11 @@ const getStatusColor = (status) => {
   }
 };
 
+// Thêm hàm helper để kiểm tra trạng thái có cho phép edit không
+const isEditableStatus = (status) => {
+  return !['shipping', 'complete', 'cancelled'].includes(status?.toLowerCase());
+};
+
 const BookingDetail = () => {
     const location = useLocation();
     const navigate = useNavigate();
@@ -224,20 +229,36 @@ const BookingDetail = () => {
     const handleDeleteKoiDetail = async (bookingKoiDetailId) => {
         if (window.confirm("Are you sure you want to delete this Koi Detail?")) {
             try {
+                // Xóa Koi detail
                 await axios.delete(`http://localhost:8080/BookingKoiDetail/${bookingKoiDetailId}`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
                 });
-    
+
+                // Kiểm tra nếu là Koi detail cuối cùng
+                if (bookingDetails.koiDetails.length === 1) {
+                    // Gọi API để cập nhật trạng thái booking thành Cancel
+                    await axios.put(`http://localhost:8080/bookings/delete/koi/${bookingId}`, null, {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    });
+
+                    toast.success("Booking has been cancelled as all Koi details were removed", {
+                        autoClose: 3000,
+                    });
+                    
+                    // Điều hướng về trang booking-for-koi-list
+                    navigate('/staff/booking-for-koi-list');
+                    return;
+                }
+
+                // Nếu không phải Koi detail cuối cùng, cập nhật state như bình thường
                 setBookingDetails(prev => {
                     const updatedKoiDetails = prev.koiDetails.filter(koi => koi.id !== bookingKoiDetailId);
                     const totalAmount = updatedKoiDetails.reduce((total, koi) => total + koi.totalAmount, 0);
-                    
-                    if (updatedKoiDetails.length === 0) {
-                        navigate(`/booking-koi/${bookingId}`); // Điều hướng về trang booking-koi với bookingId
-                    }
-    
+
                     return {
                         ...prev,
                         koiDetails: updatedKoiDetails,
@@ -249,6 +270,10 @@ const BookingDetail = () => {
                     autoClose: 2000,
                 });
             } catch (err) {
+                console.error('Error deleting koi detail:', err);
+                toast.error("Failed to delete Koi Detail", {
+                    autoClose: 2000,
+                });
                 setError('Failed to delete Koi Detail');
             }
         }
@@ -320,8 +345,12 @@ const BookingDetail = () => {
         navigate(`/view-detail-deposit/${bookingId}`);
     };
 
-    const inputClasses = "w-full px-3 py-2 rounded-lg border focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900";
-    const readOnlyClasses = "w-full px-3 py-2 rounded-lg bg-gray-50 border text-gray-900";
+    const inputClasses = `w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+      !isEditableStatus(bookingDetails?.paymentStatus) 
+        ? 'bg-gray-100 cursor-not-allowed text-gray-700'
+        : 'bg-white text-gray-900'
+    }`;
+    const readOnlyClasses = "w-full border rounded-lg px-3 py-2 bg-gray-100 text-gray-700 cursor-not-allowed";
 
     if (loading) return <p className="text-black">Loading...</p>;
     if (error) return <p className="text-red-500">{error}</p>;
@@ -400,6 +429,9 @@ const BookingDetail = () => {
                                     value={koiDetail.quantity} 
                                     onChange={(e) => handleInputChange(e, koiDetail.id)} 
                                     className={inputClasses}
+                                    min="1"
+                                    required
+                                    disabled={!isEditableStatus(bookingDetails?.paymentStatus)}
                                 />
                             </div>
                             <div>
@@ -413,6 +445,7 @@ const BookingDetail = () => {
                                     min="0.01"
                                     step="0.01"
                                     required
+                                    disabled={!isEditableStatus(bookingDetails?.paymentStatus)}
                                 />
                             </div>
                             <div>
@@ -425,18 +458,22 @@ const BookingDetail = () => {
                                 />
                             </div>
                             <div className="md:col-span-2 flex items-end justify-end gap-2">
-                                <button 
-                                    onClick={() => handleUpdateKoiDetail(koiDetail.id)} 
-                                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                                >
-                                    Update
-                                </button>
-                                <button 
-                                    onClick={() => handleDeleteKoiDetail(koiDetail.id)} 
-                                    className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
-                                >
-                                    Delete
-                                </button>
+                                {isEditableStatus(bookingDetails?.paymentStatus) && (
+                                    <button 
+                                        onClick={() => handleUpdateKoiDetail(koiDetail.id)} 
+                                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                                    >
+                                        Update
+                                    </button>
+                                )}
+                                {isEditableStatus(bookingDetails?.paymentStatus) && (
+                                    <button 
+                                        onClick={() => handleDeleteKoiDetail(koiDetail.id)} 
+                                        className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                                    >
+                                        Delete
+                                    </button>
+                                )}
                             </div>
                         </div>
                     ))}
@@ -451,10 +488,12 @@ const BookingDetail = () => {
                         <input 
                             type="number" 
                             name="vat" 
-                            value={bookingDetails?.vat ? (bookingDetails.vat * 100) : ''} 
+                            value={bookingDetails?.vat * 100 || ''} 
                             onChange={(e) => handleInputChange(e)} 
                             className={inputClasses}
-                            placeholder="Enter VAT percentage (0-100)"
+                            disabled={!isEditableStatus(bookingDetails?.paymentStatus)}
+                            min="0"
+                            max="100"
                         />
                     </div>
                     <div>
@@ -464,11 +503,12 @@ const BookingDetail = () => {
                             value={bookingDetails?.paymentMethod || ''} 
                             onChange={(e) => handleInputChange(e)} 
                             className={inputClasses}
+                            disabled={!isEditableStatus(bookingDetails?.paymentStatus)}
                         >
-                            <option value="" className="text-gray-900">Select method</option>
-                            <option value="CASH" className="text-gray-900">Cash</option>
-                            <option value="VISA" className="text-gray-900">Visa</option>
-                            <option value="TRANSFER" className="text-gray-900">Transfer</option>
+                            <option value="" className="text-gray-700">Select method</option>
+                            <option value="CASH" className="text-gray-700">Cash</option>
+                            <option value="VISA" className="text-gray-700">Visa</option>
+                            <option value="TRANSFER" className="text-gray-700">Transfer</option>
                         </select>
                     </div>
                     <div>
@@ -479,6 +519,8 @@ const BookingDetail = () => {
                             value={bookingDetails?.discountAmount || ''} 
                             onChange={(e) => handleInputChange(e)} 
                             className={inputClasses}
+                            disabled={!isEditableStatus(bookingDetails?.paymentStatus)}
+                            min="0"
                         />
                     </div>
                     <div>
@@ -491,36 +533,40 @@ const BookingDetail = () => {
                         />
                     </div>
                     <div className="md:col-span-2 flex justify-end space-x-4 mt-4">
-                        <button 
-                            type="submit" 
-                            className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
-                        >
-                            Update Booking
-                        </button>
-                        
-                        {bookingDetails?.paymentStatus?.toLowerCase() === 'pending' && (
-                            <button 
-                                type="button" 
-                                onClick={handleConfirm} 
-                                className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors flex items-center space-x-2"
-                            >
-                                <svg 
-                                    xmlns="http://www.w3.org/2000/svg" 
-                                    className="h-5 w-5" 
-                                    viewBox="0 0 20 20" 
-                                    fill="currentColor"
+                        {isEditableStatus(bookingDetails?.paymentStatus) && (
+                            <>
+                                <button 
+                                    type="submit" 
+                                    className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
                                 >
-                                    <path 
-                                        fillRule="evenodd" 
-                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" 
-                                        clipRule="evenodd" 
-                                    />
-                                </svg>
-                                <span>Confirm</span>
-                            </button>
+                                    Update Booking
+                                </button>
+                                
+                                {bookingDetails?.paymentStatus?.toLowerCase() === 'pending' && (
+                                    <button 
+                                        type="button" 
+                                        onClick={handleConfirm} 
+                                        className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors flex items-center space-x-2"
+                                    >
+                                        <svg 
+                                            xmlns="http://www.w3.org/2000/svg" 
+                                            className="h-5 w-5" 
+                                            viewBox="0 0 20 20" 
+                                            fill="currentColor"
+                                        >
+                                            <path 
+                                                fillRule="evenodd" 
+                                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" 
+                                                clipRule="evenodd" 
+                                            />
+                                        </svg>
+                                        <span>Confirm</span>
+                                    </button>
+                                )}
+                            </>
                         )}
-                        
-                        {(bookingDetails?.paymentStatus?.toLowerCase() === 'processing') && (
+
+                        {bookingDetails?.paymentStatus?.toLowerCase() === 'processing' && (
                             <div className="flex space-x-4">
                                 <button 
                                     type="button" 

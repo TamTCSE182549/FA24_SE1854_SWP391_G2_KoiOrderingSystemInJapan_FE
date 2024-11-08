@@ -28,7 +28,10 @@ const DepositList = () => {
                     Authorization: `Bearer ${token}`,
                 },
             });
-            setDeposits(response.data);
+            const sortedDeposits = response.data.sort((a, b) => 
+                new Date(b.depositDate) - new Date(a.depositDate)
+            );
+            setDeposits(sortedDeposits);
             setLoading(false);
         } catch (error) {
             console.error('Error fetching deposits:', error);
@@ -90,6 +93,7 @@ const DepositList = () => {
             title: 'Deposit Date',
             dataIndex: 'depositDate',
             key: 'depositDate',
+            defaultSortOrder: 'descend',
             render: (date) => (
                 <Text className="text-gray-600">
                     {new Date(date).toLocaleDateString('en-US', {
@@ -99,7 +103,7 @@ const DepositList = () => {
                     })}
                 </Text>
             ),
-            sorter: (a, b) => new Date(a.depositDate) - new Date(b.depositDate),
+            sorter: (a, b) => new Date(b.depositDate) - new Date(a.depositDate),
         },
         {
             title: 'Expected Delivery',
@@ -192,7 +196,8 @@ const DepositList = () => {
                             pageSize: 10,
                             showSizeChanger: true,
                             showTotal: (total) => `Total ${total} deposits`,
-                            className: "pb-4"
+                            className: "pb-4",
+                            defaultCurrent: 1
                         }}
                         className="shadow-sm"
                         scroll={{ x: 1200 }}
