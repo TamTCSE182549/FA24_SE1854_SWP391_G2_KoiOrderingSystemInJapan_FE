@@ -101,6 +101,54 @@ const BookingDetail = () => {
     const handleInputChange = (e, koiDetailId = null) => {
         const { name, value } = e.target;
         
+        // Validation cho VAT
+        if (name === 'vat') {
+            let vatValue = parseFloat(value);
+            if (vatValue < 0) {
+                // Chuyển số âm thành dương
+                vatValue = Math.abs(vatValue);
+                toast.error("VAT percentage cannot be negative", {
+                    autoClose: 2000
+                });
+            } else if (vatValue > 100) {
+                // Giới hạn ở 100
+                vatValue = 100;
+                toast.warning("VAT has been set to maximum (100%)", {
+                    autoClose: 2000
+                });
+            }
+            // Cập nhật state với giá trị đã được xử lý
+            setBookingDetails(prev => ({
+                ...prev,
+                [name]: vatValue / 100
+            }));
+            return;
+        }
+
+        // Validation cho Discount Amount
+        if (name === 'discountAmount') {
+            let discountValue = parseFloat(value);
+            if (discountValue < 0) {
+                // Chuyển số âm thành dương
+                discountValue = Math.abs(discountValue);
+                toast.warning("Discount amount has been converted to positive value", {
+                    autoClose: 2000
+                });
+            } else if (discountValue > bookingDetails.totalAmount) {
+                // Giới hạn ở tổng tiền
+                discountValue = bookingDetails.totalAmount;
+                toast.warning("Discount amount has been set to maximum (total amount)", {
+                    autoClose: 2000
+                });
+            }
+            // Cập nhật state với giá trị đã được xử lý
+            setBookingDetails(prev => ({
+                ...prev,
+                [name]: discountValue
+            }));
+            return;
+        }
+        
         if (koiDetailId) {
             setBookingDetails(prev => {
                 const updatedKoiDetails = prev.koiDetails.map(koi => {
@@ -124,6 +172,27 @@ const BookingDetail = () => {
     const handleUpdateKoiDetail = async (bookingKoiDetailId) => {
         const updatedKoiDetail = bookingDetails.koiDetails.find(koi => koi.id === bookingKoiDetailId);
         
+        if (parseInt(updatedKoiDetail.quantity) === 0) {
+            toast.warning("If you want to remove this Koi, please use the Delete button instead.", {
+                autoClose: 3000
+            });
+            return;
+        }
+
+        if (updatedKoiDetail.quantity < 0) {
+            toast.error("Quantity cannot be negative", {
+                autoClose: 2000
+            });
+            return;
+        }
+
+        if (!updatedKoiDetail.unitPrice || updatedKoiDetail.unitPrice <= 0) {
+            toast.error("Unit price must be greater than 0", {
+                autoClose: 2000
+            });
+            return;
+        }
+
         const payload = [{
             id: updatedKoiDetail.id,
             koiId: updatedKoiDetail.koiId,
@@ -341,6 +410,9 @@ const BookingDetail = () => {
                                     value={koiDetail.unitPrice} 
                                     onChange={(e) => handleInputChange(e, koiDetail.id)} 
                                     className={inputClasses}
+                                    min="0.01"
+                                    step="0.01"
+                                    required
                                 />
                             </div>
                             <div>
@@ -379,18 +451,8 @@ const BookingDetail = () => {
                         <input 
                             type="number" 
                             name="vat" 
-                            value={bookingDetails?.vat ? (bookingDetails.vat * 100).toFixed(0) : ''} 
-                            onChange={(e) => {
-                                handleInputChange({
-                                    target: {
-                                        name: 'vat',
-                                        value: parseFloat(e.target.value) / 100
-                                    }
-                                });
-                            }}
-                            min="0"
-                            max="100"
-                            step="1"
+                            value={bookingDetails?.vat ? (bookingDetails.vat * 100) : ''} 
+                            onChange={(e) => handleInputChange(e)} 
                             className={inputClasses}
                             placeholder="Enter VAT percentage (0-100)"
                         />

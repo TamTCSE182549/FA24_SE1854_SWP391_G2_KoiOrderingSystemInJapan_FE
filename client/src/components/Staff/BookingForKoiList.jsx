@@ -18,6 +18,7 @@ const BookingForKoiList = () => {
   const [cookies] = useCookies();
   const token = cookies.token;
   const navigate = useNavigate();
+  const [depositsInfo, setDepositsInfo] = useState({});
 
   useEffect(() => {
     const fetchBookings = async () => {
@@ -41,6 +42,46 @@ const BookingForKoiList = () => {
 
     fetchBookings();
   }, [token]);
+
+  
+  useEffect(() => {
+    const fetchDepositsInfo = async () => {
+      try {
+        const depositsData = {};
+        
+        for (const booking of bookings) {
+          try {
+            const response = await axios.get(`http://localhost:8080/deposit/${booking.id}`, {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            });
+            
+            console.log(`Deposit data for booking ${booking.id}:`, response.data);
+            
+            if (response.data) {
+              depositsData[booking.id] = response.data;
+            } else {
+              depositsData[booking.id] = null;
+            }
+          } catch (error) {
+            console.log(`No deposit found for booking ${booking.id}`);
+            depositsData[booking.id] = null;
+          }
+        }
+        
+        console.log('Final deposits data:', depositsData);
+        setDepositsInfo(depositsData);
+      } catch (error) {
+        console.error("Error fetching deposits info:", error);
+      }
+    };
+
+    if (bookings.length > 0) {
+      fetchDepositsInfo();
+    }
+  }, [bookings, token]);
+
 
   const handleViewDetail = (bookingId) => {
     navigate("/booking-detail", { state: { bookingId } });
@@ -85,9 +126,82 @@ const BookingForKoiList = () => {
       ),
     },
     {
-      title: "Status",
-      dataIndex: "paymentStatus",
-      key: "paymentStatus",
+      title: 'Deposit Status',
+      key: 'depositStatus',
+      render: (_, record) => {
+        console.log(`Rendering deposit status for booking ${record.id}:`, {
+          paymentStatus: record.paymentStatus,
+          depositInfo: depositsInfo[record.id]
+        });
+        
+        if (record.paymentStatus === 'cancelled') {
+          return <Tag color="default">N/A</Tag>;
+        }
+        
+        if (record.paymentStatus === 'pending') {
+          return (
+            <div className="flex items-center space-x-2">
+              <span className="w-2 h-2 rounded-full bg-gray-400" />
+              <Tag 
+                color="default"
+                style={{ fontSize: '0.9rem', padding: '4px 12px' }}
+              >
+                NOT CREATED
+              </Tag>
+            </div>
+          );
+        }
+        
+        const hasDeposit = depositsInfo[record.id] !== null;
+        
+        if (record.paymentStatus === 'processing') {
+          if (!hasDeposit) {
+            return (
+              <div className="flex items-center space-x-2">
+                <span className="w-2 h-2 rounded-full bg-red-500" />
+                <Tag 
+                  color="error"
+                  style={{ fontSize: '0.9rem', padding: '4px 12px' }}
+                >
+                  NO DEPOSIT
+                </Tag>
+              </div>
+            );
+          } else {
+            return (
+              <div className="flex items-center space-x-2">
+                <span className="w-2 h-2 rounded-full bg-yellow-500" />
+                <Tag 
+                  color="warning"
+                  style={{ fontSize: '0.9rem', padding: '4px 12px' }}
+                >
+                  PENDING APPROVAL
+                </Tag>
+              </div>
+            );
+          }
+        }
+
+        if (record.paymentStatus === 'shipping' || record.paymentStatus === 'complete') {
+          return (
+            <div className="flex items-center space-x-2">
+              <span className="w-2 h-2 rounded-full bg-green-500" />
+              <Tag 
+                color="success"
+                style={{ fontSize: '0.9rem', padding: '4px 12px' }}
+              >
+                APPROVED
+              </Tag>
+            </div>
+          );
+        }
+      },
+    },
+    {
+      title: 'Status',
+      dataIndex: 'paymentStatus',
+      key: 'paymentStatus',
+
       render: (status) => {
         return (
           <Tag

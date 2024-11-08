@@ -90,53 +90,85 @@ const BookingKoi = () => {
   };
 
   const handleAddKoi = () => {
-    const numericQuantity = parseInt(quantity, 10);
-    const numericUnitPrice = parseFloat(unitPrice);
-
-    if (selectedKoiId && numericQuantity > 0 && numericUnitPrice > 0) {
-      const selectedKoi = kois.find((koi) => koi.id === Number(selectedKoiId));
-
-      if (!selectedKoi) {
-        message.error("Koi not found!");
+    // Kiểm tra farm đã được chọn chưa
+    if (!selectedFarmId) {
+        toast.error("Please select a farm first");
         return;
-      }
-
-      const existingDetail = bookingDetails.find(
-        (detail) => detail.koiId === selectedKoiId
-      );
-
-      if (existingDetail) {
-        setBookingDetails((prevDetails) =>
-          prevDetails.map((detail) =>
-            detail.koiId === selectedKoiId
-              ? {
-                  ...detail,
-                  quantity: numericQuantity,
-                  unitPrice: numericUnitPrice,
-                }
-              : detail
-          )
-        );
-      } else {
-        setBookingDetails((prevDetails) => [
-          ...prevDetails,
-          {
-            koiId: selectedKoiId,
-            koiName: selectedKoi.koiName,
-            quantity: numericQuantity,
-            unitPrice: numericUnitPrice,
-          },
-        ]);
-      }
-
-      // Reset form sau khi thêm Koi
-      setSelectedKoiId("");
-      setSelectedKoiOption(null);
-      setQuantity("");
-      setUnitPrice("");
-    } else {
-      message.error("Please select a Koi, enter quantity and unit price.");
     }
+
+    // Kiểm tra koi đã được chọn chưa
+    if (!selectedKoiId) {
+        toast.error("Please select a koi");
+        return;
+    }
+
+    // Kiểm tra unit price trước
+    if (!unitPrice) {
+        toast.error("Please enter unit price");
+        return;
+    }
+
+    const numericUnitPrice = parseFloat(unitPrice);
+    if (numericUnitPrice <= 0) {
+        toast.error("Unit price must be greater than 0");
+        return;
+    }
+
+    // Sau đó mới kiểm tra quantity
+    if (!quantity) {
+        toast.error("Please enter quantity");
+        return;
+    }
+
+    const numericQuantity = parseInt(quantity, 10);
+    if (numericQuantity <= 0) {
+        toast.error("Quantity must be greater than 0");
+        return;
+    }
+
+    // Nếu tất cả validation pass, tiếp tục xử lý
+    const selectedKoi = kois.find((koi) => koi.id === Number(selectedKoiId));
+
+    if (!selectedKoi) {
+        toast.error("Koi not found!");
+        return;
+    }
+
+    const existingDetail = bookingDetails.find(
+        (detail) => detail.koiId === selectedKoiId
+    );
+
+    if (existingDetail) {
+        setBookingDetails((prevDetails) =>
+            prevDetails.map((detail) =>
+                detail.koiId === selectedKoiId
+                    ? {
+                        ...detail,
+                        quantity: numericQuantity,
+                        unitPrice: numericUnitPrice,
+                    }
+                    : detail
+            )
+        );
+    } else {
+        setBookingDetails((prevDetails) => [
+            ...prevDetails,
+            {
+                koiId: selectedKoiId,
+                koiName: selectedKoi.koiName,
+                quantity: numericQuantity,
+                unitPrice: numericUnitPrice,
+            },
+        ]);
+    }
+
+    // Reset form sau khi thêm Koi
+    setSelectedKoiId("");
+    setSelectedKoiOption(null);
+    setQuantity("");
+    setUnitPrice("");
+    
+    toast.success("Koi added successfully!");
   };
   const handleRemoveKoi = (koiId) => {
     setBookingDetails((prevDetails) =>
@@ -416,15 +448,20 @@ const BookingKoi = () => {
                                         <input
                                             id="vat"
                                             type="number"
-                                            min="0"
-                                            max="100"
-                                            step="1"
                                             value={vat}
                                             onChange={(e) => {
-                                                const value = parseInt(e.target.value);
-                                                if (!isNaN(value) && value >= 0 && value <= 100) {
-                                                    setVat(value);
+                                                const value = e.target.value;
+                                                if (value === '') {
+                                                    setVat('');
+                                                    return;
                                                 }
+                                                
+                                                const numValue = parseFloat(value);
+                                                if (numValue < 0 || numValue > 100) {
+                                                    toast.error("VAT must be between 0 and 100");
+                                                    return;
+                                                }
+                                                setVat(numValue);
                                             }}
                                             className="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all text-gray-900"
                                             placeholder="Enter VAT percentage (0-100)"
@@ -440,11 +477,17 @@ const BookingKoi = () => {
                                             <input
                                                 id="discountAmount"
                                                 type="number"
-                                                min="0"
-                                                step="0.01"
                                                 value={discountAmount}
-                                                onChange={(e) => setDiscountAmount(e.target.value)}
+                                                onChange={(e) => {
+                                                    const value = parseFloat(e.target.value);
+                                                    if (value < 0) {
+                                                        toast.error("Discount amount cannot be negative");
+                                                        return;
+                                                    }
+                                                    setDiscountAmount(value);
+                                                }}
                                                 className="w-full pl-8 pr-4 py-3 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all text-gray-900"
+                                                placeholder="Enter discount amount"
                                             />
                                         </div>
                                     </div>

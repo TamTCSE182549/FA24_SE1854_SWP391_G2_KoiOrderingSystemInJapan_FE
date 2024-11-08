@@ -1,9 +1,9 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useCookies } from "react-cookie";
 import { ToastContainer, toast } from "react-toastify";
 import { useParams, useNavigate } from "react-router-dom";
-import { Form, Input, DatePicker, Button, Card, Typography } from 'antd';
+import { Form, Input, DatePicker, Button, Card, Typography, Modal } from 'antd';
 import { ArrowLeftOutlined, DollarOutlined, EnvironmentOutlined, CalendarOutlined, PercentageOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 
@@ -15,6 +15,15 @@ const CreateDeposit = () => {
   const [form] = Form.useForm();
   const [cookies] = useCookies();
   const token = cookies.token;
+
+  // Thêm state để lưu trữ previous location
+  const [previousLocation] = useState(document.referrer);
+
+  // Thêm hàm kiểm tra form có thay đổi
+  const hasFormChanges = () => {
+    const values = form.getFieldsValue();
+    return Object.keys(values).some(key => values[key] !== undefined && values[key] !== '');
+  };
 
   const handleSubmit = async (values) => {
     try {
@@ -48,6 +57,53 @@ const CreateDeposit = () => {
     return current && current < dayjs().startOf('day');
   };
 
+  // Sửa lại hàm xử lý click Back
+  const handleBack = () => {
+    if (hasFormChanges()) {
+      Modal.confirm({
+        title: 'Leave page?',
+        content: 'Are you sure you want to leave? Your changes will be lost.',
+        okText: 'Leave',
+        cancelText: 'Stay',
+        onOk: () => {
+          // Nếu đến từ trang booking detail
+          if (previousLocation.includes('/booking-detail')) {
+            navigate('/staff/booking-for-koi-list');
+          } else {
+            navigate(-1);
+          }
+        },
+        okButtonProps: {
+          className: 'bg-red-500 hover:bg-red-600',
+        },
+        centered: true,
+      });
+    } else {
+      // Nếu form chưa có thay đổi, back trực tiếp
+      if (previousLocation.includes('/booking-detail')) {
+        navigate('/booking-koi-list');
+      } else {
+        navigate(-1);
+      }
+    }
+  };
+
+  // Thêm xử lý khi user refresh hoặc đóng tab
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (hasFormChanges()) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-50 py-12 pt-40">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -57,7 +113,7 @@ const CreateDeposit = () => {
         <div className="mb-8">
           <Button 
             icon={<ArrowLeftOutlined />} 
-            onClick={() => navigate(-1)}
+            onClick={handleBack}
             className="mb-4 hover:bg-gray-100"
             type="text"
           >
