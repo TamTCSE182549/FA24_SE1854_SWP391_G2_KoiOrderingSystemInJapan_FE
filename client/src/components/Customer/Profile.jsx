@@ -5,6 +5,7 @@ import { UserOutlined, EditOutlined, SaveOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { useCookies } from "react-cookie";
 import axios from "axios";
+import { useLoadScript, GoogleMap, Marker } from '@react-google-maps/api';
 
 const { Text } = Typography;
 const { Option } = Select;
@@ -197,6 +198,55 @@ const Profile = () => {
         </div>
       </div>
     </div>
+  );
+};
+
+const GoogleMapComponent = ({ country }) => {
+  const { isLoaded } = useLoadScript({
+    googleMapsApiKey: "YOUR_GOOGLE_MAPS_API_KEY" // Thay thế bằng API key của bạn
+  });
+
+  const countryCoordinates = {
+    Vietnam: { lat: 14.0583, lng: 108.2772, zoom: 5 },
+    Japan: { lat: 36.2048, lng: 138.2529, zoom: 5 },
+    America: { lat: 37.0902, lng: -95.7129, zoom: 4 },
+    India: { lat: 20.5937, lng: 78.9629, zoom: 4 },
+    Indonesia: { lat: -0.7893, lng: 113.9213, zoom: 4 },
+    Laos: { lat: 19.8563, lng: 102.4955, zoom: 6 }
+  };
+
+  const coords = countryCoordinates[country] || countryCoordinates.Vietnam;
+
+  if (!isLoaded) return <div>Loading...</div>;
+
+  return (
+    <GoogleMap
+      mapContainerStyle={{
+        width: '100%',
+        height: '400px',
+        borderRadius: '0.5rem'
+      }}
+      center={{ lat: coords.lat, lng: coords.lng }}
+      zoom={coords.zoom}
+      options={{
+        styles: [
+          {
+            featureType: "administrative.country",
+            elementType: "geometry",
+            stylers: [
+              {
+                visibility: "on"
+              },
+              {
+                weight: 2
+              }
+            ]
+          }
+        ]
+      }}
+    >
+      <Marker position={{ lat: coords.lat, lng: coords.lng }} />
+    </GoogleMap>
   );
 };
 
