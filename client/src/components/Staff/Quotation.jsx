@@ -13,6 +13,7 @@ import {
   Form,
   Input,
   message,
+  Checkbox,
 } from "antd";
 import { useLocation } from "react-router-dom";
 import axios from "axios";
@@ -39,6 +40,8 @@ const Quotation = () => {
   const [paymentForm] = Form.useForm();
   const [completedPayments, setCompletedPayments] = useState(new Set());
   const [bookingDetails, setBookingDetails] = useState(null);
+  const [allowPaymentMethodChange, setAllowPaymentMethodChange] = useState(false);
+  const [originalPaymentMethod, setOriginalPaymentMethod] = useState(null);
 
   const fetchQuotations = async () => {
     setLoading(true);
@@ -125,6 +128,7 @@ const Quotation = () => {
         }
       });
       setBookingDetails(response.data);
+      setOriginalPaymentMethod(response.data.paymentMethod);
       
       // Convert VAT to nearest allowed value (0, 5, or 10)
       const vatPercentage = response.data.vat * 100;
@@ -381,18 +385,35 @@ const Quotation = () => {
 
         <Form
           form={paymentForm}
-          onFinish={handlePaymentSubmit}
+          onFinish={(values) => {
+            if (allowPaymentMethodChange && values.paymentMethod === originalPaymentMethod) {
+              message.error('Please select a different payment method or uncheck the change option');
+              return;
+            }
+            handlePaymentSubmit(values);
+          }}
           layout="vertical"
         >
+          <Form.Item
+            name="allowChangePayment"
+            valuePropName="checked"
+          >
+            <Checkbox 
+              onChange={(e) => setAllowPaymentMethodChange(e.target.checked)}
+            >
+              Allow payment method change
+            </Checkbox>
+          </Form.Item>
+
           <Form.Item
             name="paymentMethod"
             label="Payment Method"
             rules={[{ required: true, message: 'Please select payment method' }]}
           >
-            <Select>
+            <Select disabled={!allowPaymentMethodChange}>
               <Option value="CASH">Cash</Option>
-              <Option value="CREDIT_CARD">Credit Card</Option>
-              <Option value="BANK_TRANSFER">Bank Transfer</Option>
+              <Option value="VISA">Credit Card</Option>
+              <Option value="TRANSFER">Bank Transfer</Option>
             </Select>
           </Form.Item>
           <Form.Item 
@@ -411,15 +432,16 @@ const Quotation = () => {
           <Form.Item
             name="discountAmount"
             label="Discount Amount"
+            tooltip="Enter discount rate (0 to 0.5 or 0% to 50%)"
             rules={[
               { required: true, message: 'Please input discount amount' },
               {
                 validator: (_, value) => {
                   if (value < 0) {
-                    return Promise.reject('Discount amount cannot be negative');
+                    return Promise.reject('Discount rate cannot be negative');
                   }
-                  if (selectedQuotation && value > selectedQuotation.amount) {
-                    return Promise.reject('Discount cannot exceed total amount');
+                  if (value > 0.5) {
+                    return Promise.reject('Discount rate cannot exceed 0.5 (50%)');
                   }
                   return Promise.resolve();
                 }
@@ -430,7 +452,8 @@ const Quotation = () => {
               type="number" 
               step="0.01" 
               min="0"
-              placeholder="Enter discount amount" 
+              max="0.5"
+              placeholder="Enter discount rate (e.g., 0.1 for 10%)" 
             />
           </Form.Item>
           <Form.Item className="flex justify-end">
