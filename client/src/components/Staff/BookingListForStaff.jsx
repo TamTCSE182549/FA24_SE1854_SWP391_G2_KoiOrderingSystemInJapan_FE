@@ -138,12 +138,12 @@ const BookingListForStaff = () => {
             View Details
           </Button>
 
-          {record.paymentStatus.toLowerCase() !== 'complete' && (
+          {record.paymentStatus.toLowerCase() !== "complete" && (
             <Button onClick={() => handleCreateQuotation(record)}>
               Create Quotation
             </Button>
           )}
-          <Button 
+          <Button
             type="default"
             onClick={() => handleCreateCheckin(record.id)}
             disabled={record.paymentStatus.toLowerCase() !== "processing"}
@@ -265,15 +265,6 @@ const BookingListForStaff = () => {
     }
   }, [selectedBooking]);
 
-  // Thêm styles cho input disabled
-  const disabledInputStyle = {
-    backgroundColor: "white",
-    color: "black",
-    borderColor: "#d9d9d9",
-    cursor: "not-allowed",
-    opacity: 0.8,
-  };
-
   return (
     <div className="p-6" style={{ marginTop: "100px" }}>
       <div className="flex justify-between items-center mb-6">
@@ -323,7 +314,7 @@ const BookingListForStaff = () => {
               selectedBooking.paymentStatus.toLowerCase() === "pending" && (
                 <Button
                   type="primary"
-                  onClick={handleUpdateBooking}
+                  onClick={handleUpdateBooking(selectedBooking.id)}
                   className="flex items-center gap-2 transform hover:scale-105 active:scale-95 transition-all duration-200 bg-indigo-600 hover:bg-indigo-700"
                 >
                   <SaveOutlined />
@@ -411,27 +402,46 @@ const BookingListForStaff = () => {
                     <span className="text-gray-600 w-32 font-medium">
                       VAT (%):
                     </span>
-                    <Input 
+                    <Input
                       value={editedBooking?.vat}
-                      onChange={(e) => handleFieldChange('vat', e.target.value)}
+                      onChange={(e) => handleFieldChange("vat", e.target.value)}
                       className="w-24 ml-2 bg-white border-gray-200 text-gray-800"
                       placeholder="0-100"
-                      status={editedBooking?.vat && (parseFloat(editedBooking.vat) < 0 || parseFloat(editedBooking.vat) > 100) ? 'error' : ''}
-                      readOnly={selectedBooking.paymentStatus.toLowerCase() !== 'pending'}
+                      status={
+                        editedBooking?.vat &&
+                        (parseFloat(editedBooking.vat) < 0 ||
+                          parseFloat(editedBooking.vat) > 100)
+                          ? "error"
+                          : ""
+                      }
+                      readOnly={
+                        selectedBooking.paymentStatus.toLowerCase() !==
+                        "pending"
+                      }
                     />
                   </div>
                   <div className="flex items-center">
                     <span className="text-gray-600 w-32 font-medium">
                       Discount:
                     </span>
-                    <Input 
+                    <Input
                       value={editedBooking?.discountAmount}
-                      onChange={(e) => handleFieldChange('discountAmount', e.target.value)}
+                      onChange={(e) =>
+                        handleFieldChange("discountAmount", e.target.value)
+                      }
                       className="w-32 ml-2 bg-white border-gray-200 text-gray-800"
                       prefix="$"
                       placeholder="≥ 0"
-                      status={editedBooking?.discountAmount && parseFloat(editedBooking.discountAmount) < 0 ? 'error' : ''}
-                      readOnly={selectedBooking.paymentStatus.toLowerCase() !== 'pending'}
+                      status={
+                        editedBooking?.discountAmount &&
+                        parseFloat(editedBooking.discountAmount) < 0
+                          ? "error"
+                          : ""
+                      }
+                      readOnly={
+                        selectedBooking.paymentStatus.toLowerCase() !==
+                        "pending"
+                      }
                     />
                   </div>
                 </div>
@@ -442,14 +452,10 @@ const BookingListForStaff = () => {
                     </span>
                     <Select
                       value={editedBooking?.paymentMethod}
-                      onChange={(value) => handleFieldChange('paymentMethod', value)}
+                      onChange={(value) =>
+                        handleFieldChange("paymentMethod", value)
+                      }
                       className="w-48 ml-2"
-                      open={selectedBooking.paymentStatus.toLowerCase() === 'pending'}
-                      onClick={(e) => {
-                        if (selectedBooking.paymentStatus.toLowerCase() !== 'pending') {
-                          e.preventDefault();
-                        }
-                      }}
                     >
                       <Select.Option value="CASH">
                         <div className="flex items-center gap-2">
@@ -485,17 +491,25 @@ const BookingListForStaff = () => {
                     <span className="text-gray-600 w-32 font-medium">
                       Payment Status:
                     </span>
-                    <Tag color={
-                      selectedBooking.paymentStatus.toLowerCase() === 'pending' ? 'gold' :
-                      selectedBooking.paymentStatus.toLowerCase() === 'complete' ? 'green' :
-                      selectedBooking.paymentStatus.toLowerCase() === 'processing' ? 'blue' :
-                      'red'
-                    }
-                    className="text-sm font-medium"
+                    <Tag
+                      color={
+                        selectedBooking.paymentStatus.toLowerCase() ===
+                        "pending"
+                          ? "gold"
+                          : selectedBooking.paymentStatus.toLowerCase() ===
+                            "complete"
+                          ? "green"
+                          : selectedBooking.paymentStatus.toLowerCase() ===
+                            "processing"
+                          ? "blue"
+                          : "red"
+                      }
+                      className="text-sm font-medium"
                     >
                       {selectedBooking.paymentStatus}
                     </Tag>
-                    {selectedBooking.paymentStatus.toLowerCase() === 'pending' && (
+                    {selectedBooking.paymentStatus.toLowerCase() ===
+                      "pending" && (
                       <span className="ml-2 text-sm text-gray-500 italic">
                         (Will be updated to Processing)
                       </span>
