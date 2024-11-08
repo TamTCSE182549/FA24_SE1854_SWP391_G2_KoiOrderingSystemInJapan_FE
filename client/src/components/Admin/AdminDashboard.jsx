@@ -7,44 +7,39 @@ import Dashboard2 from "./Dashboard2";
 import Users from "./Users";
 import TourManagement from "./TourManagement";
 import Settings from "./Settings";
-
 import SiderBoard from "./SiderBoard";
 import FarmManagement from "./FarmManagement";
-import BookingManagement from "./BookingManagement"
-
+import BookingManagement from "./BookingManagement";
 import KoiManagement from "./KoiManagement";
 import FarmDetail from "./Farmdetail";
 import TourDetail from "./TourDetail";
-
 import ServiceManagement from "./ServiceManagement";
 
-const { Header, Content } = Layout;
+const { Content } = Layout;
 
 const AdminDashboard = () => {
   return (
-    <Layout className="min-h-screen mt-40 backdrop-filter backdrop-blur-3xl">
-      <SiderBoard />
-
-      <Layout>
-        <Header className="bg-[#c5bd92] shadow-md p-4 ">
-          <h2 className="text-xl font-semibold">Welcome, Admin</h2>
-        </Header>
-        <Content className="p-6 bg-[#e7ede0] ">
-          {/* Định nghĩa các route con của Admin */}
-
-          <Routes>
-            <Route path="dashboard" element={<Dashboard2 />} />
-            <Route path="users" element={<Users />} />
-            <Route path="tour-management" element={<TourManagement />} />
-            <Route path="farm-management" element={<FarmManagement />} />
-            <Route path="BookingManagement" element={<BookingManagement/>}/>
-            <Route path="settings" element={<Settings />} />
-            <Route path="tourdetail/:id" element={<TourDetail />} />
-            <Route path="koi-management" element={<KoiManagement />} />
-            <Route path="farm/:id" element={<FarmDetail />} />
-            <Route path="ServiceManagement" element={<ServiceManagement/>}/>
-          </Routes>
-        </Content>
+    <Layout>
+      <Layout style={{ marginTop: '96px' }}>
+        <SiderBoard />
+        <Layout className="transition-all duration-300 ml-[280px] bg-gray-50">
+          <Content className="m-6">
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <Routes>
+                <Route path="dashboard" element={<Dashboard2 />} />
+                <Route path="users" element={<Users />} />
+                <Route path="tour-management" element={<TourManagement />} />
+                <Route path="farm-management" element={<FarmManagement />} />
+                <Route path="BookingManagement" element={<BookingManagement />} />
+                <Route path="settings" element={<Settings />} />
+                <Route path="tourdetail/:id" element={<TourDetail />} />
+                <Route path="koi-management" element={<KoiManagement />} />
+                <Route path="farm/:id" element={<FarmDetail />} />
+                <Route path="ServiceManagement" element={<ServiceManagement />} />
+              </Routes>
+            </div>
+          </Content>
+        </Layout>
       </Layout>
     </Layout>
   );

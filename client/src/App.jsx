@@ -42,6 +42,7 @@ import BookingForKoiList from "./components/Staff/BookingForKoiList";
 import QuotationService from "./components/SaleStaff/QuotationService";
 import BookingListForStaff from "./components/Staff/BookingListForStaff";
 import CheckinService from "./components/SaleStaff/CheckinService";
+import AboutUs from "./components/Hero/AboutUs";
 const App = () => {
   return (
     // <AuthProvider>
@@ -82,6 +83,7 @@ const App = () => {
             <Route path="/tour" element={<Tour />} />
 
             <Route path="/koi/:id" element={<KoiDetail />} />
+            <Route path="/aboutus" element={<AboutUs />} />
 
             <Route path="/farmdetail" element={<FarmDetail />} />
             <Route path="/tourdetail" element={<TourDetail />} />

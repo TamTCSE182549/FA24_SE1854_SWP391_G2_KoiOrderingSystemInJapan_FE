@@ -42,6 +42,11 @@ const UpdateQuotation = () => {
   };
 
   const onFinish = async (values) => {
+    if (values.status === 'PROCESS') {
+      message.error('You must change the status to update Status');
+      return;
+    }
+
     console.log('Submitting values:', values);
     try {
       const response = await axios.put(
@@ -86,7 +91,17 @@ const UpdateQuotation = () => {
           <Form.Item
             name="status"
             label="Status"
-            rules={[{ required: true, message: 'Please select a status' }]}
+            rules={[
+              { required: true, message: 'Please select a status' },
+              { 
+                validator: (_, value) => {
+                  if (value === 'PROCESS') {
+                    return Promise.reject('You must change the status to update Status');
+                  }
+                  return Promise.resolve();
+                }
+              }
+            ]}
           >
             <Select>
               <Option value="FINISH">Accept</Option>
