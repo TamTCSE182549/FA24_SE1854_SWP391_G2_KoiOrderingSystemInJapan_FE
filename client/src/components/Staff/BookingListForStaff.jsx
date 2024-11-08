@@ -486,37 +486,41 @@ const BookingListForStaff = () => {
                     />
                   </div>
                 </div>
+                
                 <div className="space-y-4">
                   <div className="flex items-center">
                     <span className="text-gray-600 w-32 font-medium">
                       Payment Method:
                     </span>
-//                     <Select
-//                       value={editedBooking?.paymentMethod}
-//                       onChange={(value) =>
-//                         handleFieldChange("paymentMethod", value)
-//                       }
-//                       className="w-48 ml-2"
-//                     >
-//                       <Select.Option value="CASH">
-//                         <div className="flex items-center gap-2">
-//                           <DollarOutlined className="text-green-500" />
-//                           Cash
-//                         </div>
-//                       </Select.Option>
-//                       <Select.Option value="CREDIT_CARD">
-//                         <div className="flex items-center gap-2">
-//                           <CreditCardOutlined className="text-blue-500" />
-//                           Credit Card
-//                         </div>
-//                       </Select.Option>
-//                       <Select.Option value="BANK_TRANSFER">
-//                         <div className="flex items-center gap-2">
-//                           <BankOutlined className="text-purple-500" />
-//                           Bank Transfer
-//                         </div>
-//                       </Select.Option>
-//                     </Select>
+                    {/*
+                     <Select
+                      value={editedBooking?.paymentMethod}
+                      onChange={(value) =>
+                        handleFieldChange("paymentMethod", value)
+                      }
+                      className="w-48 ml-2"
+                    >
+                      <Select.Option value="CASH">
+                        <div className="flex items-center gap-2">
+                          <DollarOutlined className="text-green-500" />
+                          Cash
+                        </div>
+                      </Select.Option>
+                      <Select.Option value="CREDIT_CARD">
+                        <div className="flex items-center gap-2">
+                          <CreditCardOutlined className="text-blue-500" />
+                          Credit Card
+                        </div>
+                      </Select.Option>
+                      <Select.Option value="BANK_TRANSFER">
+                        <div className="flex items-center gap-2">
+                          <BankOutlined className="text-purple-500" />
+                          Bank Transfer
+                        </div>
+                      </Select.Option>
+                    </Select>
+                    */}
+                    
 
                     <div className="flex items-center gap-2">
                       <span className={`text-lg ${getPaymentMethodInfo(selectedBooking.paymentMethod).color}`}>
