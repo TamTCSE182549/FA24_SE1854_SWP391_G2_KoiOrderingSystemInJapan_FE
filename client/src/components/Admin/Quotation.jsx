@@ -91,7 +91,7 @@ const Quotation = () => {
   return (
     <div className="container mx-auto py-4" style={{ paddingLeft: '100px', paddingRight: '100px', paddingTop: '100px' }}>
       <h1 className="text-2xl font-bold mb-4">Quotations List</h1>
-      <Space className="mb-4">
+      {/* <Space className="mb-4">
         <Select
           defaultValue="ALL"
           style={{ width: 120 }}
@@ -101,14 +101,11 @@ const Quotation = () => {
           <Option value="PROCESS">In Process</Option>
           <Option value="FINISH">Accept</Option>
           <Option value="REJECTED">Reject</Option>
-        </Select>
+        </Select> */}
         {/* <DatePicker
           onChange={(date) => setDateFilter(date)}
         /> */}
-        <Button type="primary" onClick={fetchQuotations}>
-          Reload Quotations
-        </Button>
-      </Space>
+      {/* </Space> */}
 
       <Row gutter={[16, 16]}>
         {paginatedQuotations.map((quotation) => (
