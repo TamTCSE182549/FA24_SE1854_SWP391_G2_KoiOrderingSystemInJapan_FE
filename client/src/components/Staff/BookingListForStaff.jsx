@@ -143,22 +143,24 @@ const BookingListForStaff = () => {
               Create Quotation
             </Button>
           )}
-          <Button 
-            type="default"
-            onClick={() => handleCreateCheckin(record.id)}
-            disabled={record.paymentStatus.toLowerCase() !== "processing"}
-          >
-            Create Checkin
-          </Button>
 
-          {record.paymentStatus === "complete" && (
-            <Button
-              type="primary"
-              onClick={() => handleCreateBookingKoi(record.id)}
-              style={{ backgroundColor: "#10B981" }}
-            >
-              Create Koi Booking
-            </Button>
+          {record.paymentStatus.toLowerCase() === "complete" && (
+            <>
+              <Button 
+                type="default"
+                onClick={() => handleCreateCheckin(record.id)}
+              >
+                Create Checkin
+              </Button>
+
+              <Button
+                type="primary"
+                onClick={() => handleCreateBookingKoi(record.id)}
+                style={{ backgroundColor: "#10B981" }}
+              >
+                Create Koi Booking
+              </Button>
+            </>
           )}
         </Space>
       ),
@@ -272,6 +274,36 @@ const BookingListForStaff = () => {
     borderColor: "#d9d9d9",
     cursor: "not-allowed",
     opacity: 0.8,
+  };
+
+  // Add this helper function to get payment method icon and color
+  const getPaymentMethodInfo = (method) => {
+    switch (method?.toUpperCase()) {
+      case 'VISA':
+        return {
+          icon: <CreditCardOutlined />,
+          color: 'text-blue-500',
+          label: 'Visa'
+        };
+      case 'TRANSFER':
+        return {
+          icon: <BankOutlined />,
+          color: 'text-purple-500',
+          label: 'Transfer'
+        };
+      case 'CASH':
+        return {
+          icon: <DollarOutlined />,
+          color: 'text-green-500',
+          label: 'Cash'
+        };
+      default:
+        return {
+          icon: <DollarOutlined />,
+          color: 'text-gray-500',
+          label: method || 'Unknown'
+        };
+    }
   };
 
   return (
@@ -440,36 +472,14 @@ const BookingListForStaff = () => {
                     <span className="text-gray-600 w-32 font-medium">
                       Payment Method:
                     </span>
-                    <Select
-                      value={editedBooking?.paymentMethod}
-                      onChange={(value) => handleFieldChange('paymentMethod', value)}
-                      className="w-48 ml-2"
-                      open={selectedBooking.paymentStatus.toLowerCase() === 'pending'}
-                      onClick={(e) => {
-                        if (selectedBooking.paymentStatus.toLowerCase() !== 'pending') {
-                          e.preventDefault();
-                        }
-                      }}
-                    >
-                      <Select.Option value="CASH">
-                        <div className="flex items-center gap-2">
-                          <DollarOutlined className="text-green-500" />
-                          Cash
-                        </div>
-                      </Select.Option>
-                      <Select.Option value="CREDIT_CARD">
-                        <div className="flex items-center gap-2">
-                          <CreditCardOutlined className="text-blue-500" />
-                          Credit Card
-                        </div>
-                      </Select.Option>
-                      <Select.Option value="BANK_TRANSFER">
-                        <div className="flex items-center gap-2">
-                          <BankOutlined className="text-purple-500" />
-                          Bank Transfer
-                        </div>
-                      </Select.Option>
-                    </Select>
+                    <div className="flex items-center gap-2">
+                      <span className={`text-lg ${getPaymentMethodInfo(selectedBooking.paymentMethod).color}`}>
+                        {getPaymentMethodInfo(selectedBooking.paymentMethod).icon}
+                      </span>
+                      <span className="font-semibold">
+                        {getPaymentMethodInfo(selectedBooking.paymentMethod).label}
+                      </span>
+                    </div>
                   </div>
 
                   <div className="flex items-center">
