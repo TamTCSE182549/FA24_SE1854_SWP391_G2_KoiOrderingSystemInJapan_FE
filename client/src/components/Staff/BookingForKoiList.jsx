@@ -3,12 +3,13 @@ import axios from "axios";
 import { useCookies } from "react-cookie";
 import { ToastContainer, toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import { Table, Tag, Button, Input, Card, Statistic, Space } from "antd";
+import { Table, Tag, Button, Input, Card, Statistic, Space, Modal } from "antd";
 import {
   SearchOutlined,
   FileTextOutlined,
   EyeOutlined,
   CarOutlined,
+  DeleteOutlined,
 } from "@ant-design/icons";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -95,6 +96,38 @@ const BookingForKoiList = () => {
     navigate(`/delivery/${bookingId}`);
   };
 
+  const handleDelete = async (bookingId) => {
+    Modal.confirm({
+      title: 'Are you sure you want to cancel this booking?',
+      content: 'This action cannot be undone.',
+      okText: 'Yes, Cancel it',
+      okType: 'danger',
+      cancelText: 'No',
+      async onOk() {
+        try {
+          await axios.put(`http://localhost:8080/bookings/delete/koi/${bookingId}`, null, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          
+          setBookings(prevBookings => 
+            prevBookings.map(booking => 
+              booking.id === bookingId 
+                ? { ...booking, paymentStatus: 'cancelled' }
+                : booking
+            )
+          );
+          
+          toast.success('Booking cancelled successfully');
+        } catch (error) {
+          console.error('Error cancelling booking:', error);
+          toast.error('Failed to cancel booking');
+        }
+      },
+    });
+  };
+
   const columns = [
     {
       title: "Booking ID",
@@ -116,11 +149,11 @@ const BookingForKoiList = () => {
       key: "totalAmountWithVAT",
       render: (amount) => (
         <span style={{ color: "#059669", fontWeight: 500, fontSize: "1rem" }}>
-          {new Intl.NumberFormat("vi-VN", {
+          {new Intl.NumberFormat("en-US", {
             style: "currency",
-            currency: "VND",
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0,
+            currency: "USD",
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
           }).format(amount)}
         </span>
       ),
@@ -240,15 +273,31 @@ const BookingForKoiList = () => {
           >
             View Details
           </Button>
-          <Button
-            type="default"
-            icon={<CarOutlined />}
-            onClick={() => handleNavigateToDelivery(record.id)}
-            size="large"
-            className="font-medium"
-          >
-            Delivery
-          </Button>
+          
+          {(record.paymentStatus === 'pending' || record.paymentStatus === 'processing') && (
+            <Button
+              type="default"
+              danger
+              icon={<DeleteOutlined />}
+              onClick={() => handleDelete(record.id)}
+              size="large"
+              className="font-medium"
+            >
+              Cancel
+            </Button>
+          )}
+          
+          {record.paymentStatus !== 'cancelled' && (
+            <Button
+              type="default"
+              icon={<CarOutlined />}
+              onClick={() => handleNavigateToDelivery(record.id)}
+              size="large"
+              className="font-medium"
+            >
+              Delivery
+            </Button>
+          )}
         </Space>
       ),
     },
