@@ -87,7 +87,21 @@ const TourDetail = () => {
     // }
 
     if (!token) {
+      toast.dismiss();
       toast.error("Token not found or invalid. Please log in."); // Hiển thị thông báo lỗi
+      return;
+    }
+
+    // Kiểm tra số lượng khách phải hợp lệ
+    if (participants <= 0) {
+      toast.dismiss();
+      toast.warning("Number of guests must be greater than 0");
+      return;
+    }
+    
+    if (participants > tour.remaining) {
+      toast.dismiss();
+      toast.warning(`Maximum number of participants is ${tour.remaining}`);
       return;
     }
 
@@ -101,6 +115,7 @@ const TourDetail = () => {
     try {
       if (participants <= tour.remaining) {
         if (Object.keys(bookings).length > 0) {
+          toast.dismiss();
           toast.warn(
             "You have booking not complete. Please check your booking!"
           );
@@ -120,6 +135,7 @@ const TourDetail = () => {
         // NotificationManager.success("Booking successful!", "Success", 5000);
         navigate("/tour", { state: { toastMessage: "Booking successful!" } });
       } else {
+        toast.dismiss();
         toast.warning(
           "Participants must be less than or equal remaning of tour AND must be greater than 0"
         );
@@ -127,15 +143,18 @@ const TourDetail = () => {
     } catch (error) {
       if (error.response) {
         console.error("Error response:", error.response.data);
+        toast.dismiss();
         toast.error(
           error.response.data.message ||
             "Failed to book the trip. Please try again."
         ); // Hiển thị thông báo lỗi
       } else if (error.request) {
         console.error("Error request:", error.request);
+        toast.dismiss();
         toast.error("No response from server. Please check your connection.");
       } else {
         console.error("Error message:", error.message);
+        toast.dismiss();
         toast.error("An unexpected error occurred. Please try again.");
       }
     } finally {
@@ -180,19 +199,19 @@ const TourDetail = () => {
               <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <p className="text-gray-600">Start Time</p>
-                  <p className="text-lg font-medium">
+                  <p className="text-lg font-medium text-green-600">
                     {format(new Date(tour.startTime), "MMM dd, yyyy HH:mm")}
                   </p>
                 </div>
                 <div className="space-y-2">
                   <p className="text-gray-600">End Time</p>
-                  <p className="text-lg font-medium">
+                  <p className="text-lg font-medium text-green-600">
                     {format(new Date(tour.endTime), "MMM dd, yyyy HH:mm")}
                   </p>
                 </div>
                 <div className="space-y-2">
                   <p className="text-gray-600">Max Participants</p>
-                  <p className="text-lg font-medium">{tour.maxParticipants}</p>
+                  <p className="text-lg text-green-600 font-medium">{tour.maxParticipants}</p>
                 </div>
                 <div className="space-y-2">
                   <p className="text-gray-600">Remaining Spots</p>
@@ -231,12 +250,45 @@ const TourDetail = () => {
                 <div>
                   <label className="block text-gray-700 mb-2">Number of Guests</label>
                   <InputNumber
-                    min={1}
-                    max={tour.remaining}
-                    defaultValue={1}
-                    onChange={(value) => setParticipants(value)}
-                    className="w-full"
+                    placeholder="Number of Guests"
+                    onChange={(value) => {
+                      // Kiểm tra giá trị bằng 0
+                      if (value === 0) {
+                        toast.dismiss();
+                        toast.warning("Number of guests must be greater than 0");
+                        return;
+                      }
+                      // Kiểm tra giá trị vượt quá remaining
+                      if (value > tour.remaining) {
+                        toast.dismiss();
+                        toast.warning(`Maximum number of participants is ${tour.remaining}`);
+                        return;
+                      }
+                      // Chỉ set giá trị khi nó hợp lệ
+                      setParticipants(value);
+                    }}
+                    className="w-full !rounded-xl"
                     size="large"
+                    controls={false}
+                    onKeyDown={(e) => {
+                      // Cho phép: số (0-9), backspace, delete, arrow keys, tab
+                      const allowedKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'];
+                      const isNumber = /^[0-9]$/.test(e.key);
+                      
+                      if (!isNumber && !allowedKeys.includes(e.key)) {
+                        e.preventDefault();
+                        toast.dismiss();
+                        toast.warning("Please enter numbers only");
+                      }
+                    }}
+                    parser={(value) => {
+                      // Chỉ giữ lại số
+                      return value.replace(/[^\d]/g, '');
+                    }}
+                    formatter={(value) => {
+                      // Định dạng hiển thị chỉ số
+                      return `${value}`.replace(/[^\d]/g, '');
+                    }}
                   />
                 </div>
 
@@ -257,7 +309,7 @@ const TourDetail = () => {
                 <div className="space-y-4">
                   <button
                     onClick={handleBooking}
-                    className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition duration-300"
+                    className="w-full bg-blue-600 text-green py-3 rounded-lg font-medium hover:bg-blue-700 transition duration-300"
                   >
                     Book Now
                   </button>

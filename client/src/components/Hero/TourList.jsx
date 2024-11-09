@@ -42,8 +42,48 @@ const Tour = () => {
     }
   }, [location]);
 
+  useEffect(() => {
+    // Tạo một hàm để gọi handleSubmit khi component mount
+    const initialFetch = async () => {
+      const findTourRequest = {
+        farmId: null,
+        koiId: null,
+        minPrice: null,
+        maxPrice: null,
+        startDate: null,
+        endDate: null,
+      };
+
+      try {
+        const response = await axios.post(
+          `http://localhost:8080/tour/findTourByFarmNameAndKoiName?page=${currentPage}&size=6`,
+          findTourRequest, // Send findTourRequest as the request body
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        
+
+        if (Array.isArray(response.data.content)) {
+          setTours(response.data.content);
+          setTotalPage(response.data.totalPage);
+        } else {
+          setTours([]);
+          toast.error("No tours found");
+        }
+      } catch (error) {
+        console.error("Error searching tours:", error);
+        toast.error("Error searching tours");
+      }
+    };
+
+    initialFetch();
+  }, [currentPage]); // Chỉ gọi lại khi currentPage thay đổi
+
   const handleSubmit = async (e, page = 0) => {
-    e.preventDefault();
+    e?.preventDefault(); // Thêm optional chaining vì có thể không có event
     const findTourRequest = {
       farmId: farm || null,
       koiId: koi || null,
@@ -65,28 +105,29 @@ const Tour = () => {
       return;
     }
 
-    // Nếu qua tất cả điều kiện, gửi yêu cầu
     try {
       const response = await axios.post(
-        "http://localhost:8080/tour/findTourByFarmNameAndKoiName",
-        findTourRequest,
+        `http://localhost:8080/tour/findTourByFarmNameAndKoiName?page=${page}&size=6`,
+        findTourRequest, // Send findTourRequest as the request body
         {
           headers: {
             "Content-Type": "application/json",
           },
         }
       );
+      
 
       if (Array.isArray(response.data.content)) {
         setTours(response.data.content);
         setTotalPage(response.data.totalPage);
+        setCurrentPage(page);
       } else {
-        setTours(hardcodedTours); // Dữ liệu tạm thời khi phản hồi không hợp lệ
+        setTours([]);
+        toast.error("No tours found");
       }
-
-      console.log("Kết quả từ server:", response.data.content);
     } catch (error) {
-      console.error("Lỗi khi gửi yêu cầu:", error);
+      console.error("Error searching tours:", error);
+      toast.error("Error searching tours");
     }
   };
 
@@ -173,36 +214,10 @@ const Tour = () => {
     setEndDate(e.target.value);
   };
 
-  let response = "";
-  const fetchTourData = async (page = 0) => {
-    try {
-      // toast.success("Show all tour success");
-      response = await axios.get(
-        `http://localhost:8080/tour/showAllPageable?page=${page}`
-      );
-
-      if (Array.isArray(response.data.content)) {
-        setTours(response.data.content);
-        setTotalPage(response.data.totalPage);
-      } else {
-        setTours(hardcodedTours);
-      }
-      console.log("Tour Data:", response.data.content);
-    } catch (error) {
-      console.error("Error fetching tour data:", error);
-      console.error("Failed to fetch tour data. Displaying fallback data.");
-      setTours(hardcodedTours); // Display hardcoded data on API failure
-    }
-  };
-
-  useEffect(() => {
-    fetchTourData(currentPage); // Gọi API mỗi khi `currentPage` thay đổi
-  }, [currentPage]);
-
   useEffect(() => {
     const fetchFarms = async () => {
       try {
-        response = await axios.get(
+        const response = await axios.get(
           "http://localhost:8080/koi-farm/list-farm-active"
         );
         if (Array.isArray(response.data)) {
@@ -222,7 +237,7 @@ const Tour = () => {
   useEffect(() => {
     const fetchKois = async () => {
       try {
-        response = await axios.get("http://localhost:8080/kois/all/active");
+        const response = await axios.get("http://localhost:8080/kois/all/active");
         if (Array.isArray(response.data)) {
           console.log(response.data);
           setKois(response.data); // Lưu danh sách farm vào state
@@ -241,15 +256,15 @@ const Tour = () => {
 
   const handleNextPage = () => {
     if (currentPage < totalPage - 1) {
-      setCurrentPage((prevPage) => prevPage + 1); // Tăng trang nếu chưa đến trang cuối
-      window.scrollTo({ top: 0, behavior: "smooth" }); // Cuộn về đầu trang
+      handleSubmit(null, currentPage + 1);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
   const handlePreviousPage = () => {
     if (currentPage > 0) {
-      setCurrentPage((prevPage) => prevPage - 1); // Giảm trang nếu chưa đến trang đầu
-      window.scrollTo({ top: 0, behavior: "smooth" }); // Cuộn về đầu trang
+      handleSubmit(null, currentPage - 1);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
@@ -286,6 +301,11 @@ const Tour = () => {
                   className="w-full !rounded-xl hover:border-blue-500 focus:border-blue-500"
                   placeholder="Select Farm"
                   size="large"
+                  showSearch
+                  optionFilterProp="children"
+                  filterOption={(input, option) => 
+                    option?.children?.toLowerCase().includes(input.toLowerCase())
+                  }
                 >
                   <Option value="">All Farms</Option>
                   {farms.map((farm) => (
@@ -310,6 +330,11 @@ const Tour = () => {
                   className="w-full !rounded-xl hover:border-blue-500 focus:border-blue-500"
                   placeholder="Select Koi"
                   size="large"
+                  showSearch
+                  optionFilterProp="children"
+                  filterOption={(input, option) => 
+                    option?.children?.toLowerCase().includes(input.toLowerCase())
+                  }
                 >
                   <Option value="">All Kois</Option>
                   {kois.map((koi) => (
@@ -333,19 +358,46 @@ const Tour = () => {
                     placeholder="Min"
                     min={0}
                     value={minPrice}
-                    onChange={(value) => setMinPrice(value)}
+                    onChange={(value) => {
+                      // Chỉ cho phép số và dấu chấm thập phân
+                      if (value && /^[0-9]*\.?[0-9]*$/.test(value.toString())) {
+                        setMinPrice(value);
+                      }
+                    }}
                     className="w-full !rounded-xl"
                     size="large"
                     prefix="$"
+                    controls={false}
+                    onKeyDown={(e) => {
+                      // Ngăn chặn nhập ký tự đặc biệt
+                      const specialChars = /[!@#$%^&*()_+\-=\[\]{};':"\\|,<>\/?]+/;
+                      if (specialChars.test(e.key)) {
+                        e.preventDefault();
+                      }
+                    }}
                   />
                   <span className="text-gray-400">-</span>
                   <InputNumber
                     placeholder="Max"
+                    min={0}
                     value={maxPrice}
-                    onChange={(value) => setMaxPrice(value)}
+                    onChange={(value) => {
+                      // Chỉ cho phép số và dấu chấm thập phân
+                      if (value && /^[0-9]*\.?[0-9]*$/.test(value.toString())) {
+                        setMaxPrice(value);
+                      }
+                    }}
                     className="w-full !rounded-xl"
                     size="large"
                     prefix="$"
+                    controls={false}
+                    onKeyDown={(e) => {
+                      // Ngăn chặn nhập ký tự đặc biệt
+                      const specialChars = /[!@#$%^&*()_+\-=\[\]{};':"\\|,<>\/?]+/;
+                      if (specialChars.test(e.key)) {
+                        e.preventDefault();
+                      }
+                    }}
                   />
                 </div>
               </div>
