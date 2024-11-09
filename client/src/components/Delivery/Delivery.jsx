@@ -110,10 +110,25 @@ const Delivery = () => {
   };
 
   const handleUpdate = async () => {
+    const routeError = validateRoute(newRoute);
+    const descriptionError = validateDescription(newDescription);
+
+    if (routeError) {
+      message.error(routeError);
+      return;
+    }
+    if (descriptionError) {
+      message.error(descriptionError);
+      return;
+    }
+
     try {
       await updateDelivery(
         selectedDelivery.deliveryId,
-        { route: newRoute, healthKoiDescription: newDescription },
+        {
+          route: newRoute.trim(),
+          healthKoiDescription: newDescription.trim(),
+        },
         token
       );
       setDeliveries((prevDeliveries) =>
@@ -121,8 +136,8 @@ const Delivery = () => {
           delivery.deliveryId === selectedDelivery.deliveryId
             ? {
                 ...delivery,
-                route: newRoute,
-                healthKoiDescription: newDescription,
+                route: newRoute.trim(),
+                healthKoiDescription: newDescription.trim(),
               }
             : delivery
         )
@@ -131,8 +146,7 @@ const Delivery = () => {
       setIsUpdateModalVisible(false);
     } catch (error) {
       console.error("Error updating delivery:", error);
-      setError("Failed to update delivery data.");
-      message.error("Failed to update delivery");
+      message.error(error.response?.data || "Failed to update delivery");
     }
   };
 
@@ -159,13 +173,84 @@ const Delivery = () => {
     });
   };
 
+  const validateRoute = (route) => {
+    if (!route || !route.trim()) {
+      return "Route is required";
+    }
+    if (route.length > 100) {
+      return "Route cannot exceed 100 characters";
+    }
+    // Chỉ cho phép chữ, số, dấu phẩy, dấu chấm và khoảng trắng
+    const routeRegex = /^[a-zA-Z0-9,.\s]+$/;
+    if (!routeRegex.test(route)) {
+      return "Route can only contain letters, numbers, commas, periods and spaces";
+    }
+    return null;
+  };
+
+  const validateDescription = (description) => {
+    if (!description || !description.trim()) {
+      return "Health description is required";
+    }
+    if (description.length > 500) {
+      return "Description cannot exceed 500 characters";
+    }
+    return null;
+  };
+
+  const validateCheckout = (data) => {
+    const errors = {};
+
+    if (!data.customerName || !data.customerName.trim()) {
+      errors.customerName = "Customer name is required";
+    } else if (data.customerName.length > 50) {
+      errors.customerName = "Customer name cannot exceed 50 characters";
+    }
+
+    if (!data.receiveDate) {
+      errors.receiveDate = "Receive date is required";
+    } else {
+      const currentDate = new Date();
+      const selectedDate = new Date(data.receiveDate);
+      if (selectedDate < currentDate) {
+        errors.receiveDate = "Receive date cannot be in the past";
+      }
+    }
+
+    if (!data.healthKoiDescription || !data.healthKoiDescription.trim()) {
+      errors.healthKoiDescription = "Health description is required";
+    }
+
+    if (!data.status) {
+      errors.status = "Status is required";
+    }
+
+    if (data.status === "CANCELLED" && (!data.reason || !data.reason.trim())) {
+      errors.reason = "Reason is required for cancelled status";
+    }
+
+    return errors;
+  };
+
   const handleAdd = async () => {
+    const routeError = validateRoute(newDeliveryRoute);
+    const descriptionError = validateDescription(newDeliveryDescription);
+
+    if (routeError) {
+      message.error(routeError);
+      return;
+    }
+    if (descriptionError) {
+      message.error(descriptionError);
+      return;
+    }
+
     try {
       await addDelivery(
         bookingId,
         {
-          route: newDeliveryRoute,
-          healthKoiDescription: newDeliveryDescription,
+          route: newDeliveryRoute.trim(),
+          healthKoiDescription: newDeliveryDescription.trim(),
         },
         token
       );
@@ -174,37 +259,36 @@ const Delivery = () => {
       await deliveryList();
     } catch (error) {
       console.error("Error adding delivery:", error);
-      setError("Failed to add delivery data.");
-      message.error(error.response.data);
+      message.error(error.response?.data || "Failed to add delivery");
     }
   };
 
   const handleCheckout = async () => {
-    if (checkoutStatus === "CANCELLED" && !checkoutReason.trim()) {
-      message.error("Please provide a reason for cancellation");
+    const checkoutData = {
+      customerName: checkoutCustomerName,
+      receiveDate: checkoutReceiveDate,
+      healthKoiDescription: checkoutHealthDescription,
+      status: checkoutStatus,
+      reason: checkoutReason,
+    };
+
+    const errors = validateCheckout(checkoutData);
+
+    if (Object.keys(errors).length > 0) {
+      // Hiển thị lỗi đầu tiên tìm thấy
+      message.error(Object.values(errors)[0]);
       return;
     }
 
     try {
-      const payload = {
-        customerName: checkoutCustomerName,
-        receiveDate: checkoutReceiveDate,
-        healthKoiDescription: checkoutHealthDescription,
-        status: checkoutStatus,
-      };
-
-      if (checkoutStatus === "CANCELLED") {
-        payload.reason = checkoutReason;
-      }
-
-      await checkoutDelivery(bookingId, payload, token);
+      await checkoutDelivery(bookingId, checkoutData, token);
       message.success("Delivery checked out successfully");
       setIsCheckoutModalVisible(false);
       await fetchCheckoutInfo();
-      setCheckoutReason(""); // Reset reason after successful checkout
+      setCheckoutReason("");
     } catch (error) {
       console.error("Error checking out delivery:", error);
-      message.error(error.response.data);
+      message.error(error.response?.data || "Failed to checkout delivery");
     }
   };
 

@@ -56,7 +56,53 @@ const CreateCheckin = () => {
         setParticipants(newParticipants);
     };
 
+    // Thêm hàm kiểm tra ký tự đặc biệt
+    const containsSpecialChars = (str) => {
+        // Regex này chỉ cho phép chữ cái (cả hoa và thường), khoảng trắng và dấu gạch ngang
+        const regex = /^[a-zA-Z\s-]+$/;
+        return !regex.test(str);
+    };
+
     const handleSubmit = async () => {
+        // Kiểm tra whitespace cho Airline
+        if (!commonInfo.airline.trim()) {
+            setError('Airline is required');
+            return;
+        }
+        
+        // Kiểm tra whitespace cho Airport
+        if (!commonInfo.airport.trim()) {
+            setError('Airport is required');
+            return;
+        }
+        
+        // Kiểm tra Check-in Date
+        if (!commonInfo.checkinDate) {
+            setError('Check-in Date is required');
+            return;
+        }
+
+        // Kiểm tra whitespace và ký tự đặc biệt cho First Name và Last Name
+        for (let i = 0; i < participants.length; i++) {
+            if (!participants[i].firstName.trim()) {
+                setError(`First Name is required for Participant ${i + 1}`);
+                return;
+            }
+            if (containsSpecialChars(participants[i].firstName)) {
+                setError(`First Name for Participant ${i + 1} contains special characters. Only letters and spaces are allowed.`);
+                return;
+            }
+
+            if (!participants[i].lastName.trim()) {
+                setError(`Last Name is required for Participant ${i + 1}`);
+                return;
+            }
+            if (containsSpecialChars(participants[i].lastName)) {
+                setError(`Last Name for Participant ${i + 1} contains special characters. Only letters and spaces are allowed.`);
+                return;
+            }
+        }
+
         try {
             // Tạo một mảng promises để xử lý tất cả các request
             const checkinPromises = participants.map(participant => {

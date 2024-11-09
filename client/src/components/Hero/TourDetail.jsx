@@ -29,7 +29,8 @@ const TourDetail = () => {
   const { id } = useParams(); // Get the id from the URL
 
   const [paymentMethod, setPaymentMethod] = useState("CASH");
-  const [participants, setParticipants] = useState(1);
+  const [participants, setParticipants] = useState(0);
+  const [participantInfo, setParticipantInfo] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -78,24 +79,38 @@ const TourDetail = () => {
     navigate(-1); // Di chuyển về trang trước đó
   };
 
+  const handleAddParticipant = () => {
+    setParticipantInfo([...participantInfo, { firstName: '', lastName: '' }]);
+    setParticipants(participantInfo.length + 1);
+  };
+
+  const handleParticipantChange = (index, field, value) => {
+    const newParticipants = [...participantInfo];
+    newParticipants[index] = {
+      ...newParticipants[index],
+      [field]: value
+    };
+    setParticipantInfo(newParticipants);
+  };
+
+  const handleRemoveParticipant = (indexToRemove) => {
+    const newParticipantInfo = participantInfo.filter((_, index) => index !== indexToRemove);
+    setParticipantInfo(newParticipantInfo);
+    setParticipants(newParticipantInfo.length);
+  };
+
   const handleBooking = async (e) => {
     e.preventDefault();
 
-    // if (!token) {
-    //   setMessage("Token not found or invalid. Please log in.");
-    //   return;
-    // }
-
     if (!token) {
       toast.dismiss();
-      toast.error("Token not found or invalid. Please log in."); // Hiển thị thông báo lỗi
+      toast.error("Token not found or invalid. Please log in.");
       return;
     }
 
-    // Kiểm tra số lượng khách phải hợp lệ
     if (participants <= 0) {
       toast.dismiss();
-      toast.warning("Number of guests must be greater than 0");
+      toast.warning("Please add at least one participant");
       return;
     }
     
@@ -105,7 +120,19 @@ const TourDetail = () => {
       return;
     }
 
-    // Dữ liệu booking tương ứng với BookingRequest class
+    for (let i = 0; i < participantInfo.length; i++) {
+      if (!participantInfo[i].firstName.trim() || !participantInfo[i].lastName.trim()) {
+        toast.dismiss();
+        toast.warning(`Please fill in all participant information for participant ${i + 1}`);
+        return;
+      }
+      if (containsSpecialChars(participantInfo[i].firstName) || containsSpecialChars(participantInfo[i].lastName)) {
+        toast.dismiss();
+        toast.warning(`Names can only contain letters and spaces for participant ${i + 1}`);
+        return;
+      }
+    }
+
     const bookingData = {
       tourID: Number(tour.id),
       paymentMethod: paymentMethod,
@@ -113,33 +140,47 @@ const TourDetail = () => {
     };
 
     try {
-      if (participants <= tour.remaining) {
-        if (Object.keys(bookings).length > 0) {
-          toast.dismiss();
-          toast.warn(
-            "You have booking not complete. Please check your booking!"
-          );
-          return;
+      const bookingResponse = await axios.post(
+        "http://localhost:8080/bookings/CreateForTour",
+        bookingData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         }
-        const response = await axios.post(
-          "http://localhost:8080/bookings/CreateForTour",
-          bookingData,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`, // Ensure the token is correctly passed
-              "Content-Type": "application/json",
-            },
-          }
-        );
-        console.log("Booking successful:", response.data);
-        // NotificationManager.success("Booking successful!", "Success", 5000);
-        navigate("/tour", { state: { toastMessage: "Booking successful!" } });
-      } else {
-        toast.dismiss();
-        toast.warning(
-          "Participants must be less than or equal remaning of tour AND must be greater than 0"
-        );
+      );
+
+      if (bookingResponse.data) {
+        const bookingId = bookingResponse.data.id;
+        
+        const checkinPromises = participantInfo.map(participant => {
+          const checkinData = {
+            firstName: participant.firstName,
+            lastName: participant.lastName,
+            airline: "",
+            airport: "",
+            checkinDate: new Date().toISOString().split('T')[0],
+            bookingTour: bookingId,
+            bookingKoi: null
+          };
+          
+          return axios.post(
+            `http://localhost:8080/checkins/${bookingId}`,
+            checkinData,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              }
+            }
+          );
+        });
+
+        await Promise.all(checkinPromises);
       }
+
+      navigate("/tour", { state: { toastMessage: "Booking successful!" } });
     } catch (error) {
       if (error.response) {
         console.error("Error response:", error.response.data);
@@ -147,7 +188,7 @@ const TourDetail = () => {
         toast.error(
           error.response.data.message ||
             "Failed to book the trip. Please try again."
-        ); // Hiển thị thông báo lỗi
+        );
       } else if (error.request) {
         console.error("Error request:", error.request);
         toast.dismiss();
@@ -158,8 +199,15 @@ const TourDetail = () => {
         toast.error("An unexpected error occurred. Please try again.");
       }
     } finally {
-      setIsLoading(false); // Kết thúc trạng thái loading
+      setIsLoading(false);
     }
+  };
+
+  // Thêm hàm kiểm tra ký tự đặc biệt
+  const containsSpecialChars = (str) => {
+    // Regex này chỉ cho phép chữ cái (cả hoa và thường), khoảng trắng và dấu gạch ngang
+    const regex = /^[a-zA-Z\s-]+$/;
+    return !regex.test(str);
   };
 
   return (
@@ -250,46 +298,68 @@ const TourDetail = () => {
                 <div>
                   <label className="block text-gray-700 mb-2">Number of Guests</label>
                   <InputNumber
-                    placeholder="Number of Guests"
-                    onChange={(value) => {
-                      // Kiểm tra giá trị bằng 0
-                      if (value === 0) {
-                        toast.dismiss();
-                        toast.warning("Number of guests must be greater than 0");
-                        return;
-                      }
-                      // Kiểm tra giá trị vượt quá remaining
-                      if (value > tour.remaining) {
-                        toast.dismiss();
-                        toast.warning(`Maximum number of participants is ${tour.remaining}`);
-                        return;
-                      }
-                      // Chỉ set giá trị khi nó hợp lệ
-                      setParticipants(value);
-                    }}
-                    className="w-full !rounded-xl"
+                    value={participants}
+                    disabled={true}
+                    className="w-full !rounded-xl bg-gray-100"
                     size="large"
-                    controls={false}
-                    onKeyDown={(e) => {
-                      // Cho phép: số (0-9), backspace, delete, arrow keys, tab
-                      const allowedKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'];
-                      const isNumber = /^[0-9]$/.test(e.key);
-                      
-                      if (!isNumber && !allowedKeys.includes(e.key)) {
-                        e.preventDefault();
-                        toast.dismiss();
-                        toast.warning("Please enter numbers only");
-                      }
-                    }}
-                    parser={(value) => {
-                      // Chỉ giữ lại số
-                      return value.replace(/[^\d]/g, '');
-                    }}
-                    formatter={(value) => {
-                      // Định dạng hiển thị chỉ số
-                      return `${value}`.replace(/[^\d]/g, '');
-                    }}
                   />
+                </div>
+
+                <div>
+                  <div className="flex justify-between items-center mb-2">
+                    <label className="block text-gray-700">Participant Information</label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (participantInfo.length >= tour.remaining) {
+                          toast.dismiss();
+                          toast.warning(`Maximum number of participants is ${tour.remaining}`);
+                          return;
+                        }
+                        handleAddParticipant();
+                      }}
+                      className="text-blue-600 hover:text-blue-700"
+                    >
+                      + Add Participant
+                    </button>
+                  </div>
+                  
+                  {participantInfo.length === 0 ? (
+                    <div className="text-gray-500 text-center py-4 border rounded-lg">
+                      No participants added yet
+                    </div>
+                  ) : (
+                    participantInfo.map((participant, index) => (
+                      <div key={index} className="mb-4 p-4 border rounded-lg relative">
+                        <div className="flex justify-between items-center mb-2">
+                          <h4 className="text-sm font-medium">Participant {index + 1}</h4>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveParticipant(index)}
+                            className="text-red-500 hover:text-red-700"
+                          >
+                            - Remove
+                          </button>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <input
+                            type="text"
+                            placeholder="First Name"
+                            value={participant.firstName}
+                            onChange={(e) => handleParticipantChange(index, 'firstName', e.target.value)}
+                            className="border rounded-lg p-2 text-black"
+                          />
+                          <input
+                            type="text"
+                            placeholder="Last Name"
+                            value={participant.lastName}
+                            onChange={(e) => handleParticipantChange(index, 'lastName', e.target.value)}
+                            className="border rounded-lg p-2 text-black"
+                          />
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </div>
 
                 <div>
