@@ -185,6 +185,15 @@ const BookingInformation = () => {
                         </div>
                       )}
                     </div>
+                    {booking.paymentDate && (
+                      <div className="mt-2 bg-blue-50 p-2 rounded-md border border-blue-100">
+                        <p className="text-blue-600 text-sm font-medium mb-1">Payment Date</p>
+                        <span className="text-sm text-blue-700 font-semibold flex items-center gap-2">
+                          <FileTextOutlined className="text-blue-500" />
+                          {formatDateTime(booking.paymentDate)}
+                        </span>
+                      </div>
+                    )}
                   </div>
 
                   {/* Middle: Booking Details */}
@@ -202,7 +211,7 @@ const BookingInformation = () => {
                         <div className="bg-green-50 p-2 rounded-lg">
                           <p className="text-gray-600 text-sm">Discount</p>
                           <p className="font-semibold text-lg text-green-600">
-                            - ${booking.discountAmount}
+                            ${booking.discountAmount}
                           </p>
                         </div>
 
