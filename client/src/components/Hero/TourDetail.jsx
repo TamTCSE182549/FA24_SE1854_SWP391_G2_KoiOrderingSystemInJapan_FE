@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { DatePicker, InputNumber, Select, Card, Typography, Descriptions, Tag, Divider } from "antd";
+import { DatePicker, InputNumber, Select, Card, Typography, Descriptions, Tag, Divider, Modal } from "antd";
 import "antd/dist/reset.css"; // Import Ant Design CSS if not already done
 import { FaPlane } from "react-icons/fa"; // Import plane icon from react-icons
 import { getTourById } from "../../services/tourservice"; // Import the API function
@@ -30,10 +30,24 @@ const TourDetail = () => {
   const { id } = useParams(); // Get the id from the URL
 
   const [paymentMethod, setPaymentMethod] = useState("CASH");
-  const [participants, setParticipants] = useState(0);
   const [participantInfo, setParticipantInfo] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [farmDetails, setFarmDetails] = useState([]);
+
+  const [isAddModalVisible, setIsAddModalVisible] = useState(false);
+  const [isViewModalVisible, setIsViewModalVisible] = useState(false);
+
+  // Thêm state tạm thời để lưu thông tin participant mới
+  const [newParticipant, setNewParticipant] = useState({ firstName: '', lastName: '' });
+
+  // Thêm state để quản lý nhiều participant mới
+  const [newParticipants, setNewParticipants] = useState([{ 
+    firstName: '', 
+    lastName: '', 
+    email: '', 
+    phoneNumber: '', 
+    passport: '' 
+  }]);
 
   useEffect(() => {
     const fetchBookingData = async () => {
@@ -105,8 +119,12 @@ const TourDetail = () => {
   };
   
   const handleAddParticipant = () => {
+    if (participantInfo.length >= tour.remaining) {
+      toast.dismiss();
+      toast.warning(`Maximum number of participants is ${tour.remaining}`);
+      return;
+    }
     setParticipantInfo([...participantInfo, { firstName: '', lastName: '' }]);
-    setParticipants(participantInfo.length + 1);
   };
 
   const handleParticipantChange = (index, field, value) => {
@@ -121,7 +139,26 @@ const TourDetail = () => {
   const handleRemoveParticipant = (indexToRemove) => {
     const newParticipantInfo = participantInfo.filter((_, index) => index !== indexToRemove);
     setParticipantInfo(newParticipantInfo);
-    setParticipants(newParticipantInfo.length);
+  };
+
+  // Add these validation functions near the top of your component
+  const validateName = (name) => {
+    return name.trim().length > 0;
+  };
+
+  const validatePhone = (phone) => {
+    const phoneRegex = /^09\d{8}$/;
+    return phoneRegex.test(phone);
+  };
+
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@gmail\.com$/;
+    return emailRegex.test(email);
+  };
+
+  const validatePassport = (passport) => {
+    const passportRegex = /^B\d{7}$/;
+    return passportRegex.test(passport);
   };
 
   const handleBooking = async (tour) => {
@@ -133,11 +170,11 @@ const TourDetail = () => {
     }
 
     // Kiểm tra điều kiện số lượng người tham gia
-    if (Number(participants) <= 0) {
+    if (participantInfo.length <= 0) {
       toast.warning("Paticipants must be larger than 0");
       return;
     }
-    if (Number(participants) > Number(tour.remaining)) {
+    if (participantInfo.length > tour.remaining) {
       toast.warning(
         `Participants must be equal or less than ${tour.remaining}.`
       );
@@ -148,6 +185,29 @@ const TourDetail = () => {
     if (Object.keys(bookings).length > 0) {
       toast.warn("You have booking not complete. Please check again!");
       return;
+    }
+
+    // Add validation before booking
+    for (const participant of participantInfo) {
+      if (!validateName(participant.firstName) || !validateName(participant.lastName)) {
+        toast.error("First name and last name are required for all participants");
+        return;
+      }
+
+      if (!participant.phoneNumber || !validatePhone(participant.phoneNumber)) {
+        toast.error("Phone number is required and must be in format 09xxxxxxxx");
+        return;
+      }
+
+      if (!participant.passport || !validatePassport(participant.passport)) {
+        toast.error("Passport is required and must be in format B2700000 (B followed by 7 digits)");
+        return;
+      }
+
+      if (participant.email && !validateEmail(participant.email)) {
+        toast.error("Email must be in format xxx@gmail.com");
+        return;
+      }
     }
 
     for (let i = 0; i < participantInfo.length; i++) {
@@ -166,11 +226,11 @@ const TourDetail = () => {
     const bookingData = {
       tourID: Number(tour.id),
       paymentMethod: paymentMethod,
-      participants: Number(participants),
+      participants: participantInfo.length,
     };
 
     try {
-      if (Number(participants) <= Number(tour.remaining)) {
+      if (participantInfo.length <= Number(tour.remaining)) {
         if (Object.keys(bookings).length > 0) {
           toast.warn(
             "You have booking not complete. Please check your booking!"
@@ -182,42 +242,44 @@ const TourDetail = () => {
           bookingData,
           {
             headers: {
-              Authorization: `Bearer ${token}`, // Ensure the token is correctly passed
+              Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
             },
           }
         );
         
         if (response.data) {
-        const bookingId = response.data.id;
-        
-        const checkinPromises = participantInfo.map(participant => {
-          const checkinData = {
-            firstName: participant.firstName,
-            lastName: participant.lastName,
-            airline: "",
-            airport: "",
-            checkinDate: new Date().toISOString().split('T')[0],
-            bookingTour: bookingId,
-            bookingKoi: null
-          };
+          const bookingId = response.data.id;
           
-          return axios.post(
-            `http://localhost:8080/checkins/${bookingId}`,
-            checkinData,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-                'Content-Type': 'application/json'
+          await Promise.all(participantInfo.map(participant => {
+            const checkinData = {
+              firstName: participant.firstName,
+              lastName: participant.lastName,
+              email: participant.email,
+              phoneNumber: participant.phoneNumber,
+              passport: participant.passport,
+              airline: "",
+              airport: "",
+              checkinDate: new Date().toISOString().split('T')[0],
+              bookingTour: bookingId,
+              bookingKoi: null
+            };
+            
+            return axios.post(
+              `http://localhost:8080/checkins/${bookingId}`,
+              checkinData,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  'Content-Type': 'application/json'
+                }
               }
-            }
-          );
-        })};
+            );
+          }));
 
-        await Promise.all(checkinPromises);
-        console.log("Booking successful:", response.data);
-        // NotificationManager.success("Booking successful!", "Success", 5000);
-        navigate("/tour", { state: { toastMessage: "Booking successful!" } });
+          console.log("Booking successful:", response.data);
+          navigate("/tour", { state: { toastMessage: "Booking successful!" } });
+        }
       } else {
         toast.warning(
           "Participants must be less than or equal remaning of tour AND must be greater than 0"
@@ -253,6 +315,95 @@ const TourDetail = () => {
 
   const handleViewFarmDetail = (farmId) => {
     navigate(`/farmdetail/${farmId}`);
+  };
+
+  const showAddModal = () => {
+    setIsAddModalVisible(true);
+  };
+
+  const handleAddModalOk = () => {
+    // Validate all participants
+    for (const participant of newParticipants) {
+      if (!validateName(participant.firstName) || !validateName(participant.lastName)) {
+        toast.error("First name and last name are required for all participants");
+        return;
+      }
+
+      if (!participant.phoneNumber || !validatePhone(participant.phoneNumber)) {
+        toast.error("Phone number is required and must be in format 09xxxxxxxx");
+        return;
+      }
+
+      if (!participant.passport || !validatePassport(participant.passport)) {
+        toast.error("Passport is required and must be in format B2700000 (B followed by 7 digits)");
+        return;
+      }
+
+      if (participant.email && !validateEmail(participant.email)) {
+        toast.error("Email must be in format xxx@gmail.com");
+        return;
+      }
+    }
+
+    setParticipantInfo([...participantInfo, ...newParticipants]);
+    setNewParticipants([{ firstName: '', lastName: '', email: '', phoneNumber: '', passport: '' }]);
+    setIsAddModalVisible(false);
+  };
+
+  const handleAddModalCancel = () => {
+    setIsAddModalVisible(false);
+  };
+
+  const showViewModal = () => {
+    if (participantInfo.length === 0) {
+      toast.info("No participants added yet!");
+      return;
+    }
+    setIsViewModalVisible(true);
+  };
+
+  const handleViewModalCancel = () => {
+    setIsViewModalVisible(false);
+  };
+
+  const addNewParticipantForm = () => {
+    if (participantInfo.length + newParticipants.length >= tour.remaining) {
+      toast.dismiss();
+      toast.warning(`Maximum number of participants is ${tour.remaining}`);
+      return;
+    }
+    setNewParticipants([...newParticipants, { firstName: '', lastName: '', email: '', phoneNumber: '', passport: '' }]);
+  };
+
+  const handleNewParticipantChange = (index, field, value) => {
+    const updatedParticipants = [...newParticipants];
+    updatedParticipants[index][field] = value;
+
+    // Real-time validation feedback
+    if (field === 'phoneNumber' && value && !validatePhone(value)) {
+      toast.dismiss();
+      toast.warning("Phone number must be in format 09xxxxxxxx");
+    }
+    if (field === 'email' && value && !validateEmail(value)) {
+      toast.dismiss();
+      toast.warning("Email must be in format xxx@gmail.com");
+    }
+    if (field === 'passport' && value && !validatePassport(value)) {
+      toast.dismiss();
+      toast.warning("Passport must be in format B2700000 (B followed by 7 digits)");
+    }
+
+    setNewParticipants(updatedParticipants);
+  };
+
+  // Thêm hàm xử lý remove participant form
+  const removeParticipantForm = (indexToRemove) => {
+    if (newParticipants.length > 1) {
+      const updatedParticipants = newParticipants.filter((_, index) => index !== indexToRemove);
+      setNewParticipants(updatedParticipants);
+    } else {
+      toast.info("At least one participant is required");
+    }
   };
 
   return (
@@ -476,96 +627,176 @@ const TourDetail = () => {
                     Number of Guests
                   </label>
                   <InputNumber
-                    placeholder="Number of Guests"
-                    onChange={(value) => {
-                      setParticipants(value);
-                    }}
+                    value={participantInfo.length}
+                    disabled
                     className="w-full !rounded-xl"
                     size="large"
-                    controls={false}
-                    onKeyDown={(e) => {
-                      // Cho phép: số (0-9), backspace, delete, arrow keys, tab
-                      const allowedKeys = [
-                        "Backspace",
-                        "Delete",
-                        "ArrowLeft",
-                        "ArrowRight",
-                        "Tab",
-                      ];
-                      const isNumber = /^[0-9]$/.test(e.key);
-
-                      if (!isNumber && !allowedKeys.includes(e.key)) {
-                        e.preventDefault();
-                        toast.dismiss();
-                        toast.warning("Please enter numbers only");
-                      }
-                    }}
-                    parser={(value) => {
-                      // Chỉ giữ lại số
-                      return value.replace(/[^\d]/g, "");
-                    }}
-                    formatter={(value) => {
-                      // Định dạng hiển thị chỉ số
-                      return `${value}`.replace(/[^\d]/g, "");
-                    }}
                   />
                 </div>
 
                 <div>
                   <div className="flex justify-between items-center mb-2">
                     <label className="block text-gray-700">Participant Information</label>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (participantInfo.length >= tour.remaining) {
-                          toast.dismiss();
-                          toast.warning(`Maximum number of participants is ${tour.remaining}`);
-                          return;
-                        }
-                        handleAddParticipant();
-                      }}
-                      className="text-blue-600 hover:text-blue-700"
-                    >
-                      + Add Participant
-                    </button>
+                    <div className="space-x-2">
+                      <button
+                        type="button"
+                        onClick={showViewModal}
+                        className="text-green-600 hover:text-green-700 px-3 py-1 border border-green-600 rounded"
+                      >
+                        View Participants
+                      </button>
+                      <button
+                        type="button"
+                        onClick={showAddModal}
+                        className="text-blue-600 hover:text-blue-700 px-3 py-1 border border-blue-600 rounded"
+                      >
+                        + Add Participant
+                      </button>
+                    </div>
                   </div>
                   
-                  {participantInfo.length === 0 ? (
-                    <div className="text-gray-500 text-center py-4 border rounded-lg">
-                      No participants added yet
-                    </div>
-                  ) : (
-                    participantInfo.map((participant, index) => (
-                      <div key={index} className="mb-4 p-4 border rounded-lg relative">
-                        <div className="flex justify-between items-center mb-2">
-                          <h4 className="text-sm font-medium">Participant {index + 1}</h4>
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveParticipant(index)}
-                            className="text-red-500 hover:text-red-700"
-                          >
-                            - Remove
-                          </button>
+                  {/* Add Participant Modal */}
+                  <Modal
+                    title="Add New Participant"
+                    open={isAddModalVisible}
+                    onOk={handleAddModalOk}
+                    onCancel={handleAddModalCancel}
+                    okText="Add"
+                    cancelText="Cancel"
+                  >
+                    <div className="p-4">
+                      {newParticipants.map((participant, index) => (
+                        <div key={index} className="mb-6 p-4 border rounded-lg">
+                          <div className="grid grid-cols-2 gap-4 mb-4">
+                            <div>
+                              <input
+                                type="text"
+                                placeholder="First Name *"
+                                className="border rounded-lg p-2 text-black w-full"
+                                value={participant.firstName}
+                                onChange={(e) => handleNewParticipantChange(index, 'firstName', e.target.value)}
+                              />
+                            </div>
+                            <div>
+                              <input
+                                type="text"
+                                placeholder="Last Name *"
+                                className="border rounded-lg p-2 text-black w-full"
+                                value={participant.lastName}
+                                onChange={(e) => handleNewParticipantChange(index, 'lastName', e.target.value)}
+                              />
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <input
+                                type="email"
+                                placeholder="Email (optional)"
+                                className="border rounded-lg p-2 text-black w-full"
+                                value={participant.email}
+                                onChange={(e) => handleNewParticipantChange(index, 'email', e.target.value)}
+                              />
+                            </div>
+                            <div>
+                              <input
+                                type="tel"
+                                placeholder="Phone Number (09xxxxxxxx) *"
+                                className="border rounded-lg p-2 text-black w-full"
+                                value={participant.phoneNumber}
+                                onChange={(e) => handleNewParticipantChange(index, 'phoneNumber', e.target.value)}
+                              />
+                            </div>
+                          </div>
+                          <div className="mt-4">
+                            <input
+                              type="text"
+                              placeholder="Passport Number (B2700000) *"
+                              className="border rounded-lg p-2 text-black w-full"
+                              value={participant.passport}
+                              onChange={(e) => handleNewParticipantChange(index, 'passport', e.target.value)}
+                            />
+                          </div>
+                          {newParticipants.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => removeParticipantForm(index)}
+                              className="mt-4 text-red-500 hover:text-red-700"
+                            >
+                              Remove Participant
+                            </button>
+                          )}
                         </div>
-                        <div className="grid grid-cols-2 gap-2">
-                          <input
-                            type="text"
-                            placeholder="First Name"
-                            value={participant.firstName}
-                            onChange={(e) => handleParticipantChange(index, 'firstName', e.target.value)}
-                            className="border rounded-lg p-2 text-black"
-                          />
-                          <input
-                            type="text"
-                            placeholder="Last Name"
-                            value={participant.lastName}
-                            onChange={(e) => handleParticipantChange(index, 'lastName', e.target.value)}
-                            className="border rounded-lg p-2 text-black"
-                          />
-                        </div>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={addNewParticipantForm}
+                        className="mt-4 w-full py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors"
+                      >
+                        + Add Another Participant
+                      </button>
+                      <div className="mt-4 text-sm text-gray-500">
+                        * Required fields
                       </div>
-                    ))
-                  )}
+                    </div>
+                  </Modal>
+
+                  {/* View Participants Modal */}
+                  <Modal
+                    title="View Participants"
+                    open={isViewModalVisible}
+                    onCancel={handleViewModalCancel}
+                    footer={null}
+                  >
+                    <div className="p-4">
+                      {participantInfo.length === 0 ? (
+                        <div className="text-center text-gray-500">
+                          No participants added yet
+                        </div>
+                      ) : (
+                        participantInfo.map((participant, index) => (
+                          <div key={index} className="mb-4 p-4 border rounded-lg">
+                            <div className="flex justify-between items-center mb-2">
+                              <h4 className="text-sm font-medium">Participant {index + 1}</h4>
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveParticipant(index)}
+                                className="text-red-500 hover:text-red-700"
+                              >
+                                Remove
+                              </button>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                              <div>
+                                <label className="text-xs text-gray-500">First Name</label>
+                                <p className="font-medium">{participant.firstName}</p>
+                              </div>
+                              <div>
+                                <label className="text-xs text-gray-500">Last Name</label>
+                                <p className="font-medium">{participant.lastName}</p>
+                              </div>
+                              <div>
+                                <label className="text-xs text-gray-500">Email</label>
+                                <p className="font-medium">{participant.email}</p>
+                              </div>
+                              <div>
+                                <label className="text-xs text-gray-500">Phone</label>
+                                <p className="font-medium">{participant.phoneNumber}</p>
+                              </div>
+                              <div className="col-span-2">
+                                <label className="text-xs text-gray-500">Passport</label>
+                                <p className="font-medium">{participant.passport}</p>
+                              </div>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </Modal>
+
+                  {/* Display current participants count */}
+                  <div className="mt-2 p-4 bg-gray-100 rounded-lg">
+                    <p className="text-gray-600">Current Participants: {participantInfo.length}</p>
+                  </div>
                 </div>
 
                 <div>
