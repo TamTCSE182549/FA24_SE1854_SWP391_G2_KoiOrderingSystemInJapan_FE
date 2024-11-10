@@ -187,6 +187,11 @@ const Quotation = () => {
     }
   };
 
+  // Thêm hàm tính discountAmount
+  const calculateDiscountAmount = (baseAmount, vatAmount, discountRate) => {
+    return (baseAmount + vatAmount) * discountRate;
+  };
+
   return (
     <div
       className="container mx-auto py-4"
@@ -367,11 +372,21 @@ const Quotation = () => {
                 <p className="mb-2"><strong>Booking Type:</strong> {bookingDetails.bookingType}</p>
               </div>
               <div>
-                <p className="mb-2"><strong>Total Amount:</strong> ${bookingDetails.totalAmount}</p>
+                <p className="mb-2"><strong>Base Amount:</strong> ${bookingDetails.totalAmount}</p>
                 <p className="mb-2"><strong>VAT (%):</strong> {bookingDetails.vat * 100}%</p>
-                <p className="mb-2"><strong>VAT Amount:</strong> ${bookingDetails.vatAmount}</p>
-                <p className="mb-2"><strong>Discount Amount:</strong> ${bookingDetails.discountAmount}</p>
-                <p className="mb-2"><strong>Total with VAT:</strong> ${bookingDetails.totalAmountWithVAT}</p>
+                <p className="mb-2"><strong>VAT Amount:</strong> +${bookingDetails.vatAmount}</p>
+                <p className="mb-2">
+                  <strong>Discount Rate:</strong> {(bookingDetails.discountAmount / (bookingDetails.totalAmount + bookingDetails.vatAmount) * 100).toFixed(1)}%
+                </p>
+                <p className="mb-2">
+                  <strong>Discount Amount:</strong> -${bookingDetails.discountAmount}
+                  <span className="text-gray-500 text-sm ml-2">
+                    ({(bookingDetails.discountAmount / (bookingDetails.totalAmount + bookingDetails.vatAmount) * 100).toFixed(1)}% of ${bookingDetails.totalAmount + bookingDetails.vatAmount})
+                  </span>
+                </p>
+                <p className="mb-2 text-lg font-bold border-t pt-2">
+                  <strong>Final Total:</strong> ${bookingDetails.totalAmountWithVAT}
+                </p>
               </div>
               <div className="col-span-2">
                 <p className="mb-2"><strong>Payment Method:</strong> {bookingDetails.paymentMethod}</p>
@@ -431,17 +446,18 @@ const Quotation = () => {
           </Form.Item>
           <Form.Item
             name="discountAmount"
-            label="Discount Amount"
-            tooltip="Enter discount rate (0 to 0.5 or 0% to 50%)"
+            label="Discount Rate"
+            tooltip="Enter discount rate (0 to 0.5, e.g., 0.1 for 10%)"
             rules={[
-              { required: true, message: 'Please input discount amount' },
+              { required: true, message: 'Please input discount rate' },
               {
                 validator: (_, value) => {
-                  if (value < 0) {
+                  const rate = parseFloat(value);
+                  if (isNaN(rate) || rate < 0) {
                     return Promise.reject('Discount rate cannot be negative');
                   }
-                  if (value > 0.5) {
-                    return Promise.reject('Discount rate cannot exceed 0.5 (50%)');
+                  if (rate > 0.5) {
+                    return Promise.reject('Discount rate cannot exceed 0.5');
                   }
                   return Promise.resolve();
                 }
@@ -453,7 +469,14 @@ const Quotation = () => {
               step="0.01" 
               min="0"
               max="0.5"
-              placeholder="Enter discount rate (e.g., 0.1 for 10%)" 
+              placeholder="Enter discount rate (e.g., 0.1)" 
+              onChange={(e) => {
+                const rate = parseFloat(e.target.value);
+                const baseAmount = selectedQuotation.amount;
+                const vatAmount = baseAmount * (paymentForm.getFieldValue('vat') / 100);
+                const calculatedDiscount = calculateDiscountAmount(baseAmount, vatAmount, rate);
+                console.log(`Calculated discount: $${calculatedDiscount} (${rate * 100}%)`);
+              }}
             />
           </Form.Item>
           <Form.Item className="flex justify-end">

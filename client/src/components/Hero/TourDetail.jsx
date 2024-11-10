@@ -29,7 +29,8 @@ const TourDetail = () => {
   const { id } = useParams(); // Get the id from the URL
 
   const [paymentMethod, setPaymentMethod] = useState("CASH");
-  const [participants, setParticipants] = useState(1);
+  const [participants, setParticipants] = useState(0);
+  const [participantInfo, setParticipantInfo] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -77,34 +78,66 @@ const TourDetail = () => {
   const handleBack = () => {
     navigate(-1); // Di chuyển về trang trước đó
   };
+  
+  const handleAddParticipant = () => {
+    setParticipantInfo([...participantInfo, { firstName: '', lastName: '' }]);
+    setParticipants(participantInfo.length + 1);
+  };
+
+  const handleParticipantChange = (index, field, value) => {
+    const newParticipants = [...participantInfo];
+    newParticipants[index] = {
+      ...newParticipants[index],
+      [field]: value
+    };
+    setParticipantInfo(newParticipants);
+  };
+
+  const handleRemoveParticipant = (indexToRemove) => {
+    const newParticipantInfo = participantInfo.filter((_, index) => index !== indexToRemove);
+    setParticipantInfo(newParticipantInfo);
+    setParticipants(newParticipantInfo.length);
+  };
 
   const handleBooking = async (tour) => {
 
     // Kiểm tra nếu người dùng chưa đăng nhập
     if (!token) {
-      toast.error("Bạn cần đăng nhập để đặt chỗ.");
+      toast.error("Need to login for view");
       return;
     }
 
     // Kiểm tra điều kiện số lượng người tham gia
     if (Number(participants) <= 0) {
-      toast.warning("Số lượng người tham gia phải lớn hơn 0.");
+      toast.warning("Paticipants must be larger than 0");
       return;
     }
     if (Number(participants) > Number(tour.remaining)) {
       toast.warning(
-        `Số lượng người tham gia không được vượt quá ${tour.remaining}.`
+        `Participants must be equal or less than ${tour.remaining}.`
       );
       return;
     }
 
     // Kiểm tra nếu người dùng đã có booking chưa hoàn thành
     if (Object.keys(bookings).length > 0) {
-      toast.warn("Bạn có đặt chỗ chưa hoàn thành. Vui lòng kiểm tra lại!");
+      toast.warn("You have booking not complete. Please check again!");
       return;
     }
 
-    // Dữ liệu booking tương ứng với BookingRequest class
+    for (let i = 0; i < participantInfo.length; i++) {
+      if (!participantInfo[i].firstName.trim() || !participantInfo[i].lastName.trim()) {
+        toast.dismiss();
+        toast.warning(`Please fill in all participant information for participant ${i + 1}`);
+        return;
+      }
+      if (containsSpecialChars(participantInfo[i].firstName) || containsSpecialChars(participantInfo[i].lastName)) {
+        toast.dismiss();
+        toast.warning(`Names can only contain letters and spaces for participant ${i + 1}`);
+        return;
+      }
+    }
+
     const bookingData = {
       tourID: Number(tour.id),
       paymentMethod: paymentMethod,
@@ -129,6 +162,34 @@ const TourDetail = () => {
             },
           }
         );
+        
+        if (response.data) {
+        const bookingId = response.data.id;
+        
+        const checkinPromises = participantInfo.map(participant => {
+          const checkinData = {
+            firstName: participant.firstName,
+            lastName: participant.lastName,
+            airline: "",
+            airport: "",
+            checkinDate: new Date().toISOString().split('T')[0],
+            bookingTour: bookingId,
+            bookingKoi: null
+          };
+          
+          return axios.post(
+            `http://localhost:8080/checkins/${bookingId}`,
+            checkinData,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              }
+            }
+          );
+        });
+
+        await Promise.all(checkinPromises);
         console.log("Booking successful:", response.data);
         // NotificationManager.success("Booking successful!", "Success", 5000);
         navigate("/tour", { state: { toastMessage: "Booking successful!" } });
@@ -137,6 +198,8 @@ const TourDetail = () => {
           "Participants must be less than or equal remaning of tour AND must be greater than 0"
         );
       }
+
+      navigate("/tour", { state: { toastMessage: "Booking successful!" } });
     } catch (error) {
       if (error.response) {
         console.error("Error response:", error.response.data);
@@ -144,7 +207,7 @@ const TourDetail = () => {
         toast.error(
           error.response.data.message ||
             "Failed to book the trip. Please try again."
-        ); // Hiển thị thông báo lỗi
+        );
       } else if (error.request) {
         console.error("Error request:", error.request);
 
@@ -155,8 +218,15 @@ const TourDetail = () => {
         toast.error("An unexpected error occurred. Please try again.");
       }
     } finally {
-      setIsLoading(false); // Kết thúc trạng thái loading
+      setIsLoading(false);
     }
+  };
+
+  // Thêm hàm kiểm tra ký tự đặc biệt
+  const containsSpecialChars = (str) => {
+    // Regex này chỉ cho phép chữ cái (cả hoa và thường), khoảng trắng và dấu gạch ngang
+    const regex = /^[a-zA-Z\s-]+$/;
+    return !regex.test(str);
   };
 
   return (
@@ -299,9 +369,64 @@ const TourDetail = () => {
                 </div>
 
                 <div>
-                  <label className="block text-gray-700 mb-2">
-                    Payment Method
-                  </label>
+                  <div className="flex justify-between items-center mb-2">
+                    <label className="block text-gray-700">Participant Information</label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (participantInfo.length >= tour.remaining) {
+                          toast.dismiss();
+                          toast.warning(`Maximum number of participants is ${tour.remaining}`);
+                          return;
+                        }
+                        handleAddParticipant();
+                      }}
+                      className="text-blue-600 hover:text-blue-700"
+                    >
+                      + Add Participant
+                    </button>
+                  </div>
+                  
+                  {participantInfo.length === 0 ? (
+                    <div className="text-gray-500 text-center py-4 border rounded-lg">
+                      No participants added yet
+                    </div>
+                  ) : (
+                    participantInfo.map((participant, index) => (
+                      <div key={index} className="mb-4 p-4 border rounded-lg relative">
+                        <div className="flex justify-between items-center mb-2">
+                          <h4 className="text-sm font-medium">Participant {index + 1}</h4>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveParticipant(index)}
+                            className="text-red-500 hover:text-red-700"
+                          >
+                            - Remove
+                          </button>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <input
+                            type="text"
+                            placeholder="First Name"
+                            value={participant.firstName}
+                            onChange={(e) => handleParticipantChange(index, 'firstName', e.target.value)}
+                            className="border rounded-lg p-2 text-black"
+                          />
+                          <input
+                            type="text"
+                            placeholder="Last Name"
+                            value={participant.lastName}
+                            onChange={(e) => handleParticipantChange(index, 'lastName', e.target.value)}
+                            className="border rounded-lg p-2 text-black"
+                          />
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-gray-700 mb-2">Payment Method</label>
                   <Select
                     value={paymentMethod}
                     onChange={(value) => setPaymentMethod(value)}

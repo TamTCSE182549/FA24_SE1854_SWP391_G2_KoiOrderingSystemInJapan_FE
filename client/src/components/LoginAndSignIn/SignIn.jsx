@@ -38,7 +38,7 @@ const SignIn = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-4xl">
         <h2 className="text-black text-3xl font-bold text-center mb-6">
           Sign up
         </h2>
@@ -48,94 +48,100 @@ const SignIn = () => {
           onFinishFailed={onFinishFailed}
           layout="vertical"
         >
-          <Form.Item
-            name="email"
-            label="Email"
-            rules={[
-              { required: true, message: "Please input your email!" },
-              { type: "email", message: "Please enter a valid email address!" },
-            ]}
-          >
-            <Input className="bg-white text-black" size="large" />
-          </Form.Item>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Form.Item
+                name="email"
+                label="Email"
+                rules={[
+                  { required: true, message: "Please input your email!" },
+                  { type: "email", message: "Please enter a valid email address!" },
+                ]}
+              >
+                <Input className="bg-white text-black" size="large" />
+              </Form.Item>
 
-          <Form.Item
-            name="password"
-            label="Password"
-            rules={[
-              { required: true, message: "Please input your password!" },
-              {
-                min: 6,
-                message: "Password must be at least 6 characters long!",
-              },
-            ]}
-          >
-            <Input.Password className="bg-white text-black" size="large" />
-          </Form.Item>
+              <Form.Item
+                name="password"
+                label="Password"
+                rules={[
+                  { required: true, message: "Please input your password!" },
+                  {
+                    min: 6,
+                    message: "Password must be at least 6 characters long!",
+                  },
+                ]}
+              >
+                <Input.Password className="bg-white text-black" size="large" />
+              </Form.Item>
 
-          <Form.Item
-            name="firstName"
-            label="First Name"
-            rules={[
-              { required: true, message: "Please input your first name!" },
-            ]}
-          >
-            <Input className="bg-white text-black" size="large" />
-          </Form.Item>
+              <Form.Item
+                name="firstName"
+                label="First Name"
+                rules={[
+                  { required: true, message: "Please input your first name!" },
+                ]}
+              >
+                <Input className="bg-white text-black" size="large" />
+              </Form.Item>
 
-          <Form.Item
-            name="lastName"
-            label="Last Name"
-            rules={[
-              { required: true, message: "Please input your last name!" },
-            ]}
-          >
-            <Input className="bg-white text-black" size="large" />
-          </Form.Item>
+              <Form.Item
+                name="lastName"
+                label="Last Name"
+                rules={[
+                  { required: true, message: "Please input your last name!" },
+                ]}
+              >
+                <Input className="bg-white text-black" size="large" />
+              </Form.Item>
 
-          <Form.Item
-            name="gender"
-            label="Gender"
-            rules={[{ required: true, message: "Please select your gender!" }]}
-          >
-            <Select className="bg-white text-black" size="large">
-              <Option value="MALE">Male</Option>
-              <Option value="FEMALE">Female</Option>
-              <Option value="OTHER">Other</Option>
-            </Select>
-          </Form.Item>
+              <Form.Item
+                name="gender"
+                label="Gender"
+                rules={[{ required: true, message: "Please select your gender!" }]}
+              >
+                <Select className="bg-white text-black" size="large">
+                  <Option value="MALE">Male</Option>
+                  <Option value="FEMALE">Female</Option>
+                  <Option value="OTHER">Other</Option>
+                </Select>
+              </Form.Item>
+            </div>
 
-          <Form.Item
-            name="phone"
-            label="Phone"
-            rules={[
-              { required: true, message: "Please input your phone number!" },
-              {
-                pattern: /^(84|0[3|5|7|8|9])\d{8}$/,
-                message: "Please enter a valid phone number!",
-              },
-            ]}
-          >
-            <Input className="bg-white text-black" size="large" />
-          </Form.Item>
+            <div>
+              <Form.Item
+                name="phone"
+                label="Phone"
+                rules={[
+                  { required: true, message: "Please input your phone number!" },
+                  {
+                    pattern: /^(84|0[3|5|7|8|9])\d{8}$/,
+                    message: "Please enter a valid phone number!",
+                  },
+                ]}
+              >
+                <Input className="bg-white text-black" size="large" />
+              </Form.Item>
 
-          <Form.Item
-            name="address"
-            label="Address"
-            rules={[{ required: true, message: "Please input your address!" }]}
-          >
-            <Input.TextArea className="bg-white text-black" size="large" />
-          </Form.Item>
+              <Form.Item
+                name="address"
+                label="Address"
+                rules={[{ required: true, message: "Please input your address!" }]}
+              >
+                <Input.TextArea className="bg-white text-black" size="large" />
+              </Form.Item>
 
-          <Form.Item
-            name="nationality"
-            label="Nationality"
-            rules={[
-              { required: true, message: "Please input your nationality!" },
-            ]}
-          >
-            <Input className="bg-white text-black" size="large" />
-          </Form.Item>
+              <Form.Item
+                name="nationality"
+                label="Nationality"
+                rules={[
+                  { required: true, message: "Please input your nationality!" },
+                ]}
+              >
+                <Input className="bg-white text-black" size="large" />
+              </Form.Item>
+            </div>
+          </div>
 
           <Form.Item className="mt-6">
             <Button
