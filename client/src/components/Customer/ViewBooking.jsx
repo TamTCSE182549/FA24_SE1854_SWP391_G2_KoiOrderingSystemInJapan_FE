@@ -22,6 +22,7 @@ import {
   FileTextOutlined,
   CloseCircleOutlined,
   MessageOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
 
 const BookingInformation = () => {
@@ -36,6 +37,9 @@ const BookingInformation = () => {
   const [feedbackRating, setFeedbackRating] = useState(0);
   const [feedbackContent, setFeedbackContent] = useState("");
   const [selectedBookingId, setSelectedBookingId] = useState(null);
+  const [isViewParticipantsModalVisible, setIsViewParticipantsModalVisible] = useState(false);
+  const [currentParticipants, setCurrentParticipants] = useState([]);
+  const [selectedBookingForParticipants, setSelectedBookingForParticipants] = useState(null);
 
   useEffect(() => {
     if (token) {
@@ -148,6 +152,25 @@ const BookingInformation = () => {
     } catch (error) {
       console.error("Error submitting feedback:", error);
       toast.error(error.response.data);
+    }
+  };
+
+  const handleViewParticipants = async (booking) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:8080/checkins/${booking.id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setCurrentParticipants(response.data);
+      setSelectedBookingForParticipants(booking);
+      setIsViewParticipantsModalVisible(true);
+    } catch (error) {
+      console.error('Error fetching participants:', error);
+      toast.error(error.response?.data || 'Failed to fetch participants');
     }
   };
 
@@ -364,6 +387,15 @@ const BookingInformation = () => {
                         />
                       </Tooltip>
 
+                      <Tooltip title="View participants">
+                        <Button
+                          type="default"
+                          onClick={() => handleViewParticipants(booking)}
+                          className="!bg-purple-500 !text-white hover:!bg-purple-600 flex items-center justify-center"
+                          icon={<UserOutlined />}
+                        />
+                      </Tooltip>
+
                       {booking.paymentStatus === "processing" && (
                         <Tooltip title="Proceed to payment">
                           <Button
@@ -441,6 +473,52 @@ const BookingInformation = () => {
               rows={4}
             />
           </div>
+        </div>
+      </Modal>
+      <Modal
+        title={`Participants for Booking #${selectedBookingForParticipants?.id || ''}`}
+        visible={isViewParticipantsModalVisible}
+        onCancel={() => setIsViewParticipantsModalVisible(false)}
+        footer={null}
+        width={700}
+      >
+        <div className="space-y-4">
+          {currentParticipants.length === 0 ? (
+            <div className="text-center py-4 text-gray-500">
+              No participants found for this booking
+            </div>
+          ) : (
+            currentParticipants.map((participant, index) => (
+              <div key={index} className="bg-white p-4 rounded-lg border border-gray-200">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs text-gray-500">First Name</label>
+                    <p className="font-medium">{participant.firstName}</p>
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-500">Last Name</label>
+                    <p className="font-medium">{participant.lastName}</p>
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-500">Email</label>
+                    <p className="font-medium">{participant.email || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-500">Phone</label>
+                    <p className="font-medium">{participant.phoneNumber}</p>
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-500">Passport</label>
+                    <p className="font-medium">{participant.passport}</p>
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-500">Created By</label>
+                    <p className="font-medium">{participant.createBy}</p>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </Modal>
       <ToastContainer />
