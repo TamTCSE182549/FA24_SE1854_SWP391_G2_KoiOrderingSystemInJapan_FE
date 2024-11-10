@@ -49,6 +49,13 @@ const TourDetail = () => {
     passport: '' 
   }]);
 
+  // Thêm state cho thông tin chung
+  const [commonInfo, setCommonInfo] = useState({
+    airline: '',
+    airport: '',
+    checkinDate: format(new Date(tour?.startTime || new Date()), 'yyyy-MM-dd')
+  });
+
   useEffect(() => {
     const fetchBookingData = async () => {
       try {
@@ -161,6 +168,14 @@ const TourDetail = () => {
     return passportRegex.test(passport);
   };
 
+  // Thêm hàm xử lý thay đổi thông tin chung
+  const handleCommonInfoChange = (e) => {
+    setCommonInfo({
+      ...commonInfo,
+      [e.target.name]: e.target.value
+    });
+  };
+
   const handleBooking = async (tour) => {
 
     // Kiểm tra nếu người dùng chưa đăng nhập
@@ -223,6 +238,22 @@ const TourDetail = () => {
       }
     }
 
+    // Thêm validation cho thông tin chung
+    if (!commonInfo.airline.trim()) {
+      toast.error("Airline is required");
+      return;
+    }
+    
+    if (!commonInfo.airport.trim()) {
+      toast.error("Airport is required");
+      return;
+    }
+    
+    if (!commonInfo.checkinDate) {
+      toast.error("Check-in Date is required");
+      return;
+    }
+
     const bookingData = {
       tourID: Number(tour.id),
       paymentMethod: paymentMethod,
@@ -258,9 +289,9 @@ const TourDetail = () => {
               email: participant.email,
               phoneNumber: participant.phoneNumber,
               passport: participant.passport,
-              airline: "",
-              airport: "",
-              checkinDate: new Date().toISOString().split('T')[0],
+              airline: commonInfo.airline,
+              airport: commonInfo.airport,
+              checkinDate: commonInfo.checkinDate,
               bookingTour: bookingId,
               bookingKoi: null
             };
@@ -378,21 +409,6 @@ const TourDetail = () => {
   const handleNewParticipantChange = (index, field, value) => {
     const updatedParticipants = [...newParticipants];
     updatedParticipants[index][field] = value;
-
-    // Real-time validation feedback
-    if (field === 'phoneNumber' && value && !validatePhone(value)) {
-      toast.dismiss();
-      toast.warning("Phone number must be in format 09xxxxxxxx");
-    }
-    if (field === 'email' && value && !validateEmail(value)) {
-      toast.dismiss();
-      toast.warning("Email must be in format xxx@gmail.com");
-    }
-    if (field === 'passport' && value && !validatePassport(value)) {
-      toast.dismiss();
-      toast.warning("Passport must be in format B2700000 (B followed by 7 digits)");
-    }
-
     setNewParticipants(updatedParticipants);
   };
 
@@ -405,6 +421,25 @@ const TourDetail = () => {
       toast.info("At least one participant is required");
     }
   };
+
+  // Thêm options cho airline với label và value giống nhau
+  const airlineOptions = [
+    { value: 'Vietnam Airlines', label: 'Vietnam Airlines' },
+    { value: 'Vietjet Air', label: 'Vietjet Air' },
+    { value: 'Jetstar Pacific', label: 'Jetstar Pacific' },
+    { value: 'Bamboo Airways', label: 'Bamboo Airways' }
+  ];
+
+  // Thêm options cho airport
+  const airportOptions = [
+    { value: 'Noi Bai International Airport (Hanoi)', label: 'Noi Bai International Airport (Hanoi)' },
+    { value: 'Tan Son Nhat International Airport (Ho Chi Minh City)', label: 'Tan Son Nhat International Airport (Ho Chi Minh City)' },
+    { value: 'Da Nang International Airport', label: 'Da Nang International Airport' },
+    { value: 'Cam Ranh International Airport (Khanh Hoa)', label: 'Cam Ranh International Airport (Khanh Hoa)' },
+    { value: 'Phu Bai International Airport (Thua Thien Hue)', label: 'Phu Bai International Airport (Thua Thien Hue)' },
+    { value: 'Lien Khuong International Airport (Da Lat)', label: 'Lien Khuong International Airport (Da Lat)' },
+    { value: 'Cat Bi International Airport (Hai Phong)', label: 'Cat Bi International Airport (Hai Phong)' }
+  ];
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -622,6 +657,55 @@ const TourDetail = () => {
               </h2>
 
               <div className="space-y-6">
+                {/* Common Information Section */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium text-gray-700">Travel Information</h3>
+                  
+                  <div>
+                    <label className="block text-gray-600 text-sm font-medium mb-2">
+                      Airline
+                    </label>
+                    <Select
+                      value={commonInfo.airline}
+                      onChange={(value) => setCommonInfo(prev => ({ ...prev, airline: value }))}
+                      className="w-full"
+                      placeholder="Select airline"
+                      options={airlineOptions}
+                      size="large"
+                    >
+                    </Select>
+                  </div>
+
+                  <div>
+                    <label className="block text-gray-600 text-sm font-medium mb-2">
+                      Airport
+                    </label>
+                    <Select
+                      value={commonInfo.airport}
+                      onChange={(value) => setCommonInfo(prev => ({ ...prev, airport: value }))}
+                      className="w-full"
+                      placeholder="Select airport"
+                      options={airportOptions}
+                      size="large"
+                    >
+                    </Select>
+                  </div>
+
+                  <div>
+                    <label className="block text-gray-600 text-sm font-medium mb-2">
+                      Check-in Date
+                    </label>
+                    <input
+                      type="date"
+                      name="checkinDate"
+                      value={commonInfo.checkinDate}
+                      className="w-full p-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 cursor-not-allowed"
+                      disabled
+                    />
+                  </div>
+                </div>
+
+                {/* Existing Number of Guests section */}
                 <div>
                   <label className="block text-gray-700 mb-2">
                     Number of Guests
@@ -710,7 +794,7 @@ const TourDetail = () => {
                           <div className="mt-4">
                             <input
                               type="text"
-                              placeholder="Passport Number (B2700000) *"
+                              placeholder="Passport Number (Bxxxxxxx) (7-digit number after B) *"
                               className="border rounded-lg p-2 text-black w-full"
                               value={participant.passport}
                               onChange={(e) => handleNewParticipantChange(index, 'passport', e.target.value)}

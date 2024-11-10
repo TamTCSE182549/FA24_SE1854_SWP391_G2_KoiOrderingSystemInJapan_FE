@@ -7,6 +7,11 @@ import { ToastContainer, toast } from "react-toastify";
 import { ArrowLeftOutlined, DollarOutlined, InfoCircleOutlined, SaveOutlined, CreditCardOutlined, BankOutlined } from '@ant-design/icons';
 
 const AcceptedTourList = () => {
+  const vatOptions = [
+    { value: "0", label: "0%" },
+    { value: "10", label: "10%" }
+  ];
+
   const [acceptedTours, setAcceptedTours] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState(null); 
@@ -21,6 +26,9 @@ const AcceptedTourList = () => {
   const navigate = useNavigate();
   const [cookies] = useCookies(["token"]);
   const token = cookies.token;
+
+  // Thêm state để lưu trữ các bookingId đã tạo quotation
+  const [createdQuotations, setCreatedQuotations] = useState(new Set());
 
   const handleGoBack = () => {
     navigate(-1);
@@ -46,13 +54,47 @@ const AcceptedTourList = () => {
     setIsModalOpen(true);
   };
 
-  const handleCreateQuotation = (booking) => {
-    if (booking.paymentStatus.toLowerCase() !== "pending") {
-      toast.warning("Can only create quotations for pending bookings");
-      return;
+  const handleCreateQuotation = async (booking) => {
+    try {
+      if (booking.paymentStatus.toLowerCase() !== "pending") {
+        toast.warning("Can only create quotations for pending bookings");
+        return;
+      }
+
+      const response = await axios.post(
+        "http://localhost:8080/quotations/create",
+        {
+          bookingId: booking.id,
+          amount: booking.totalAmount,
+          description: "Quotation being in Process..."
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (response.status === 201) {
+        // Thêm bookingId vào set các quotation đã tạo
+        setCreatedQuotations(prev => new Set([...prev, booking.id]));
+        toast.success("Quotation created successfully!");
+        fetchAcceptedTours();
+        toast.info(<span className="italic">Waiting to be accepted...</span>);
+      }
+    } catch (error) {
+      console.error("Error creating quotation:", error);
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        toast.error("Session expired. Please login again");
+        navigate("/login");
+      } else {
+        toast.error(
+          "Failed to create quotation: " + 
+          (error.response?.data?.message || error.message)
+        );
+      }
     }
-    setSelectedBookingForQuotation(booking);
-    setIsQuotationModalOpen(true);
   };
 
   const handleCreateCheckin = (bookingId) => {
@@ -64,19 +106,10 @@ const AcceptedTourList = () => {
 
   const handleFieldChange = (field, value) => {
     if (field === "vat") {
-      // Chỉ cho phép số và dấu chấm
-      const numericValue = value.replace(/[^\d.]/g, "");
-      if (
-        numericValue === "" ||
-        (parseFloat(numericValue) >= 0 && parseFloat(numericValue) <= 100)
-      ) {
-        setEditedBooking((prev) => ({
-          ...prev,
-          [field]: numericValue,
-        }));
-      } else {
-        toast.error("VAT must be between 0 and 100");
-      }
+      setEditedBooking((prev) => ({
+        ...prev,
+        [field]: value,
+      }));
     } else if (field === "discountAmount") {
       // Chỉ cho phép số và dấu chấm
       const numericValue = value.replace(/[^\d.]/g, "");
@@ -103,13 +136,9 @@ const AcceptedTourList = () => {
         return;
       }
 
-      // Validate VAT
-      if (
-        !editedBooking.vat ||
-        parseFloat(editedBooking.vat) < 0 ||
-        parseFloat(editedBooking.vat) > 100
-      ) {
-        toast.error("VAT must be between 0 and 100");
+      // Validate VAT (chỉ cho phép 0 hoặc 10)
+      if (!["0", "10"].includes(editedBooking.vat)) {
+        toast.error("VAT must be either 0% or 10%");
         return;
       }
 
@@ -194,22 +223,24 @@ const AcceptedTourList = () => {
   };
 
   const handleQuotationSubmit = async () => {
-    if (!validateAmount(parseFloat(quotationAmount))) {
-      return;
-    }
-
     try {
+      if (!token) {
+        toast.error("Please login again");
+        navigate("/login");
+        return;
+      }
+
       const response = await axios.post(
         "http://localhost:8080/quotations/create",
         {
           bookingId: selectedBookingForQuotation.id,
-          amount: parseFloat(quotationAmount),
+          amount: selectedBookingForQuotation.totalAmount,
           description: quotationDescription,
         },
         {
           headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
           },
         }
       );
@@ -217,16 +248,20 @@ const AcceptedTourList = () => {
       if (response.status === 201) {
         toast.success("Quotation created successfully!");
         setIsQuotationModalOpen(false);
-        bookingListResponse(); // Refresh booking list
-        // Reset form
-        setQuotationAmount("");
+        fetchAcceptedTours();
         setQuotationDescription("Quotation being in Process...");
       }
-    } catch (err) {
-      console.error("Error details:", err.response?.data);
-      toast.error(
-        "Error creating quotation: " + (err.response?.data?.message || err.message)
-      );
+    } catch (error) {
+      console.error("Error creating quotation:", error);
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        toast.error("Session expired. Please login again");
+        navigate("/login");
+      } else {
+        toast.error(
+          "Failed to create quotation: " + 
+          (error.response?.data?.message || error.message)
+        );
+      }
     }
   };
 
@@ -316,8 +351,15 @@ const AcceptedTourList = () => {
           {record.paymentStatus.toLowerCase() === "pending" && (
             <Button 
               onClick={() => handleCreateQuotation(record)}
+              className="italic"
+              disabled={createdQuotations.has(record.id)}
+              style={{
+                // Thêm style cho trạng thái disabled
+                opacity: createdQuotations.has(record.id) ? 0.5 : 1,
+                cursor: createdQuotations.has(record.id) ? 'not-allowed' : 'pointer'
+              }}
             >
-              Create Quotation
+              {createdQuotations.has(record.id) ? 'Quotation Created' : 'Create Quotation'}
             </Button>
           )}
 
@@ -371,6 +413,13 @@ const AcceptedTourList = () => {
       toast.error("Failed to accept booking: " + (error.response?.data?.message || error.message));
     }
   };
+
+  // Reset createdQuotations khi component unmount hoặc khi cần thiết
+  useEffect(() => {
+    return () => {
+      setCreatedQuotations(new Set());
+    };
+  }, []);
 
   if (loading) {
     return (
@@ -445,16 +494,17 @@ const AcceptedTourList = () => {
         footer={[
           <div key="footer" className="flex justify-end space-x-2">
             {selectedBooking &&
-              selectedBooking.paymentStatus.toLowerCase() === "pending" && (
+              selectedBooking.paymentStatus.toLowerCase() === "pending" && 
+              !createdQuotations.has(selectedBooking.id) && (
                 <Button
                   type="primary"
-                  onClick={handleUpdateBooking(selectedBooking.id)}
+                  onClick={() => handleUpdateBooking(selectedBooking.id)}
                   className="flex items-center gap-2 transform hover:scale-105 active:scale-95 transition-all duration-200 bg-indigo-600 hover:bg-indigo-700"
                 >
                   <SaveOutlined />
                   Save Update
                 </Button>
-              )}
+            )}
             <Button onClick={() => setIsModalOpen(false)}>Close</Button>
           </div>,
         ]}
@@ -536,22 +586,12 @@ const AcceptedTourList = () => {
                     <span className="text-gray-600 w-32 font-medium">
                       VAT (%):
                     </span>
-                    <Input
-                      value={editedBooking?.vat}
-                      onChange={(e) => handleFieldChange("vat", e.target.value)}
-                      className="w-24 ml-2 bg-white border-gray-200 text-gray-800"
-                      placeholder="0-100"
-                      status={
-                        editedBooking?.vat &&
-                        (parseFloat(editedBooking.vat) < 0 ||
-                          parseFloat(editedBooking.vat) > 100)
-                          ? "error"
-                          : ""
-                      }
-                      readOnly={
-                        selectedBooking.paymentStatus.toLowerCase() !==
-                        "pending"
-                      }
+                    <Select
+                      value={editedBooking?.vat || "0"}
+                      onChange={(value) => handleFieldChange("vat", value)}
+                      className="w-24 ml-2"
+                      options={vatOptions}
+                      disabled={selectedBooking.paymentStatus.toLowerCase() !== "pending"}
                     />
                   </div>
                   <div className="flex items-center">
@@ -664,15 +704,11 @@ const AcceptedTourList = () => {
               Amount:
             </label>
             <Input
-              type="number"
-              value={quotationAmount}
-              onChange={(e) => setQuotationAmount(e.target.value)}
-              className={amountError ? "border-red-500" : ""}
-              placeholder="Enter amount"
+              value={selectedBookingForQuotation?.totalAmount || ""}
+              disabled
+              prefix="$"
+              className="w-full"
             />
-            {amountError && (
-              <p className="text-red-500 text-sm mt-1">{amountError}</p>
-            )}
           </div>
 
           <div className="mb-4">
