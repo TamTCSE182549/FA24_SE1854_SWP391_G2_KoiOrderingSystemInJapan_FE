@@ -187,7 +187,7 @@ const TourDetail = () => {
               }
             }
           );
-        });
+        })};
 
         await Promise.all(checkinPromises);
         console.log("Booking successful:", response.data);
@@ -198,28 +198,25 @@ const TourDetail = () => {
           "Participants must be less than or equal remaning of tour AND must be greater than 0"
         );
       }
-
-      navigate("/tour", { state: { toastMessage: "Booking successful!" } });
     } catch (error) {
       if (error.response) {
         console.error("Error response:", error.response.data);
-
         toast.error(
           error.response.data.message ||
             "Failed to book the trip. Please try again."
         );
       } else if (error.request) {
         console.error("Error request:", error.request);
-
         toast.error("No response from server. Please check your connection.");
       } else {
         console.error("Error message:", error.message);
-
         toast.error("An unexpected error occurred. Please try again.");
       }
     } finally {
       setIsLoading(false);
     }
+
+    
   };
 
   // Thêm hàm kiểm tra ký tự đặc biệt
