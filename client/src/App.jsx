@@ -43,6 +43,7 @@ import QuotationService from "./components/SaleStaff/QuotationService";
 import BookingListForStaff from "./components/Staff/BookingListForStaff";
 import CheckinService from "./components/SaleStaff/CheckinService";
 import AboutUs from "./components/Hero/AboutUs";
+import Feedback from "./components/Customer/Feedback";
 const App = () => {
   return (
     // <AuthProvider>
@@ -93,7 +94,7 @@ const App = () => {
             <Route path="/bookingkoidetail" element={<BookingKoiDetail />} />
             <Route path="/bookingTourDetail" element={<BookingTourDetail />} />
             <Route path="/createbooking" element={<CreateBooking />} />
-
+            <Route path="/reviews" element={<Feedback />} />
             <Route path="/farmdetail/:id" element={<FarmDetail />} />
             <Route path="/tourdetail/:id" element={<TourDetail />} />
             <Route path="/ViewBooking" element={<ViewBooking />} />

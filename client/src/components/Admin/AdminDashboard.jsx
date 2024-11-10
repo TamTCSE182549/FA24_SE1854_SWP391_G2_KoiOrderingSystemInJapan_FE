@@ -6,7 +6,6 @@ import Dashboard from "./Dashboard";
 import Dashboard2 from "./Dashboard2";
 import Users from "./Users";
 import TourManagement from "./TourManagement";
-import Settings from "./Settings";
 import SiderBoard from "./SiderBoard";
 import FarmManagement from "./FarmManagement";
 import BookingManagement from "./BookingManagement";
@@ -14,13 +13,15 @@ import KoiManagement from "./KoiManagement";
 import FarmDetail from "./Farmdetail";
 import TourDetail from "./TourDetail";
 import ServiceManagement from "./ServiceManagement";
+import DeliveryManagement from "./DeliveryManagement";
+import FeedbackManagement from "./FeedbackManagement";
 
 const { Content } = Layout;
 
 const AdminDashboard = () => {
   return (
     <Layout>
-      <Layout style={{ marginTop: '96px' }}>
+      <Layout style={{ marginTop: "96px" }}>
         <SiderBoard />
         <Layout className="transition-all duration-300 ml-[280px] bg-gray-50">
           <Content className="m-6">
@@ -30,12 +31,26 @@ const AdminDashboard = () => {
                 <Route path="users" element={<Users />} />
                 <Route path="tour-management" element={<TourManagement />} />
                 <Route path="farm-management" element={<FarmManagement />} />
-                <Route path="BookingManagement" element={<BookingManagement />} />
-                <Route path="settings" element={<Settings />} />
+                <Route
+                  path="BookingManagement"
+                  element={<BookingManagement />}
+                />
+                {/* <Route path="settings" element={<Settings />} /> */}
                 <Route path="tourdetail/:id" element={<TourDetail />} />
                 <Route path="koi-management" element={<KoiManagement />} />
                 <Route path="farm/:id" element={<FarmDetail />} />
-                <Route path="ServiceManagement" element={<ServiceManagement />} />
+                <Route
+                  path="ServiceManagement"
+                  element={<ServiceManagement />}
+                />
+                <Route
+                  path="delivery-management"
+                  element={<DeliveryManagement />}
+                />
+                <Route
+                  path="feedback-management"
+                  element={<FeedbackManagement />}
+                />
               </Routes>
             </div>
           </Content>

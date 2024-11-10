@@ -21,6 +21,15 @@ export const getCheckoutInfo = async (bookingId, token) => {
 };
 
 export const updateDelivery = async (deliveryId, data, token) => {
+  const response = await axios.put(`${API_BASE_URL}/delivery/${deliveryId}`, data, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return response.data;
+};
+
+export const updateDeliveryHistory = async (deliveryId, data, token) => {
   const response = await axios.put(`${API_BASE_URL}/delivery-history/${deliveryId}`, data, {
     headers: {
       Authorization: `Bearer ${token}`,
