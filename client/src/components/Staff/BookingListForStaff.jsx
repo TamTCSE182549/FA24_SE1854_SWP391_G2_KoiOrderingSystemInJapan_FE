@@ -22,9 +22,12 @@ const BookingListForStaff = () => {
   const [filteredStatus, setFilteredStatus] = useState("all");
   const [editedBooking, setEditedBooking] = useState(null);
   const [isQuotationModalOpen, setIsQuotationModalOpen] = useState(false);
-  const [selectedBookingForQuotation, setSelectedBookingForQuotation] = useState(null);
+  const [selectedBookingForQuotation, setSelectedBookingForQuotation] =
+    useState(null);
   const [quotationAmount, setQuotationAmount] = useState("");
-  const [quotationDescription, setQuotationDescription] = useState("Quotation being in Process...");
+  const [quotationDescription, setQuotationDescription] = useState(
+    "Quotation being in Process..."
+  );
   const [amountError, setAmountError] = useState("");
 
   const statusOptions = [
@@ -147,26 +150,27 @@ const BookingListForStaff = () => {
           </Button>
 
           {record.paymentStatus.toLowerCase() === "pending" && (
-            <Button 
-              onClick={() => handleCreateQuotation(record)}
-            >
+            <Button onClick={() => handleCreateQuotation(record)}>
               Create Quotation
             </Button>
           )}
 
-          {record.paymentStatus.toLowerCase() === "pending" && record.updatedBy === null && (
-            <Button 
-              type="primary"
-              onClick={() => handleAcceptBooking(record.id)}
-              style={{ backgroundColor: "#10B981" }}
-            >
-              Accept
-            </Button>
+          {record.paymentStatus.toLowerCase() === "pending" && record.updatedBy === '' && (
+              <div>
+                {console.log("updatedBy:", record.updatedBy)}
+                <Button
+                  type="primary"
+                  onClick={() => handleAcceptBooking(record.id)}
+                  style={{ backgroundColor: "#10B981" }}
+                >
+                  Accept
+              </Button>
+            </div>
           )}
 
           {record.paymentStatus.toLowerCase() === "complete" && (
             <>
-              <Button 
+              <Button
                 type="default"
                 onClick={() => handleCreateCheckin(record.id)}
               >
@@ -287,7 +291,6 @@ const BookingListForStaff = () => {
     }
   }, [selectedBooking]);
 
-
   // Thêm styles cho input disabled
   const disabledInputStyle = {
     backgroundColor: "white",
@@ -300,29 +303,29 @@ const BookingListForStaff = () => {
   // Add this helper function to get payment method icon and color
   const getPaymentMethodInfo = (method) => {
     switch (method?.toUpperCase()) {
-      case 'VISA':
+      case "VISA":
         return {
           icon: <CreditCardOutlined />,
-          color: 'text-blue-500',
-          label: 'Visa'
+          color: "text-blue-500",
+          label: "Visa",
         };
-      case 'TRANSFER':
+      case "TRANSFER":
         return {
           icon: <BankOutlined />,
-          color: 'text-purple-500',
-          label: 'Transfer'
+          color: "text-purple-500",
+          label: "Transfer",
         };
-      case 'CASH':
+      case "CASH":
         return {
           icon: <DollarOutlined />,
-          color: 'text-green-500',
-          label: 'Cash'
+          color: "text-green-500",
+          label: "Cash",
         };
       default:
         return {
           icon: <DollarOutlined />,
-          color: 'text-gray-500',
-          label: method || 'Unknown'
+          color: "text-gray-500",
+          label: method || "Unknown",
         };
     }
   };
@@ -372,7 +375,8 @@ const BookingListForStaff = () => {
     } catch (err) {
       console.error("Error details:", err.response?.data);
       toast.error(
-        "Error creating quotation: " + (err.response?.data?.message || err.message)
+        "Error creating quotation: " +
+          (err.response?.data?.message || err.message)
       );
     }
   };
@@ -394,7 +398,10 @@ const BookingListForStaff = () => {
       }
     } catch (error) {
       console.error("Error accepting booking:", error);
-      toast.error("Failed to accept booking: " + (error.response?.data?.message || error.message));
+      toast.error(
+        "Failed to accept booking: " +
+          (error.response?.data?.message || error.message)
+      );
     }
   };
 
@@ -578,21 +585,31 @@ const BookingListForStaff = () => {
                     />
                   </div>
                 </div>
-                
+
                 <div className="space-y-4">
                   <div className="flex items-center">
                     <span className="text-gray-600 w-32 font-medium">
                       Payment Method:
                     </span>
                     <div className="flex items-center gap-2">
-                      <span className={`text-lg ${getPaymentMethodInfo(selectedBooking.paymentMethod).color}`}>
-                        {getPaymentMethodInfo(selectedBooking.paymentMethod).icon}
+                      <span
+                        className={`text-lg ${
+                          getPaymentMethodInfo(selectedBooking.paymentMethod)
+                            .color
+                        }`}
+                      >
+                        {
+                          getPaymentMethodInfo(selectedBooking.paymentMethod)
+                            .icon
+                        }
                       </span>
                       <span className="font-semibold">
-                        {getPaymentMethodInfo(selectedBooking.paymentMethod).label}
+                        {
+                          getPaymentMethodInfo(selectedBooking.paymentMethod)
+                            .label
+                        }
                       </span>
                     </div>
-
                   </div>
 
                   <div className="flex items-center">
@@ -687,7 +704,9 @@ const BookingListForStaff = () => {
           </div>
 
           <div className="flex justify-end space-x-2">
-            <Button onClick={() => setIsQuotationModalOpen(false)}>Cancel</Button>
+            <Button onClick={() => setIsQuotationModalOpen(false)}>
+              Cancel
+            </Button>
             <Button
               type="primary"
               onClick={handleQuotationSubmit}
