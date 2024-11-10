@@ -21,14 +21,6 @@ const BookingListForStaff = () => {
   const navigate = useNavigate();
   const [filteredStatus, setFilteredStatus] = useState("all");
   const [editedBooking, setEditedBooking] = useState(null);
-  const [isQuotationModalOpen, setIsQuotationModalOpen] = useState(false);
-  const [selectedBookingForQuotation, setSelectedBookingForQuotation] =
-    useState(null);
-  const [quotationAmount, setQuotationAmount] = useState("");
-  const [quotationDescription, setQuotationDescription] = useState(
-    "Quotation being in Process..."
-  );
-  const [amountError, setAmountError] = useState("");
 
   const statusOptions = [
     { value: "all", label: "All Status" },
@@ -77,15 +69,6 @@ const BookingListForStaff = () => {
   const handleViewDetailBooking = (booking) => {
     setSelectedBooking(booking);
     setIsModalOpen(true);
-  };
-
-  const handleCreateQuotation = (booking) => {
-    if (booking.paymentStatus.toLowerCase() !== "pending") {
-      toast.warning("Can only create quotations for pending bookings");
-      return;
-    }
-    setSelectedBookingForQuotation(booking);
-    setIsQuotationModalOpen(true);
   };
 
   const handleCreateCheckin = (bookingId) => {
@@ -149,21 +132,14 @@ const BookingListForStaff = () => {
             View Details
           </Button>
 
-          {record.paymentStatus.toLowerCase() === "pending" && (
-            <Button onClick={() => handleCreateQuotation(record)}>
-              Create Quotation
-            </Button>
-          )}
-
           {record.paymentStatus.toLowerCase() === "pending" && record.updatedBy === '' && (
-              <div>
-                {console.log("updatedBy:", record.updatedBy)}
-                <Button
-                  type="primary"
-                  onClick={() => handleAcceptBooking(record.id)}
-                  style={{ backgroundColor: "#10B981" }}
-                >
-                  Accept
+            <div>
+              <Button
+                type="primary"
+                onClick={() => handleAcceptBooking(record.id)}
+                style={{ backgroundColor: "#10B981" }}
+              >
+                Accept
               </Button>
             </div>
           )}
@@ -330,57 +306,6 @@ const BookingListForStaff = () => {
     }
   };
 
-  const validateAmount = (value) => {
-    if (isNaN(value) || value <= 0) {
-      setAmountError("Amount must be a positive number");
-      return false;
-    }
-    if (value > 100000) {
-      setAmountError("Amount cannot exceed 100,000");
-      return false;
-    }
-    setAmountError("");
-    return true;
-  };
-
-  const handleQuotationSubmit = async () => {
-    if (!validateAmount(parseFloat(quotationAmount))) {
-      return;
-    }
-
-    try {
-      const response = await axios.post(
-        "http://localhost:8080/quotations/create",
-        {
-          bookingId: selectedBookingForQuotation.id,
-          amount: parseFloat(quotationAmount),
-          description: quotationDescription,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      if (response.status === 201) {
-        toast.success("Quotation created successfully!");
-        setIsQuotationModalOpen(false);
-        bookingListResponse(); // Refresh booking list
-        // Reset form
-        setQuotationAmount("");
-        setQuotationDescription("Quotation being in Process...");
-      }
-    } catch (err) {
-      console.error("Error details:", err.response?.data);
-      toast.error(
-        "Error creating quotation: " +
-          (err.response?.data?.message || err.message)
-      );
-    }
-  };
-
   const handleAcceptBooking = async (bookingId) => {
     try {
       const response = await axios.get(
@@ -454,7 +379,7 @@ const BookingListForStaff = () => {
               selectedBooking.paymentStatus.toLowerCase() === "pending" && (
                 <Button
                   type="primary"
-                  onClick={handleUpdateBooking(selectedBooking.id)}
+                  onClick={() => handleUpdateBooking(selectedBooking.id)}
                   className="flex items-center gap-2 transform hover:scale-105 active:scale-95 transition-all duration-200 bg-indigo-600 hover:bg-indigo-700"
                 >
                   <SaveOutlined />
@@ -654,68 +579,6 @@ const BookingListForStaff = () => {
             </div>
           </div>
         )}
-      </Modal>
-
-      {/* Add Quotation Modal */}
-      <Modal
-        title="Create New Quotation"
-        open={isQuotationModalOpen}
-        onCancel={() => setIsQuotationModalOpen(false)}
-        footer={null}
-      >
-        <div className="p-4">
-          <div className="mb-4">
-            <label className="block text-gray-700 font-semibold mb-2">
-              Booking ID:
-            </label>
-            <Input
-              value={selectedBookingForQuotation?.id || ""}
-              disabled
-              className="w-full"
-            />
-          </div>
-
-          <div className="mb-4">
-            <label className="block text-gray-700 font-semibold mb-2">
-              Amount:
-            </label>
-            <Input
-              type="number"
-              value={quotationAmount}
-              onChange={(e) => setQuotationAmount(e.target.value)}
-              className={amountError ? "border-red-500" : ""}
-              placeholder="Enter amount"
-            />
-            {amountError && (
-              <p className="text-red-500 text-sm mt-1">{amountError}</p>
-            )}
-          </div>
-
-          <div className="mb-4">
-            <label className="block text-gray-700 font-semibold mb-2">
-              Description:
-            </label>
-            <Input.TextArea
-              value={quotationDescription}
-              onChange={(e) => setQuotationDescription(e.target.value)}
-              rows={3}
-              placeholder="Enter description"
-            />
-          </div>
-
-          <div className="flex justify-end space-x-2">
-            <Button onClick={() => setIsQuotationModalOpen(false)}>
-              Cancel
-            </Button>
-            <Button
-              type="primary"
-              onClick={handleQuotationSubmit}
-              className="bg-blue-500"
-            >
-              Create Quotation
-            </Button>
-          </div>
-        </div>
       </Modal>
 
       <ToastContainer />
