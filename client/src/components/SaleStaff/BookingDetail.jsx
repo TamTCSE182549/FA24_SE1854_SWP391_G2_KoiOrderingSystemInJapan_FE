@@ -110,7 +110,7 @@ const BookingDetail = () => {
         if (name === 'vat') {
             let vatValue = parseFloat(value);
             if (vatValue < 0) {
-                // Chuyển số âm thành dương
+                // Chuyển s âm thành dương
                 vatValue = Math.abs(vatValue);
                 toast.error("VAT percentage cannot be negative", {
                     autoClose: 2000
@@ -390,6 +390,14 @@ const BookingDetail = () => {
                             <label className="text-sm text-gray-500">Customer ID</label>
                             <p className="text-gray-900 font-medium mt-1">#{bookingDetails?.customerID}</p>
                         </div>
+                        <div>
+                            <label className="text-sm text-gray-500">Booking Date</label>
+                            <p className="text-gray-900 font-medium mt-1">{new Date(bookingDetails?.bookingDate).toLocaleString()}</p>
+                        </div>
+                        <div>
+                            <label className="text-sm text-gray-500">Created By</label>
+                            <p className="text-gray-900 font-medium mt-1">{bookingDetails?.createdBy}</p>
+                        </div>
                     </div>
                 </div>
 
@@ -420,14 +428,19 @@ const BookingDetail = () => {
                 <h3 className="text-lg font-semibold text-gray-800 mb-6">Koi Details</h3>
                 <div className="space-y-4">
                     {bookingDetails.koiDetails.map((koiDetail) => (
-                        <div key={koiDetail.id} className="grid grid-cols-1 md:grid-cols-5 gap-4 p-4 bg-gray-50 rounded-lg">
+                        <div key={koiDetail.bookingKoiDetailId} className="grid grid-cols-1 md:grid-cols-5 gap-4 p-4 bg-gray-50 rounded-lg">
+                            <div className="md:col-span-3">
+                                <h4 className="text-lg font-semibold text-gray-900">{koiDetail.koiName}</h4>
+                                <p className="text-sm text-gray-500">Origin: {koiDetail.origin}</p>
+                                <p className="text-sm text-gray-500">Description: {koiDetail.description}</p>
+                            </div>
                             <div>
                                 <label className="text-sm text-gray-500 mb-1 block">Quantity</label>
                                 <input 
                                     type="number" 
                                     name="quantity" 
                                     value={koiDetail.quantity} 
-                                    onChange={(e) => handleInputChange(e, koiDetail.id)} 
+                                    onChange={(e) => handleInputChange(e, koiDetail.bookingKoiDetailId)} 
                                     className={inputClasses}
                                     min="1"
                                     required
@@ -440,7 +453,7 @@ const BookingDetail = () => {
                                     type="number" 
                                     name="unitPrice" 
                                     value={koiDetail.unitPrice} 
-                                    onChange={(e) => handleInputChange(e, koiDetail.id)} 
+                                    onChange={(e) => handleInputChange(e, koiDetail.bookingKoiDetailId)} 
                                     className={inputClasses}
                                     min="0.01"
                                     step="0.01"
@@ -460,7 +473,7 @@ const BookingDetail = () => {
                             <div className="md:col-span-2 flex items-end justify-end gap-2">
                                 {isEditableStatus(bookingDetails?.paymentStatus) && (
                                     <button 
-                                        onClick={() => handleUpdateKoiDetail(koiDetail.id)} 
+                                        onClick={() => handleUpdateKoiDetail(koiDetail.bookingKoiDetailId)} 
                                         className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                                     >
                                         Update
@@ -468,7 +481,7 @@ const BookingDetail = () => {
                                 )}
                                 {isEditableStatus(bookingDetails?.paymentStatus) && (
                                     <button 
-                                        onClick={() => handleDeleteKoiDetail(koiDetail.id)} 
+                                        onClick={() => handleDeleteKoiDetail(koiDetail.bookingKoiDetailId)} 
                                         className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
                                     >
                                         Delete

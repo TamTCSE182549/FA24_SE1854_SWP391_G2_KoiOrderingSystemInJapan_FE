@@ -12,7 +12,9 @@ const { Title } = Typography;
 
 const BookingKoi = () => {
 
-    const { bookingId } = useParams(); 
+    const { bookingId } = useParams();
+    console.log("Current bookingId:", bookingId); // Log để kiểm tra bookingId
+
     const [farms, setFarms] = useState([]);
     const [selectedFarmId, setSelectedFarmId] = useState(null);
     const [kois, setKois] = useState([]);
@@ -21,155 +23,211 @@ const BookingKoi = () => {
     const [selectedKoiId, setSelectedKoiId] = useState('');
     const [quantity, setQuantity] = useState('');
     const [unitPrice, setUnitPrice] = useState('');
-    const [vat, setVat] = useState(0);
-    const [discountAmount, setDiscountAmount] = useState(0);
+    const [vat, setVat] = useState('');
+    const [discountAmount, setDiscountAmount] = useState('');
     const [selectedKoiOption, setSelectedKoiOption] = useState(null);
     const navigate = useNavigate();
     const [koiOptions, setKoiOptions] = useState([]);
+    const [tourFarms, setTourFarms] = useState([]);
+    const [farmKois, setFarmKois] = useState([]);
+    const [checkinList, setCheckinList] = useState([]);
+    const [selectedCheckinId, setSelectedCheckinId] = useState('');
+    const [selectedCustomer, setSelectedCustomer] = useState(null);
 
   const [cookies] = useCookies();
   const token = cookies.token;
   useEffect(() => {
-    fetchFarms();
-  }, []);
+    const fetchTourFarms = async () => {
+        try {
+            // 1. Lấy booking tour detail để có tourID
+            const bookingTourResponse = await axios.get(
+                `http://localhost:8080/BookingTourDetail/${bookingId}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+            
+            console.log("Booking tour response:", bookingTourResponse.data); // Debug log
+            
+            // Kiểm tra response là array và có phần tử
+            if (!bookingTourResponse.data || !Array.isArray(bookingTourResponse.data) || bookingTourResponse.data.length === 0) {
+                toast.error("Booking tour detail not found");
+                return;
+            }
 
-  const fetchFarms = async () => {
-    try {
-      const response = await axios.get(
-        "http://localhost:8080/koi-farm/list-farm-active",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+            const tourId = bookingTourResponse.data[0].tourID; // Lấy tourID từ phần tử đầu tiên của array
+            console.log("Tour ID:", tourId); // Debug log
+
+            // 2. Lấy tour detail để có danh sách farm
+            const tourDetailResponse = await axios.get(
+                `http://localhost:8080/TourDetail/tour/${tourId}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+
+            // 3. Map danh sách farm
+            const farmList = tourDetailResponse.data
+                .filter(detail => detail && detail.farmName)
+                .map(detail => ({
+                    id: detail.id,
+                    farmName: detail.farmName
+                }));
+            
+            console.log("Farm list:", farmList); // Debug log
+            
+            if (farmList.length === 0) {
+                toast.warning("No farms available from this tour");
+                return;
+            }
+            
+            setFarms(farmList);
+
+        } catch (error) {
+            console.error("Error fetching tour farms:", error);
+            toast.error("Failed to fetch farm information");
         }
-      );
-      setFarms(response.data);
-    } catch (error) {
-      console.error("Error fetching farms:", error);
-    }
-  };
+    };
 
-  const handleFarmChange = async (farmId) => {
-    setSelectedFarmId(farmId);
+    if (bookingId) {
+        fetchTourFarms();
+    }
+  }, [bookingId, token]);
+
+  const handleFarmChange = async (e) => {
+    const farmId = e.target.value;
+    
+    if (!farmId || farmId === "") {
+        setSelectedFarmId(null);
+        setKois([]);
+        setKoiOptions([]);
+        return;
+    }
+
+    const numericFarmId = parseInt(farmId, 10);
+    
+    if (isNaN(numericFarmId)) {
+        console.error("Invalid farmId:", farmId);
+        toast.error("Invalid farm selection");
+        return;
+    }
+
+    setSelectedFarmId(numericFarmId);
+    
     try {
-      const response = await axios.get(
-        `http://localhost:8080/koi-farm/get/${farmId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      
-      const koiList = response.data.koiResponses;
-      setKois(koiList);
+        const response = await axios.get(
+            `http://localhost:8080/koi-farm/get/${numericFarmId}`, 
+            {
+                headers: { Authorization: `Bearer ${token}` },
+            }
+        );
+        
+        const koiList = response.data.koiResponses || [];
+        setKois(koiList);
 
-      // Tạo koiOptions từ danh sách koi
-      const options = koiList.map(koi => ({
-        value: koi.id,
-        label: `${koi.koiName} - ${koi.color} - ${koi.origin}`,
-        price: koi.price
-      }));
-      setKoiOptions(options);
-      
+        const options = koiList.map(koi => ({
+            value: koi.id,
+            label: `${koi.koiName} - ${koi.color} - ${koi.origin}`,
+            price: koi.price
+        }));
+        setKoiOptions(options);
+        
     } catch (error) {
-      console.error("Error fetching Koi:", error);
-      toast.error("Failed to fetch koi list");
+        console.error("Error fetching Koi:", error);
+        toast.error("Failed to fetch koi list");
+        setKois([]);
+        setKoiOptions([]);
     }
-  };
+};
 
   const handleKoiChange = (selectedOption) => {
     setSelectedKoiOption(selectedOption);
     if (selectedOption) {
-      setSelectedKoiId(selectedOption.value);
-      setUnitPrice(selectedOption.price);
+        const newKoiId = selectedOption.value.toString(); // Chuyển về string để đồng nhất kiểu dữ liệu
+        console.log("Selected Koi ID:", newKoiId); // Debug log
+        setSelectedKoiId(newKoiId);
+        setUnitPrice(selectedOption.price);
     } else {
-      setSelectedKoiId("");
-      setUnitPrice("");
+        setSelectedKoiId("");
+        setUnitPrice("");
     }
-  };
+};
 
   const handleAddKoi = () => {
-    // Kiểm tra farm đã được chọn chưa
-    if (!selectedFarmId) {
-        toast.error("Please select a farm first");
+    if (!selectedKoiId || !quantity || !unitPrice) {
+        toast.error("Please select a koi and enter quantity and price");
         return;
     }
 
-    // Kiểm tra koi đã được chọn chưa
-    if (!selectedKoiId) {
-        toast.error("Please select a koi");
-        return;
-    }
+    // Kiểm tra số lượng và đơn giá là số dương
+    const quantityNum = parseInt(quantity);
+    const unitPriceNum = parseFloat(unitPrice);
 
-    // Kiểm tra unit price trước
-    if (!unitPrice) {
-        toast.error("Please enter unit price");
-        return;
-    }
-
-    const numericUnitPrice = parseFloat(unitPrice);
-    if (numericUnitPrice <= 0) {
-        toast.error("Unit price must be greater than 0");
-        return;
-    }
-
-    // Sau đó mới kiểm tra quantity
-    if (!quantity) {
-        toast.error("Please enter quantity");
-        return;
-    }
-
-    const numericQuantity = parseInt(quantity, 10);
-    if (numericQuantity <= 0) {
+    if (quantityNum <= 0) {
         toast.error("Quantity must be greater than 0");
+        setQuantity(''); // Reset quantity
         return;
     }
 
-    // Nếu tất cả validation pass, tiếp tục xử lý
-    const selectedKoi = kois.find((koi) => koi.id === Number(selectedKoiId));
+    if (unitPriceNum <= 0) {
+        toast.error("Unit price must be greater than 0");
+        setUnitPrice(''); // Reset unit price
+        return;
+    }
 
+    // Kiểm tra cá có tồn tại trong farm không
+    const selectedKoi = kois.find(koi => koi.id.toString() === selectedKoiId.toString());
     if (!selectedKoi) {
-        toast.error("Koi not found!");
+        toast.error("Selected koi not found in farm");
         return;
     }
 
-    const existingDetail = bookingDetails.find(
-        (detail) => detail.koiId === selectedKoiId
-    );
+    // Kiểm tra số lượng có vượt quá s lượng trong farm không
+    const existingKoiIndex = bookingDetails.findIndex(detail => detail.koiId === selectedKoiId);
+    const currentBookedQuantity = existingKoiIndex !== -1 ? bookingDetails[existingKoiIndex].quantity : 0;
+    const newTotalQuantity = currentBookedQuantity + quantityNum;
 
-    if (existingDetail) {
-        setBookingDetails((prevDetails) =>
-            prevDetails.map((detail) =>
-                detail.koiId === selectedKoiId
-                    ? {
-                        ...detail,
-                        quantity: numericQuantity,
-                        unitPrice: numericUnitPrice,
-                    }
-                    : detail
-            )
-        );
-    } else {
-        setBookingDetails((prevDetails) => [
-            ...prevDetails,
-            {
-                koiId: selectedKoiId,
-                koiName: selectedKoi.koiName,
-                quantity: numericQuantity,
-                unitPrice: numericUnitPrice,
-            },
-        ]);
+    if (newTotalQuantity > selectedKoi.quantity) {
+        toast.error(`Not enough koi in stock. Available: ${selectedKoi.quantity - currentBookedQuantity}`);
+        return;
     }
 
-    // Reset form sau khi thêm Koi
-    setSelectedKoiId("");
+    if (existingKoiIndex !== -1) {
+        // Cập nhật số lượng cho cá đã tồn tại
+        setBookingDetails(prevDetails => {
+            const updatedDetails = [...prevDetails];
+            updatedDetails[existingKoiIndex] = {
+                ...updatedDetails[existingKoiIndex],
+                quantity: newTotalQuantity,
+                unitPrice: parseFloat(unitPrice)
+            };
+            return updatedDetails;
+        });
+        
+        toast.success(`Updated quantity of ${selectedKoi.koiName} to ${newTotalQuantity}`);
+    } else {
+        // Thêm cá mới
+        const newBookingDetail = {
+            koiId: selectedKoiId,
+            koiName: selectedKoi.koiName,
+            quantity: quantityNum,
+            unitPrice: parseFloat(unitPrice)
+        };
+        
+        setBookingDetails(prev => [...prev, newBookingDetail]);
+        toast.success(`Added ${quantity} ${selectedKoi.koiName} to booking`);
+    }
+    
+    // Reset form
     setSelectedKoiOption(null);
+    setSelectedKoiId("");
     setQuantity("");
     setUnitPrice("");
-    
-    toast.success("Koi added successfully!");
-  };
+};
   const handleRemoveKoi = (koiId) => {
     setBookingDetails((prevDetails) =>
       prevDetails.filter((detail) => detail.koiId !== koiId)
@@ -188,59 +246,120 @@ const BookingKoi = () => {
     setDiscountAmount("");
   };
 
+  useEffect(() => {
+    const fetchCheckinList = async () => {
+        try {
+            // Log trước khi gọi API
+            console.log("Fetching checkins for bookingId:", bookingId);
+            
+            const response = await axios.get(
+                `http://localhost:8080/checkins/status/${bookingId}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+            
+            // Log response
+            console.log("Checkin API response:", response.data);
+            
+            setCheckinList(response.data);
+        } catch (error) {
+            console.error("Error details:", error.response || error);
+            toast.error("Failed to fetch checkin list");
+        }
+    };
+
+    // Chỉ gọi API khi có bookingId và nó là một số hợp lệ
+    if (bookingId && !isNaN(bookingId)) {
+        fetchCheckinList();
+    } else {
+        console.error("Invalid bookingId:", bookingId);
+    }
+  }, [bookingId, token]);
+
+  const calculateTotal = (details) => {
+    return details.reduce((total, detail) => {
+        return total + (detail.quantity * detail.unitPrice);
+    }, 0);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!selectedFarmId) {
-      toast.error("Please select a farm.");
-      return;
+    
+    if (bookingDetails.length === 0) {
+        toast.error("Please add at least one koi to booking");
+        return;
     }
 
     if (!paymentMethod) {
-      toast.error("Please select a payment method.");
-      return;
+        toast.error("Please select a payment method");
+        return;
     }
 
-    if (bookingDetails.length === 0) {
-      toast.error("Please add at least one Koi to the booking list.");
-      return;
+    // Thêm validation cho Discount Amount
+    const subtotal = calculateTotal(bookingDetails);
+    if (parseFloat(discountAmount) > subtotal) {
+        toast.error("Discount amount cannot exceed subtotal amount");
+        return;
     }
-
-    const bookingKoiRequest = {
-      farmId: selectedFarmId,
-      paymentMethod,
-      vat: parseFloat(vat) / 100,
-      discountAmount,
-      details: bookingDetails.map((detail) => ({
-        koiId: detail.koiId,
-        quantity: detail.quantity,
-        unitPrice: detail.unitPrice,
-      })),
-    };
 
     try {
-      await axios.post(
-        `http://localhost:8080/bookings/koi/create/${bookingId}`,
-        bookingKoiRequest,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      
-      toast.success("Booking successful!", {
-        autoClose: 1000,
-        onClose: () => {
-          navigate("/staff/booking-for-koi-list");
-        },
-      });
-      
-      resetForm();
+        const requestData = {
+            chekinId: parseInt(selectedCheckinId),
+            paymentMethod: paymentMethod,
+            details: bookingDetails.map(detail => ({
+                farmId: selectedFarmId,
+                koiId: parseInt(detail.koiId),
+                quantity: detail.quantity,
+                unitPrice: detail.unitPrice
+            })),
+            vat: parseFloat(vat || 0) / 100,
+            discountAmount: parseFloat(discountAmount || 0)
+        };
+
+        console.log("Submitting data:", requestData);
+
+        const response = await axios.post(
+            `http://localhost:8080/bookings/koi/create/${bookingId}`,
+            requestData,
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+
+        console.log("Booking response:", response.data);
+        toast.success("Booking created successfully");
+        resetForm();
+        navigate("/staff/booking-for-koi-list");
+
     } catch (error) {
-      toast.error(error.response?.data?.message || "Booking Failed");
+        console.error("Booking error:", {
+            message: error.message,
+            data: error.response?.data,
+            status: error.response?.status
+        });
+        toast.error(error.response?.data?.message || "Booking Failed");
     }
   };
+
+  const handleCustomerSelect = (e) => {
+    const checkinId = e.target.value;
+    console.log("Selected checkin ID:", checkinId);
+    setSelectedCheckinId(checkinId);
+    
+    // Tìm thông tin khách hàng từ checkinList
+    const selectedCheckin = checkinList.find(checkin => checkin.id === parseInt(checkinId));
+    console.log("Selected customer info:", selectedCheckin);
+    
+    if (selectedCheckin) {
+        setSelectedCustomer(selectedCheckin);
+    }
+};
 
    return (
         <div className="min-h-screen bg-emerald-50 py-12 pt-40">
@@ -255,16 +374,43 @@ const BookingKoi = () => {
 
                 {/* Main Form Card */}
                 <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-                    {/* Form Header */}
-                    <div className="bg-emerald-600 p-6">
-                        <h2 className="text-xl text-white font-semibold">
-                            New Booking Details
-                        </h2>
-                    </div>
+                    <form onSubmit={handleSubmit} className="p-6">
+                        <div className="space-y-6">
+                            {/* Customer Selection - Moved to top */}
+                            <div className="bg-gray-50 p-6 rounded-xl">
+                                <h3 className="text-lg font-semibold text-gray-800 mb-4">Customer Selection</h3>
+                                <div>
+                                    <label htmlFor="checkin" className="block text-sm font-medium text-gray-700 mb-1">
+                                        Select Customer from Checkin List
+                                    </label>
+                                    <select
+                                        id="checkin"
+                                        value={selectedCheckinId}
+                                        onChange={handleCustomerSelect}
+                                        required
+                                        className="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all bg-white text-gray-900"
+                                    >
+                                        <option value="">Choose a customer</option>
+                                        {checkinList.map(checkin => (
+                                            <option 
+                                                key={checkin.id} 
+                                                value={checkin.id}
+                                                className="text-gray-900"
+                                            >
+                                                {`${checkin.firstName} ${checkin.lastName}`}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    
+                                    {/* Hiển thị thông tin khách hàng đã chọn */}
+                                    {selectedCustomer && (
+                                        <div className="mt-2 text-sm text-gray-600">
+                                            Selected customer: {selectedCustomer.firstName} {selectedCustomer.lastName}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
 
-                    <form onSubmit={handleSubmit} className="p-8">
-                        {/* Main Form Content */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             {/* Farm Selection Section */}
                             <div className="bg-gray-50 p-6 rounded-xl">
                                 <h3 className="text-lg font-semibold text-gray-800 mb-4">Farm Information</h3>
@@ -275,14 +421,20 @@ const BookingKoi = () => {
                                         </label>
                                         <select
                                             id="farm"
-                                            value={selectedFarmId}
-                                            onChange={(e) => handleFarmChange(e.target.value)}
+                                            value={selectedFarmId || ""}
+                                            onChange={handleFarmChange}
                                             required
                                             className="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-emerald-500 focus:ring focus:ring-emerald-200 transition-all bg-white text-gray-900"
                                         >
-                                            <option value="" className="text-gray-900">Choose a farm</option>
+                                            <option value="">Choose a farm</option>
                                             {farms.map(farm => (
-                                                <option key={farm.id} value={farm.id} className="text-gray-900">{farm.farmName}</option>
+                                                <option 
+                                                    key={farm.id} 
+                                                    value={farm.id}
+                                                    className="text-gray-900"
+                                                >
+                                                    {farm.farmName}
+                                                </option>
                                             ))}
                                         </select>
                                     </div>
@@ -367,9 +519,11 @@ const BookingKoi = () => {
                                                     min="0"
                                                     step="0.01"
                                                     value={unitPrice}
-                                                    onChange={(e) => setUnitPrice(e.target.value)}
-                                                    required={bookingDetails.length === 0}
+                                                    onChange={(e) => {
+                                                        setUnitPrice(e.target.value);
+                                                    }}
                                                     className="w-full pl-8 pr-4 py-3 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all text-gray-900"
+                                                    placeholder="Enter unit price"
                                                 />
                                             </div>
                                         </div>
@@ -383,8 +537,8 @@ const BookingKoi = () => {
                                                 min="1"
                                                 value={quantity}
                                                 onChange={(e) => setQuantity(e.target.value)}
-                                                required={bookingDetails.length === 0}
                                                 className="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all text-gray-900"
+                                                placeholder="Enter quantity"
                                             />
                                         </div>
                                     </div>
@@ -402,40 +556,85 @@ const BookingKoi = () => {
                                 </div>
                             </div>
 
-                            {/* Booking Details List - Moved here */}
-                            {bookingDetails.length > 0 && (
-                                <div className="md:col-span-2 bg-gray-50 p-6 rounded-xl">
-                                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Your Booking Summary</h3>
-                                    <div className="space-y-3">
-                                        {bookingDetails.map((detail, index) => (
-                                            <div key={index} className="bg-white rounded-lg p-4 shadow-sm">
-                                                <div className="flex items-center justify-between">
-                                                    <div className="space-y-1">
-                                                        <h4 className="text-lg font-medium text-gray-900">{detail.koiName}</h4>
-                                                        <div className="flex items-center text-sm text-gray-500 space-x-2">
-                                                            <span>{detail.quantity} units</span>
-                                                            <span>•</span>
-                                                            <span>${detail.unitPrice.toLocaleString()} each</span>
+                            {/* Koi List Section */}
+                            <div className="bg-gray-50 p-6 rounded-xl">
+                                <h3 className="text-lg font-semibold text-gray-800 mb-4">Selected Koi List</h3>
+                                
+                                {bookingDetails.length > 0 ? (
+                                    <div className="space-y-4">
+                                        {/* Thêm max-height và overflow-auto */}
+                                        <div className="max-h-[400px] overflow-auto pr-2">
+                                            {bookingDetails.map((detail, index) => (
+                                                <div 
+                                                    key={detail.koiId}
+                                                    className={`bg-white rounded-lg shadow p-4 relative ${
+                                                        index !== bookingDetails.length - 1 ? 'mb-4' : ''
+                                                    }`}
+                                                >
+                                                    <div className="flex justify-between items-start">
+                                                        <div className="flex-1">
+                                                            <h4 className="text-lg font-semibold text-gray-900 mb-2">
+                                                                {detail.koiName}
+                                                            </h4>
+                                                            
+                                                            <div className="grid grid-cols-2 gap-4">
+                                                                <div className="space-y-1">
+                                                                    <p className="text-sm text-gray-600">Quantity</p>
+                                                                    <p className="text-base font-medium text-gray-900">
+                                                                        {detail.quantity} Kois
+                                                                    </p>
+                                                                </div>
+                                                                <div className="space-y-1">
+                                                                    <p className="text-sm text-gray-600">Unit Price</p>
+                                                                    <p className="text-base font-medium text-gray-900">
+                                                                        ${detail.unitPrice.toLocaleString()}
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+
+                                                            <div className="pt-2 border-t border-gray-200">
+                                                                <div className="flex justify-between items-center">
+                                                                    <span className="text-sm font-medium text-gray-600">
+                                                                        Subtotal:
+                                                                    </span>
+                                                                    <span className="text-lg font-bold text-emerald-600">
+                                                                        ${(detail.quantity * detail.unitPrice).toLocaleString()}
+                                                                    </span>
+                                                                </div>
+                                                            </div>
                                                         </div>
-                                                        <div className="text-sm font-medium text-gray-900">
-                                                            Total: ${(detail.quantity * detail.unitPrice).toLocaleString()}
-                                                        </div>
+
+                                                        {/* Nút xóa */}
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleRemoveKoi(detail.koiId)}
+                                                            className="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition-colors"
+                                                        >
+                                                            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                                                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                                                            </svg>
+                                                        </button>
                                                     </div>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => handleRemoveKoi(detail.koiId)}
-                                                        className="text-red-500 hover:text-red-700 transition-colors duration-200"
-                                                    >
-                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                                            <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
-                                                        </svg>
-                                                    </button>
                                                 </div>
+                                            ))}
+                                        </div>
+
+                                        {/* Tổng cộng */}
+                                        <div className="mt-4 p-4 bg-white rounded-lg shadow">
+                                            <div className="flex justify-between items-center text-lg font-bold">
+                                                <span>Total Amount:</span>
+                                                <span className="text-emerald-600">
+                                                    ${calculateTotal(bookingDetails).toLocaleString()}
+                                                </span>
                                             </div>
-                                        ))}
+                                        </div>
                                     </div>
-                                </div>
-                            )}
+                                ) : (
+                                    <div className="text-center py-8 text-gray-500">
+                                        No koi selected yet. Please select koi from above.
+                                    </div>
+                                )}
+                            </div>
 
                             {/* Additional Details Section */}
                             <div className="bg-gray-50 p-6 rounded-xl md:col-span-2">
@@ -461,7 +660,7 @@ const BookingKoi = () => {
                                                     toast.error("VAT must be between 0 and 100");
                                                     return;
                                                 }
-                                                setVat(numValue);
+                                                setVat(value);
                                             }}
                                             className="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all text-gray-900"
                                             placeholder="Enter VAT percentage (0-100)"
@@ -479,8 +678,14 @@ const BookingKoi = () => {
                                                 type="number"
                                                 value={discountAmount}
                                                 onChange={(e) => {
-                                                    const value = parseFloat(e.target.value);
-                                                    if (value < 0) {
+                                                    const value = e.target.value;
+                                                    if (value === '') {
+                                                        setDiscountAmount('');
+                                                        return;
+                                                    }
+                                                    
+                                                    const numValue = parseFloat(value);
+                                                    if (numValue < 0) {
                                                         toast.error("Discount amount cannot be negative");
                                                         return;
                                                     }

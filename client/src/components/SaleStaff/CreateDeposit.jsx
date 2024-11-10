@@ -3,7 +3,7 @@ import axios from "axios";
 import { useCookies } from "react-cookie";
 import { ToastContainer, toast } from "react-toastify";
 import { useParams, useNavigate } from "react-router-dom";
-import { Form, Input, DatePicker, Button, Card, Typography, Modal } from 'antd';
+import { Form, Input, DatePicker, Button, Card, Typography, Modal, Select } from 'antd';
 import { ArrowLeftOutlined, DollarOutlined, EnvironmentOutlined, CalendarOutlined, PercentageOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 
@@ -32,6 +32,9 @@ const CreateDeposit = () => {
         deliveryExpectedDate: values.deliveryExpectedDate.format('YYYY-MM-DD'),
         shippingAddress: values.shippingAddress,
         depositPercentage: parseFloat(values.depositPercentage) / 100, // Chuyển đổi % thành decimal
+        depositDate: values.depositDate.format('YYYY-MM-DD'), // Thêm deposit date
+        paymentMethod: values.paymentMethod, // Thêm payment method
+        depositStatus: "processing" // Thêm trạng thái mặc định
       };
 
       await axios.post(
@@ -52,8 +55,16 @@ const CreateDeposit = () => {
     }
   };
 
-  // Validation cho ngày
-  const disabledDate = (current) => {
+  // Sửa lại hàm validate cho depositDate
+  const disabledDepositDate = (current) => {
+    // Cho phép chọn ngày trong quá khứ và tương lai, nhưng không quá 30 ngày trước
+    const thirtyDaysAgo = dayjs().subtract(30, 'days');
+    const thirtyDaysAhead = dayjs().add(30, 'days'); // Thêm giới hạn 30 ngày tương lai
+    return current < thirtyDaysAgo || current > thirtyDaysAhead;
+  };
+
+  // Giữ nguyên hàm validate cho deliveryExpectedDate
+  const disabledDeliveryDate = (current) => {
     return current && current < dayjs().startOf('day');
   };
 
@@ -175,7 +186,7 @@ const CreateDeposit = () => {
             >
               <DatePicker 
                 className="w-full h-11 rounded-lg"
-                disabledDate={disabledDate}
+                disabledDate={disabledDeliveryDate}  // Sử dụng hàm validate cho ngày giao hàng
                 placeholder="Select delivery date"
                 size="large"
                 suffixIcon={<CalendarOutlined className="text-gray-400" />}
@@ -228,6 +239,41 @@ const CreateDeposit = () => {
                 className="h-11 rounded-lg"
                 size="large"
               />
+            </Form.Item>
+
+            <Form.Item
+              label={<span className="text-gray-700 font-medium">Deposit Date</span>}
+              name="depositDate"
+              rules={[
+                { required: true, message: 'Please select deposit date' },
+              ]}
+              tooltip="Select deposit date (within 30 days before or after today)"
+            >
+              <DatePicker 
+                className="w-full h-11 rounded-lg"
+                disabledDate={disabledDepositDate}
+                placeholder="Select deposit date"
+                size="large"
+                suffixIcon={<CalendarOutlined className="text-gray-400" />}
+              />
+            </Form.Item>
+
+            <Form.Item
+              label={<span className="text-gray-700 font-medium">Payment Method</span>}
+              name="paymentMethod"
+              rules={[
+                { required: true, message: 'Please select payment method' },
+              ]}
+            >
+              <Select
+                size="large"
+                className="w-full h-11 rounded-lg"
+                placeholder="Select payment method"
+              >
+                <Select.Option value="CASH">Cash</Select.Option>
+                <Select.Option value="VISA">Visa</Select.Option>
+                <Select.Option value="TRANSFER">Transfer</Select.Option>
+              </Select>
             </Form.Item>
 
             <Form.Item className="mb-0 pt-4">
