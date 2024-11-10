@@ -25,10 +25,19 @@ import {
   deleteDelivery,
   addDelivery,
   checkoutDelivery,
+  updateDeliveryHistory,
 } from "../../services/deliveryService"; // Import the service functions
 
 const { Title, Text } = Typography;
 const { Option } = Select;
+
+const ROUTE_OPTIONS = {
+  TAKE_KOI_AT_FARM: "Take Koi at Farm",
+  DEPARTING_FROM_JAPAN: "Departing from Japan",
+  ARRIVED_YOUR_COUNTRY: "Arrived Your Country",
+  IN_LOCAL_TRANSIT: "In Local Transit",
+  DELIVERED_TO_CUSTOMER: "Delivered to Customer",
+};
 
 const Delivery = () => {
   const [loading, setLoading] = useState(true);
@@ -57,6 +66,7 @@ const Delivery = () => {
     useState(false);
   const [checkoutReason, setCheckoutReason] = useState("");
   const [isUpdateModalVisible, setIsUpdateModalVisible] = useState(false);
+  const [checkoutAddress, setCheckoutAddress] = useState("");
 
   const navigate = useNavigate();
 
@@ -123,10 +133,10 @@ const Delivery = () => {
     }
 
     try {
-      await updateDelivery(
+      await updateDeliveryHistory(
         selectedDelivery.deliveryId,
         {
-          route: newRoute.trim(),
+          route: newRoute,
           healthKoiDescription: newDescription.trim(),
         },
         token
@@ -136,7 +146,7 @@ const Delivery = () => {
           delivery.deliveryId === selectedDelivery.deliveryId
             ? {
                 ...delivery,
-                route: newRoute.trim(),
+                route: newRoute,
                 healthKoiDescription: newDescription.trim(),
               }
             : delivery
@@ -174,16 +184,11 @@ const Delivery = () => {
   };
 
   const validateRoute = (route) => {
-    if (!route || !route.trim()) {
+    if (!route) {
       return "Route is required";
     }
-    if (route.length > 100) {
-      return "Route cannot exceed 100 characters";
-    }
-    // Chỉ cho phép chữ, số, dấu phẩy, dấu chấm và khoảng trắng
-    const routeRegex = /^[a-zA-Z0-9,.\s]+$/;
-    if (!routeRegex.test(route)) {
-      return "Route can only contain letters, numbers, commas, periods and spaces";
+    if (!Object.keys(ROUTE_OPTIONS).includes(route)) {
+      return "Invalid route selected";
     }
     return null;
   };
@@ -249,7 +254,7 @@ const Delivery = () => {
       await addDelivery(
         bookingId,
         {
-          route: newDeliveryRoute.trim(),
+          route: newDeliveryRoute,
           healthKoiDescription: newDeliveryDescription.trim(),
         },
         token
@@ -300,6 +305,7 @@ const Delivery = () => {
         healthKoiDescription: checkoutHealthDescription,
         status: checkoutStatus,
         reason: checkoutReason,
+        address: checkoutAddress,
       };
 
       await updateDelivery(bookingId, payload, token);
@@ -321,6 +327,7 @@ const Delivery = () => {
       setCheckoutHealthDescription(checkoutInfo.healthKoiDescription);
       setCheckoutStatus(checkoutInfo.status);
       setCheckoutReason(checkoutInfo.reason || "");
+      setCheckoutAddress(checkoutInfo.address || "");
     }
     setIsUpdateCheckoutModalVisible(true);
   };
@@ -333,6 +340,11 @@ const Delivery = () => {
     setNewDeliveryRoute("");
     setNewDeliveryDescription("");
     setIsAddModalVisible(true);
+  };
+
+  // Thêm helper function để format route text
+  const formatRouteText = (route) => {
+    return ROUTE_OPTIONS[route]?.split(" ").join("\n") || route;
   };
 
   return (
@@ -374,9 +386,48 @@ const Delivery = () => {
             progressDot
             current={deliveries.length - 1}
             items={deliveries.map((delivery) => ({
-              title: delivery.route,
+              title: (
+                <div
+                  className="step-title"
+                  style={{
+                    whiteSpace: "pre-line",
+                    fontSize: "12px",
+                    lineHeight: "1.2",
+                    textAlign: "center",
+                    maxWidth: "120px", // Đi���u chỉnh độ rộng phù hợp
+                    margin: "0 auto",
+                  }}
+                >
+                  {ROUTE_OPTIONS[delivery.route]}
+                </div>
+              ),
+              description: formatDateTime(delivery.createdDate), // Thêm ngày tháng nếu cần
             }))}
+            style={{
+              margin: "20px 0",
+              padding: "20px 0",
+            }}
           />
+          <style jsx>{`
+            .ant-steps-item-title {
+              padding-right: 0 !important;
+            }
+
+            .ant-steps-item {
+              padding: 0 0px !important;
+            }
+
+            .step-title {
+              position: relative;
+              top: 8px;
+            }
+
+            @media (max-width: 768px) {
+              .step-title {
+                font-size: 10px !important;
+              }
+            }
+          `}</style>
           <Divider />
           {deliveries.map((delivery, index) => (
             <div
@@ -441,28 +492,32 @@ const Delivery = () => {
             style={{ display: "flex", flexDirection: "column", gap: "10px" }}
           >
             <Text>
-              <strong>Customer Name:</strong> {checkoutInfo.customerName}
+              <strong>Customer Name: </strong> {checkoutInfo.customerName}
             </Text>
             <Text>
-              <strong>Delivery Date:</strong>{" "}
+              <strong>Delivery Date: </strong>{" "}
               {formatDateTime(checkoutInfo.receiveDate)}
             </Text>
             <Text>
-              <strong>Koi Health:</strong> {checkoutInfo.healthKoiDescription}
+              <strong>Koi Health: </strong> {checkoutInfo.healthKoiDescription}
             </Text>
             <Text>
-              <strong>Delivery Status:</strong> {checkoutInfo.status}
+              <strong>Delivery Status: </strong> {checkoutInfo.status}
             </Text>
             <Text>
-              <strong>Payment Amount:</strong>
+              <strong>Payment Amount: </strong>
               {checkoutInfo.remainAmount}
             </Text>
             <Text>
-              <strong>Delivery Staff:</strong> {checkoutInfo.staffName}
+              <strong>Address: </strong>
+              {checkoutInfo.address}
+            </Text>
+            <Text>
+              <strong>Delivery Staff: </strong> {checkoutInfo.staffName}
             </Text>
             {checkoutInfo.reason && (
               <Text>
-                <strong>Reason:</strong> {checkoutInfo.reason}
+                <strong>Reason: </strong> {checkoutInfo.reason}
               </Text>
             )}
           </div>
@@ -522,9 +577,16 @@ const Delivery = () => {
         />
         <DatePicker
           value={checkoutReceiveDate ? moment(checkoutReceiveDate) : null}
-          onChange={(date) => setCheckoutReceiveDate(date)}
+          onChange={(date) => {
+            setCheckoutReceiveDate(date ? date.toDate() : null);
+          }}
           style={{ marginBottom: 16, width: "100%" }}
           placeholder="Receive Date"
+          showTime={{ format: "HH:mm" }}
+          format="DD/MM/YYYY HH:mm"
+          disabledDate={(current) => {
+            return current && current < moment().startOf("day");
+          }}
         />
         <Input.TextArea
           value={checkoutHealthDescription}
@@ -569,15 +631,29 @@ const Delivery = () => {
         />
         <DatePicker
           value={checkoutReceiveDate ? moment(checkoutReceiveDate) : null}
-          onChange={(date) => setCheckoutReceiveDate(date)}
+          onChange={(date) => {
+            setCheckoutReceiveDate(date ? date.toDate() : null);
+          }}
           style={{ marginBottom: 16, width: "100%" }}
           placeholder="Receive Date"
+          showTime={{ format: "HH:mm" }}
+          format="DD/MM/YYYY HH:mm"
+          disabledDate={(current) => {
+            return current && current < moment().startOf("day");
+          }}
         />
         <Input.TextArea
           value={checkoutHealthDescription}
           onChange={(e) => setCheckoutHealthDescription(e.target.value)}
           placeholder="Health Koi Description"
           rows={4}
+          style={{ marginBottom: 16 }}
+        />
+        <Input.TextArea
+          value={checkoutAddress}
+          onChange={(e) => setCheckoutAddress(e.target.value)}
+          placeholder="Delivery Address"
+          rows={3}
           style={{ marginBottom: 16 }}
         />
         <Select
@@ -607,12 +683,18 @@ const Delivery = () => {
         onOk={handleAdd}
         onCancel={() => setIsAddModalVisible(false)}
       >
-        <Input
+        <Select
           value={newDeliveryRoute}
-          onChange={(e) => setNewDeliveryRoute(e.target.value)}
-          placeholder="Delivery Route"
-          style={{ marginBottom: 16 }}
-        />
+          onChange={(value) => setNewDeliveryRoute(value)}
+          placeholder="Select Delivery Route"
+          style={{ width: "100%", marginBottom: 16 }}
+        >
+          {Object.entries(ROUTE_OPTIONS).map(([key, value]) => (
+            <Select.Option key={key} value={key}>
+              {value}
+            </Select.Option>
+          ))}
+        </Select>
         <Input.TextArea
           value={newDeliveryDescription}
           onChange={(e) => setNewDeliveryDescription(e.target.value)}
@@ -628,12 +710,6 @@ const Delivery = () => {
         onOk={handleUpdate}
         onCancel={() => setIsUpdateModalVisible(false)}
       >
-        <Input
-          value={newRoute}
-          onChange={(e) => setNewRoute(e.target.value)}
-          placeholder="Delivery Route"
-          style={{ marginBottom: 16 }}
-        />
         <Input.TextArea
           value={newDescription}
           onChange={(e) => setNewDescription(e.target.value)}

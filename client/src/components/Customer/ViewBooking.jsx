@@ -5,13 +5,24 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useCookies } from "react-cookie"; // Thêm useCookies để lấy token từ cookie
 import { jwtDecode } from "jwt-decode";
-import { Button, Row, Col, Pagination, Tag, Tooltip } from "antd"; // Import Ant Design components
-import { 
-  EyeOutlined, 
-  CreditCardOutlined, 
-  FileTextOutlined, 
-  CloseCircleOutlined 
-} from '@ant-design/icons';
+import {
+  Button,
+  Row,
+  Col,
+  Pagination,
+  Tag,
+  Tooltip,
+  Modal,
+  Rate,
+  Input,
+} from "antd"; // Import Ant Design components
+import {
+  EyeOutlined,
+  CreditCardOutlined,
+  FileTextOutlined,
+  CloseCircleOutlined,
+  MessageOutlined,
+} from "@ant-design/icons";
 
 const BookingInformation = () => {
   const [cookies] = useCookies(["token"]);
@@ -21,6 +32,10 @@ const BookingInformation = () => {
   const bookingsPerPage = 3;
   const navigate = useNavigate();
   const [userRole, setUserRole] = useState("");
+  const [isFeedbackModalVisible, setIsFeedbackModalVisible] = useState(false);
+  const [feedbackRating, setFeedbackRating] = useState(0);
+  const [feedbackContent, setFeedbackContent] = useState("");
+  const [selectedBookingId, setSelectedBookingId] = useState(null);
 
   useEffect(() => {
     if (token) {
@@ -106,6 +121,36 @@ const BookingInformation = () => {
     }
   };
 
+  const handleFeedbackClick = (booking) => {
+    setSelectedBookingId(booking.id);
+    setIsFeedbackModalVisible(true);
+  };
+
+  const handleSubmitFeedback = async () => {
+    try {
+      await axios.post(
+        "http://localhost:8080/feedback/create",
+        {
+          bookingId: selectedBookingId,
+          rating: feedbackRating,
+          content: feedbackContent,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      toast.success("Feedback submitted successfully!");
+      setIsFeedbackModalVisible(false);
+      // Reset form
+      setFeedbackRating(0);
+      setFeedbackContent("");
+    } catch (error) {
+      console.error("Error submitting feedback:", error);
+      toast.error(error.response.data);
+    }
+  };
+
   // Calculate the bookings to display on the current page
   const indexOfLastBooking = currentPage * bookingsPerPage;
   const indexOfFirstBooking = indexOfLastBooking - bookingsPerPage;
@@ -153,8 +198,12 @@ const BookingInformation = () => {
   return (
     <div className="container mx-auto px-4 mt-40 pt-10 min-h-screen bg-gradient-to-b from-blue-50 to-white">
       <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-blue-800 mb-2">My Koi Bookings</h1>
-        <p className="text-gray-600">Track and manage your Koi fish purchases</p>
+        <h1 className="text-3xl font-bold text-blue-800 mb-2">
+          My Koi Bookings
+        </h1>
+        <p className="text-gray-600">
+          Track and manage your Koi fish purchases
+        </p>
       </div>
 
       <section>
@@ -164,8 +213,12 @@ const BookingInformation = () => {
               <div className="bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden border border-gray-100">
                 {/* Header with curved design */}
                 <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-3 text-white">
-                  <h3 className="text-lg font-semibold">Booking #{booking.id}</h3>
-                  <p className="text-sm opacity-90">{formatDateTime(booking.createdDate)}</p>
+                  <h3 className="text-lg font-semibold">
+                    Booking #{booking.id}
+                  </h3>
+                  <p className="text-sm opacity-90">
+                    {formatDateTime(booking.createdDate)}
+                  </p>
                 </div>
 
                 <div className="p-6 flex flex-col md:flex-row gap-6">
@@ -187,7 +240,9 @@ const BookingInformation = () => {
                     </div>
                     {booking.paymentDate && (
                       <div className="mt-2 bg-blue-50 p-2 rounded-md border border-blue-100">
-                        <p className="text-blue-600 text-sm font-medium mb-1">Payment Date</p>
+                        <p className="text-blue-600 text-sm font-medium mb-1">
+                          Payment Date
+                        </p>
                         <span className="text-sm text-blue-700 font-semibold flex items-center gap-2">
                           <FileTextOutlined className="text-blue-500" />
                           {formatDateTime(booking.paymentDate)}
@@ -203,8 +258,12 @@ const BookingInformation = () => {
                       <div className="grid grid-cols-2 gap-x-8 gap-y-3">
                         {/* Original Price */}
                         <div className="bg-blue-50 p-2 rounded-lg">
-                          <p className="text-gray-600 text-sm">Original Price</p>
-                          <p className="font-semibold text-lg text-blue-700">${booking.totalAmount}</p>
+                          <p className="text-gray-600 text-sm">
+                            Original Price
+                          </p>
+                          <p className="font-semibold text-lg text-blue-700">
+                            ${booking.totalAmount}
+                          </p>
                         </div>
 
                         {/* Discount */}
@@ -218,14 +277,18 @@ const BookingInformation = () => {
                         {/* VAT Rate */}
                         <div className="bg-purple-50 p-2 rounded-lg border-t">
                           <div className="flex items-center gap-2">
-                            <p className="text-gray-600 text-sm pb-1">VAT percent</p>
+                            <p className="text-gray-600 text-sm pb-1">
+                              VAT percent
+                            </p>
                           </div>
                           <Tag color="purple">{booking.vat * 100}%</Tag>
                         </div>
 
                         {/* Final Total */}
                         <div className="bg-indigo-50 p-2 rounded-lg border-t">
-                          <p className="text-gray-600 text-sm">Total (Inc. VAT)</p>
+                          <p className="text-gray-600 text-sm">
+                            Total (Inc. VAT)
+                          </p>
                           <p className="font-bold text-lg text-indigo-600">
                             ${booking.totalAmountWithVAT}
                           </p>
@@ -237,13 +300,21 @@ const BookingInformation = () => {
                     <div className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
                       <div>
                         <p className="text-gray-500 text-sm mb-1">Status</p>
-                        <Tag color={getPaymentStatusColor(booking.paymentStatus)} className="text-sm">
+                        <Tag
+                          color={getPaymentStatusColor(booking.paymentStatus)}
+                          className="text-sm"
+                        >
                           {booking.paymentStatus.toUpperCase()}
                         </Tag>
                       </div>
                       <div>
-                        <p className="text-gray-500 text-sm mb-1">Payment Method</p>
-                        <Tag color={getPaymentMethodColor(booking.paymentMethod)} className="text-sm">
+                        <p className="text-gray-500 text-sm mb-1">
+                          Payment Method
+                        </p>
+                        <Tag
+                          color={getPaymentMethodColor(booking.paymentMethod)}
+                          className="text-sm"
+                        >
                           {booking.paymentMethod}
                         </Tag>
                       </div>
@@ -263,15 +334,21 @@ const BookingInformation = () => {
                       <div className="text-sm bg-white p-3 rounded-lg shadow-sm">
                         <div className="flex justify-between mb-2 text-gray-600">
                           <span>Subtotal:</span>
-                          <span className="font-medium">${booking.totalAmount}</span>
+                          <span className="font-medium">
+                            ${booking.totalAmount}
+                          </span>
                         </div>
                         <div className="flex justify-between mb-2 text-gray-600">
                           <span>VAT:</span>
-                          <span className="font-medium text-purple-600">${booking.vatAmount}</span>
+                          <span className="font-medium text-purple-600">
+                            ${booking.vatAmount}
+                          </span>
                         </div>
                         <div className="flex justify-between text-gray-600">
                           <span>Discount:</span>
-                          <span className="font-medium text-green-600">- ${booking.discountAmount}</span>
+                          <span className="font-medium text-green-600">
+                            - ${booking.discountAmount}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -308,6 +385,16 @@ const BookingInformation = () => {
                           />
                         </Tooltip>
                       )}
+                      {booking.paymentStatus === "complete" && (
+                        <Tooltip title="Give Feedback">
+                          <Button
+                            type="primary"
+                            onClick={() => handleFeedbackClick(booking)}
+                            className="hover:!bg-blue-600 hover:!text-white flex items-center justify-center"
+                            icon={<MessageOutlined />}
+                          />
+                        </Tooltip>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -324,6 +411,38 @@ const BookingInformation = () => {
           className="text-center mt-8 mb-12"
         />
       </section>
+      <Modal
+        title="Give Your Feedback"
+        visible={isFeedbackModalVisible}
+        onOk={handleSubmitFeedback}
+        onCancel={() => {
+          setIsFeedbackModalVisible(false);
+          setFeedbackRating(0);
+          setFeedbackContent("");
+        }}
+        okText="Submit Feedback"
+        cancelText="Cancel"
+      >
+        <div className="space-y-4">
+          <div>
+            <p className="mb-2 text-gray-700">Rate your experience:</p>
+            <Rate
+              value={feedbackRating}
+              onChange={setFeedbackRating}
+              className="text-yellow-500"
+            />
+          </div>
+          <div>
+            <p className="mb-2 text-gray-700">Your feedback:</p>
+            <Input.TextArea
+              value={feedbackContent}
+              onChange={(e) => setFeedbackContent(e.target.value)}
+              placeholder="Please share your experience..."
+              rows={4}
+            />
+          </div>
+        </div>
+      </Modal>
       <ToastContainer />
     </div>
   );
