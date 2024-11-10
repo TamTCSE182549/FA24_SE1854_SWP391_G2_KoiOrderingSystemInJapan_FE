@@ -78,30 +78,29 @@ const TourDetail = () => {
     navigate(-1); // Di chuyển về trang trước đó
   };
 
-  const handleBooking = async (e) => {
-    e.preventDefault();
+  const handleBooking = async (tour) => {
 
-    // if (!token) {
-    //   setMessage("Token not found or invalid. Please log in.");
-    //   return;
-    // }
-
+    // Kiểm tra nếu người dùng chưa đăng nhập
     if (!token) {
-      toast.dismiss();
-      toast.error("Token not found or invalid. Please log in."); // Hiển thị thông báo lỗi
+      toast.error("Bạn cần đăng nhập để đặt chỗ.");
       return;
     }
 
-    // Kiểm tra số lượng khách phải hợp lệ
-    if (participants <= 0) {
-      toast.dismiss();
-      toast.warning("Number of guests must be greater than 0");
+    // Kiểm tra điều kiện số lượng người tham gia
+    if (Number(participants) <= 0) {
+      toast.warning("Số lượng người tham gia phải lớn hơn 0.");
       return;
     }
-    
-    if (participants > tour.remaining) {
-      toast.dismiss();
-      toast.warning(`Maximum number of participants is ${tour.remaining}`);
+    if (Number(participants) > Number(tour.remaining)) {
+      toast.warning(
+        `Số lượng người tham gia không được vượt quá ${tour.remaining}.`
+      );
+      return;
+    }
+
+    // Kiểm tra nếu người dùng đã có booking chưa hoàn thành
+    if (Object.keys(bookings).length > 0) {
+      toast.warn("Bạn có đặt chỗ chưa hoàn thành. Vui lòng kiểm tra lại!");
       return;
     }
 
@@ -113,9 +112,8 @@ const TourDetail = () => {
     };
 
     try {
-      if (participants <= tour.remaining) {
+      if (Number(participants) <= Number(tour.remaining)) {
         if (Object.keys(bookings).length > 0) {
-          toast.dismiss();
           toast.warn(
             "You have booking not complete. Please check your booking!"
           );
@@ -135,7 +133,6 @@ const TourDetail = () => {
         // NotificationManager.success("Booking successful!", "Success", 5000);
         navigate("/tour", { state: { toastMessage: "Booking successful!" } });
       } else {
-        toast.dismiss();
         toast.warning(
           "Participants must be less than or equal remaning of tour AND must be greater than 0"
         );
@@ -143,18 +140,18 @@ const TourDetail = () => {
     } catch (error) {
       if (error.response) {
         console.error("Error response:", error.response.data);
-        toast.dismiss();
+
         toast.error(
           error.response.data.message ||
             "Failed to book the trip. Please try again."
         ); // Hiển thị thông báo lỗi
       } else if (error.request) {
         console.error("Error request:", error.request);
-        toast.dismiss();
+
         toast.error("No response from server. Please check your connection.");
       } else {
         console.error("Error message:", error.message);
-        toast.dismiss();
+
         toast.error("An unexpected error occurred. Please try again.");
       }
     } finally {
@@ -181,7 +178,9 @@ const TourDetail = () => {
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent">
             <div className="absolute bottom-8 left-8">
-              <h1 className="text-5xl font-bold text-white mb-4">{tour.tourName}</h1>
+              <h1 className="text-5xl font-bold text-white mb-4">
+                {tour.tourName}
+              </h1>
               <div className="flex items-center space-x-4 text-white">
                 <FaPlane className="text-2xl" />
                 <span className="text-lg">Premium Tour Experience</span>
@@ -195,7 +194,9 @@ const TourDetail = () => {
           {/* Tour Information */}
           <div className="lg:col-span-2 space-y-8">
             <div className="bg-gray-50 p-6 rounded-xl">
-              <h2 className="text-2xl font-semibold text-gray-800 mb-4">Tour Details</h2>
+              <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+                Tour Details
+              </h2>
               <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <p className="text-gray-600">Start Time</p>
@@ -211,18 +212,26 @@ const TourDetail = () => {
                 </div>
                 <div className="space-y-2">
                   <p className="text-gray-600">Max Participants</p>
-                  <p className="text-lg text-green-600 font-medium">{tour.maxParticipants}</p>
+                  <p className="text-lg text-green-600 font-medium">
+                    {tour.maxParticipants}
+                  </p>
                 </div>
                 <div className="space-y-2">
                   <p className="text-gray-600">Remaining Spots</p>
-                  <p className="text-lg font-medium text-green-600">{tour.remaining}</p>
+                  <p className="text-lg font-medium text-green-600">
+                    {tour.remaining}
+                  </p>
                 </div>
               </div>
             </div>
 
             <div className="bg-gray-50 p-6 rounded-xl">
-              <h2 className="text-2xl font-semibold text-gray-800 mb-4">Description</h2>
-              <p className="text-gray-700 leading-relaxed">{tour.description}</p>
+              <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+                Description
+              </h2>
+              <p className="text-gray-700 leading-relaxed">
+                {tour.description}
+              </p>
             </div>
 
             {/* Image Gallery */}
@@ -244,27 +253,18 @@ const TourDetail = () => {
           {/* Booking Section */}
           <div className="lg:col-span-1">
             <div className="sticky top-8 bg-gray-50 p-6 rounded-xl">
-              <h2 className="text-2xl font-semibold text-gray-800 mb-6">Book This Tour</h2>
-              
+              <h2 className="text-2xl font-semibold text-gray-800 mb-6">
+                Book This Tour
+              </h2>
+
               <div className="space-y-6">
                 <div>
-                  <label className="block text-gray-700 mb-2">Number of Guests</label>
+                  <label className="block text-gray-700 mb-2">
+                    Number of Guests
+                  </label>
                   <InputNumber
                     placeholder="Number of Guests"
                     onChange={(value) => {
-                      // Kiểm tra giá trị bằng 0
-                      if (value === 0) {
-                        toast.dismiss();
-                        toast.warning("Number of guests must be greater than 0");
-                        return;
-                      }
-                      // Kiểm tra giá trị vượt quá remaining
-                      if (value > tour.remaining) {
-                        toast.dismiss();
-                        toast.warning(`Maximum number of participants is ${tour.remaining}`);
-                        return;
-                      }
-                      // Chỉ set giá trị khi nó hợp lệ
                       setParticipants(value);
                     }}
                     className="w-full !rounded-xl"
@@ -272,9 +272,15 @@ const TourDetail = () => {
                     controls={false}
                     onKeyDown={(e) => {
                       // Cho phép: số (0-9), backspace, delete, arrow keys, tab
-                      const allowedKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'];
+                      const allowedKeys = [
+                        "Backspace",
+                        "Delete",
+                        "ArrowLeft",
+                        "ArrowRight",
+                        "Tab",
+                      ];
                       const isNumber = /^[0-9]$/.test(e.key);
-                      
+
                       if (!isNumber && !allowedKeys.includes(e.key)) {
                         e.preventDefault();
                         toast.dismiss();
@@ -283,17 +289,19 @@ const TourDetail = () => {
                     }}
                     parser={(value) => {
                       // Chỉ giữ lại số
-                      return value.replace(/[^\d]/g, '');
+                      return value.replace(/[^\d]/g, "");
                     }}
                     formatter={(value) => {
                       // Định dạng hiển thị chỉ số
-                      return `${value}`.replace(/[^\d]/g, '');
+                      return `${value}`.replace(/[^\d]/g, "");
                     }}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-gray-700 mb-2">Payment Method</label>
+                  <label className="block text-gray-700 mb-2">
+                    Payment Method
+                  </label>
                   <Select
                     value={paymentMethod}
                     onChange={(value) => setPaymentMethod(value)}
@@ -308,7 +316,7 @@ const TourDetail = () => {
 
                 <div className="space-y-4">
                   <button
-                    onClick={handleBooking}
+                    onClick={() => handleBooking(tour)}
                     className="w-full bg-blue-600 text-green py-3 rounded-lg font-medium hover:bg-blue-700 transition duration-300"
                   >
                     Book Now
