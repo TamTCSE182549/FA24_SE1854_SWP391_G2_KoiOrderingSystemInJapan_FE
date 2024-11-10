@@ -84,11 +84,12 @@ const Tour = () => {
 
   const handleSubmit = async (e, page = 0) => {
     e?.preventDefault(); // Thêm optional chaining vì có thể không có event
+    console.log(farm, koi, minPrice, maxPrice, startDate, endDate);
     const findTourRequest = {
       farmId: farm || null,
       koiId: koi || null,
-      minPrice: minPrice > 0 ? minPrice : null,
-      maxPrice: maxPrice > 0 ? maxPrice : null,
+      minPrice: minPrice === "" ? null : minPrice,
+      maxPrice: maxPrice === "" ? null : maxPrice,
       startDate: startDate || null,
       endDate: endDate || null,
     };
@@ -100,7 +101,7 @@ const Tour = () => {
       return;
     }
 
-    if (minPrice > 0 && (maxPrice == null || maxPrice <= minPrice)) {
+    if (minPrice > 0 && maxPrice != null && maxPrice < minPrice) {
       toast.warn("Max Price must be larger than Min Price");
       return;
     }
@@ -356,16 +357,14 @@ const Tour = () => {
                 <div className="flex items-center gap-2">
                   <InputNumber
                     placeholder="Min"
-                    onChange={(value) => {
-                      // Chỉ cho phép số và dấu chấm thập phân
-                      if (value && /^[0-9]*\.?[0-9]*$/.test(value.toString())) {
-                        setMinPrice(value);
-                      }
-                    }}
+                    value={minPrice}
+                    onChange={(value) => setMinPrice(value)}
                     className="w-full !rounded-xl"
                     size="large"
                     prefix="$"
                     controls={false}
+                    min={0}
+                    allowEmpty={true}
                     onKeyDown={(e) => {
                       // Ngăn chặn nhập ký tự đặc biệt
                       const specialChars = /[!@#$%^&*()_+\-=\[\]{};':"\\|,<>\/?]+/;
@@ -377,16 +376,14 @@ const Tour = () => {
                   <span className="text-gray-400">-</span>
                   <InputNumber
                     placeholder="Max"
-                    onChange={(value) => {
-                      // Chỉ cho phép số và dấu chấm thập phân
-                      if (value && /^[0-9]*\.?[0-9]*$/.test(value.toString())) {
-                        setMaxPrice(value);
-                      }
-                    }}
+                    value={maxPrice}
+                    onChange={(value) => setMaxPrice(value)}
                     className="w-full !rounded-xl"
                     size="large"
                     prefix="$"
                     controls={false}
+                    min={0}
+                    allowEmpty={true}
                     onKeyDown={(e) => {
                       // Ngăn chặn nhập ký tự đặc biệt
                       const specialChars = /[!@#$%^&*()_+\-=\[\]{};':"\\|,<>\/?]+/;
