@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { DatePicker, InputNumber, Select } from "antd";
+import { DatePicker, InputNumber, Select, Card, Typography, Descriptions, Tag, Divider } from "antd";
 import "antd/dist/reset.css"; // Import Ant Design CSS if not already done
 import { FaPlane } from "react-icons/fa"; // Import plane icon from react-icons
 import { getTourById } from "../../services/tourservice"; // Import the API function
@@ -13,6 +13,7 @@ import { useParams, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify"; // Import ToastContainer và toast
 import "react-toastify/dist/ReactToastify.css"; // Import CSS cho Toast
+import { GlobalOutlined, PhoneOutlined, EnvironmentOutlined, ClockCircleOutlined, InfoCircleOutlined, RightOutlined } from '@ant-design/icons';
 
 const { Option } = Select; // Ensure Option is imported
 
@@ -32,6 +33,7 @@ const TourDetail = () => {
   const [participants, setParticipants] = useState(0);
   const [participantInfo, setParticipantInfo] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [farmDetails, setFarmDetails] = useState([]);
 
   useEffect(() => {
     const fetchBookingData = async () => {
@@ -56,6 +58,29 @@ const TourDetail = () => {
 
     fetchBookingData();
   }, [id]); // Use id in the dependency array
+
+  useEffect(() => {
+    const fetchFarmDetails = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:8080/TourDetail/tour/${tour.id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        setFarmDetails(response.data);
+      } catch (error) {
+        console.error("Error fetching farm details:", error);
+      }
+    };
+
+    if (tour?.id) {
+      fetchFarmDetails();
+    }
+  }, [id, tour?.id, token]);
 
   if (loading) {
     return <div>Loading...</div>;
@@ -226,6 +251,10 @@ const TourDetail = () => {
     return !regex.test(str);
   };
 
+  const handleViewFarmDetail = (farmId) => {
+    navigate(`/farmdetail/${farmId}`);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       {/* Loading Overlay */}
@@ -312,6 +341,123 @@ const TourDetail = () => {
                     alt={`Tour Image ${item.id}`}
                     className="rounded-lg h-48 w-full object-cover hover:opacity-90 transition duration-300"
                   />
+                ))}
+              </div>
+            </div>
+
+            {/* Farm Details Section */}
+            <div className="bg-white p-8 rounded-2xl shadow-lg">
+              <div className="flex items-center justify-between mb-8">
+                <div>
+                  <h2 className="text-3xl font-bold text-gray-800">
+                    Included Destinations
+                  </h2>
+                  <p className="text-gray-500 mt-2">Explore the unique farms and locations included in this tour</p>
+                </div>
+                <Tag color="blue" className="text-base px-4 py-1">
+                  {farmDetails.length} Locations
+                </Tag>
+              </div>
+
+              <div className="grid grid-cols-1 gap-8">
+                {farmDetails.map((farm, index) => (
+                  <Card 
+                    key={index}
+                    className="overflow-hidden hover:shadow-xl transition-all duration-300 border-none"
+                    bodyStyle={{ padding: 0 }}
+                  >
+                    <div className="grid grid-cols-1 lg:grid-cols-5 h-full">
+                      {/* Left Section - Main Info */}
+                      <div className="lg:col-span-3 p-8 bg-white">
+                        <div className="flex items-start justify-between mb-4">
+                          <div>
+                            <Typography.Title level={3} className="!mb-2">
+                              {farm.farmName}
+                            </Typography.Title>
+                            <div className="flex items-center gap-2 text-gray-500">
+                              <ClockCircleOutlined />
+                              <span>Included in tour schedule</span>
+                            </div>
+                          </div>
+                          <Tag color="green" className="text-sm">
+                            Featured Location
+                          </Tag>
+                        </div>
+
+                        <Divider className="my-6" />
+
+                        <div className="space-y-4">
+                          {farm.address && (
+                            <div className="flex items-center gap-3 group">
+                              <div className="p-2 rounded-full bg-blue-50 group-hover:bg-blue-100 transition-colors">
+                                <EnvironmentOutlined className="text-blue-600 text-lg" />
+                              </div>
+                              <Typography.Text className="text-gray-600">
+                                {farm.address}
+                              </Typography.Text>
+                            </div>
+                          )}
+                          
+                          {farm.website && (
+                            <div className="flex items-center gap-3 group">
+                              <div className="p-2 rounded-full bg-green-50 group-hover:bg-green-100 transition-colors">
+                                <GlobalOutlined className="text-green-600 text-lg" />
+                              </div>
+                              <Typography.Link 
+                                href={farm.website} 
+                                target="_blank"
+                                className="text-gray-600 hover:text-blue-600"
+                              >
+                                {farm.website}
+                              </Typography.Link>
+                            </div>
+                          )}
+                          
+                          {farm.phone && (
+                            <div className="flex items-center gap-3 group">
+                              <div className="p-2 rounded-full bg-purple-50 group-hover:bg-purple-100 transition-colors">
+                                <PhoneOutlined className="text-purple-600 text-lg" />
+                              </div>
+                              <Typography.Text className="text-gray-600">
+                                {farm.phone}
+                              </Typography.Text>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Right Section - Description */}
+                      <div className="lg:col-span-2 p-8 bg-gray-50">
+                        <div className="h-full flex flex-col justify-between">
+                          <div>
+                            <div className="flex items-center gap-2 mb-4">
+                              <InfoCircleOutlined className="text-blue-600" />
+                              <Typography.Text strong className="text-gray-700">
+                                About this location
+                              </Typography.Text>
+                            </div>
+                            <Typography.Paragraph 
+                              className="text-gray-600 leading-relaxed"
+                              ellipsis={{ rows: 4, expandable: true, symbol: 'Read more' }}
+                            >
+                              {farm.description}
+                            </Typography.Paragraph>
+                          </div>
+                          
+                          {/* Add View Details Button */}
+                          <div className="mt-6 pt-4 border-t border-gray-200">
+                            <button
+                              onClick={() => handleViewFarmDetail(farm.id)}
+                              className="group w-full flex items-center justify-center gap-2 bg-white hover:bg-blue-50 text-blue-600 font-medium py-2 px-4 rounded-lg border-2 border-blue-100 transition-all duration-300"
+                            >
+                              View Farm Details
+                              <RightOutlined className="group-hover:translate-x-1 transition-transform duration-300" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
                 ))}
               </div>
             </div>
