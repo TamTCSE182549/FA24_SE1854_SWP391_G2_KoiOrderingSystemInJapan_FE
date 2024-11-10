@@ -164,7 +164,7 @@ const BookingTourDetail = () => {
               {/* Tour Details Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* Time Information */}
-                <div className="space-y-6">
+                <div className="space-y- flex betwee">
                   <div className="flex items-start space-x-4">
                     <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-indigo-400 to-purple-400 rounded-full flex items-center justify-center transform hover:scale-105 transition-transform duration-300">
                       <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -190,21 +190,6 @@ const BookingTourDetail = () => {
                       <p className="text-indigo-700">
                         {new Date(tourDetails.endTime).toLocaleString()}
                       </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Additional Information */}
-                <div className="space-y-6">
-                  <div className="flex items-start space-x-4">
-                    <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-pink-400 to-red-400 rounded-full flex items-center justify-center transform hover:scale-105 transition-transform duration-300">
-                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-                      </svg>
-                    </div>
-                    <div>
-                      <p className="font-medium text-indigo-900 mb-1">Price</p>
-                      <p className="text-indigo-700">${tourDetails.unitPrice}</p>
                     </div>
                   </div>
                 </div>
