@@ -1,31 +1,30 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { Table, Tag, Button, Spin, Space, Modal, Input, Select } from "antd";
 import { useNavigate } from "react-router-dom";
-import { ToastContainer, toast } from "react-toastify";
 import { useCookies } from "react-cookie";
-import { Table, Modal, Button, Tag, Space, Select, Input } from "antd";
-import {
-  DollarOutlined,
-  CreditCardOutlined,
-  BankOutlined,
-  SaveOutlined,
-  InfoCircleOutlined,
-} from "@ant-design/icons";
+import { ToastContainer, toast } from "react-toastify";
+import { ArrowLeftOutlined, DollarOutlined, InfoCircleOutlined, SaveOutlined } from '@ant-design/icons';
 
-const BookingListForStaff = () => {
-  const [cookies] = useCookies(["token"]);
-  const token = cookies.token;
-  const [bookingList, setBookingList] = useState([]);
-  const [selectedBooking, setSelectedBooking] = useState(null);
+const AcceptedTourList = () => {
+  const [acceptedTours, setAcceptedTours] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const navigate = useNavigate();
+  const [selectedBooking, setSelectedBooking] = useState(null); 
   const [filteredStatus, setFilteredStatus] = useState("all");
-  const [editedBooking, setEditedBooking] = useState(null);
   const [isQuotationModalOpen, setIsQuotationModalOpen] = useState(false);
   const [selectedBookingForQuotation, setSelectedBookingForQuotation] = useState(null);
   const [quotationAmount, setQuotationAmount] = useState("");
+  const [editedBooking, setEditedBooking] = useState(null);
   const [quotationDescription, setQuotationDescription] = useState("Quotation being in Process...");
   const [amountError, setAmountError] = useState("");
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const [cookies] = useCookies(["token"]);
+  const token = cookies.token;
+
+  const handleGoBack = () => {
+    navigate(-1);
+  };
 
   const statusOptions = [
     { value: "all", label: "All Status" },
@@ -35,41 +34,12 @@ const BookingListForStaff = () => {
     { value: "cancelled", label: "Cancelled" },
   ];
 
-  const filteredBookings = bookingList.filter((booking) =>
+  const filteredBookings = acceptedTours.filter((booking) =>
     filteredStatus === "all"
       ? true
       : booking.paymentStatus.toLowerCase() === filteredStatus
   );
 
-  const formatDateTime = (dateTimeString) => {
-    const date = new Date(dateTimeString);
-    return date.toLocaleString();
-  };
-
-  const bookingListResponse = async () => {
-    try {
-      const response = await axios.get(
-        "http://localhost:8080/bookings/BookingForTour",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (response.status === 200) {
-        const sortedBookings = [...response.data].sort((a, b) => b.id - a.id);
-        setBookingList(sortedBookings);
-      }
-    } catch (error) {
-      console.error("Error fetching Booking data:", error);
-      toast.error("Failed to fetch Booking data.");
-    }
-  };
-
-  useEffect(() => {
-    bookingListResponse();
-  }, []);
 
   const handleViewDetailBooking = (booking) => {
     setSelectedBooking(booking);
@@ -91,101 +61,6 @@ const BookingListForStaff = () => {
   const handleCreateBookingKoi = (bookingId) => {
     navigate(`/booking-koi/${bookingId}`);
   };
-
-  // Mỗi booking sẽ có nút Create Checkin
-  // Nút sẽ bị vô hiệu hóa nếu booking chưa được thanh toán
-  // Khi nhấn vào nút, người dùng sẽ được chuyển đến trang CreateCheckin với bookingId tương ứng
-  // CreateCheckin component sẽ nhận bookingId từ URL params và sử dụng nó để tạo checkin mới
-
-  const columns = [
-    {
-      title: "Booking ID",
-      dataIndex: "id",
-      key: "id",
-    },
-    {
-      title: "Customer Name",
-      dataIndex: "nameCus",
-      key: "nameCus",
-    },
-    {
-      title: "Total Amount",
-      dataIndex: "totalAmount",
-      key: "totalAmount",
-      render: (amount) => `$${amount}`,
-    },
-    {
-      title: "Payment Status",
-      dataIndex: "paymentStatus",
-      key: "paymentStatus",
-      render: (status) => (
-        <Tag
-          color={
-            status === "pending"
-              ? "gold"
-              : status === "complete"
-              ? "green"
-              : status === "processing"
-              ? "blue" // Changed to blue for processing
-              : "red"
-          }
-        >
-          {status}
-        </Tag>
-      ),
-    },
-    {
-      title: "Actions",
-      key: "actions",
-      render: (_, record) => (
-        <Space>
-          <Button
-            type="primary"
-            onClick={() => handleViewDetailBooking(record)}
-          >
-            View Details
-          </Button>
-
-          {record.paymentStatus.toLowerCase() === "pending" && (
-            <Button 
-              onClick={() => handleCreateQuotation(record)}
-            >
-              Create Quotation
-            </Button>
-          )}
-
-          {record.paymentStatus.toLowerCase() === "pending" && record.updatedBy === null && (
-            <Button 
-              type="primary"
-              onClick={() => handleAcceptBooking(record.id)}
-              style={{ backgroundColor: "#10B981" }}
-            >
-              Accept
-            </Button>
-          )}
-
-          {record.paymentStatus.toLowerCase() === "complete" && (
-            <>
-              <Button 
-                type="default"
-                onClick={() => handleCreateCheckin(record.id)}
-              >
-                Create Checkin
-              </Button>
-
-              <Button
-                type="primary"
-                onClick={() => handleCreateBookingKoi(record.id)}
-                style={{ backgroundColor: "#10B981" }}
-              >
-                Create Koi Booking
-              </Button>
-            </>
-          )}
-        </Space>
-      ),
-    },
-  ];
 
   const handleFieldChange = (field, value) => {
     if (field === "vat") {
@@ -276,28 +151,6 @@ const BookingListForStaff = () => {
     }
   };
 
-  // When modal opens, initialize editedBooking with selected booking values
-  useEffect(() => {
-    if (selectedBooking) {
-      setEditedBooking({
-        vat: (selectedBooking.vat * 100).toString(),
-        paymentMethod: selectedBooking.paymentMethod,
-        discountAmount: selectedBooking.discountAmount,
-      });
-    }
-  }, [selectedBooking]);
-
-
-  // Thêm styles cho input disabled
-  const disabledInputStyle = {
-    backgroundColor: "white",
-    color: "black",
-    borderColor: "#d9d9d9",
-    cursor: "not-allowed",
-    opacity: 0.8,
-  };
-
-  // Add this helper function to get payment method icon and color
   const getPaymentMethodInfo = (method) => {
     switch (method?.toUpperCase()) {
       case 'VISA':
@@ -377,6 +230,121 @@ const BookingListForStaff = () => {
     }
   };
 
+  const formatDateTime = (dateTimeString) => {
+    const date = new Date(dateTimeString);
+    return date.toLocaleString();
+  };
+
+  // Fetch accepted tours
+  const fetchAcceptedTours = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:8080/bookings/BookingForTourAccepted", // Điều chỉnh endpoint theo API của bạn
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      setAcceptedTours(response.data);
+      setLoading(false);
+    } catch (error) {
+      toast.error("Failed to fetch accepted tours");
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAcceptedTours();
+  }, []);
+
+  const columns = [
+    {
+      title: "Booking ID",
+      dataIndex: "id",
+      key: "id",
+    },
+    {
+      title: "Customer Name",
+      dataIndex: "nameCus",
+      key: "nameCus",
+    },
+    {
+      title: "Payment Status",
+      dataIndex: "paymentStatus",
+      key: "paymentStatus",
+      render: (status) => (
+        <Tag
+          color={
+            status === "pending"
+              ? "gold"
+              : status === "complete"
+              ? "green"
+              : status === "processing"
+              ? "blue" // Changed to blue for processing
+              : "red"
+          }
+        >
+          {status}
+        </Tag>
+      ),
+    },
+    {
+      title: "Total Amount - not contain VAT",
+      dataIndex: "totalAmount",
+      key: "totalAmount",
+      align: "right",
+      render: (amount) => (
+        <span className="font-semibold text-green-600">
+          ${amount.toFixed(2)}
+        </span>
+      ),
+    },
+    {
+      title: "Actions",
+      key: "actions",
+      render: (_, record) => (
+        <Space>
+          <Button
+            type="primary"
+            onClick={() => handleViewDetailBooking(record)}
+          >
+            View Details
+          </Button>
+
+          {record.paymentStatus.toLowerCase() === "pending" && (
+            <Button 
+              onClick={() => handleCreateQuotation(record)}
+            >
+              Create Quotation
+            </Button>
+          )}
+
+          {record.paymentStatus.toLowerCase() === "complete" && (
+            <>
+              <Button 
+                type="default"
+                onClick={() => handleCreateCheckin(record.id)}
+              >
+                Create Checkin
+              </Button>
+
+              <Button
+                type="primary"
+                onClick={() => handleCreateBookingKoi(record.id)}
+                style={{ backgroundColor: "#10B981" }}
+              >
+                Create Koi Booking
+              </Button>
+            </>
+          )}
+        </Space>
+      ),
+    },
+  ];
+
+  // Add this function to handle the accept action
   const handleAcceptBooking = async (bookingId) => {
     try {
       const response = await axios.get(
@@ -389,8 +357,14 @@ const BookingListForStaff = () => {
       );
 
       if (response.status === 200) {
+        const sortedBookings = [...response.data].sort((a, b) => b.id - a.id);
+        setAcceptedTours(sortedBookings);
+      }
+
+      if (response.status === 200) {
         toast.success("Booking accepted successfully!");
-        bookingListResponse(); // Refresh the booking list
+        // Refresh the booking list
+        bookingListResponse();
       }
     } catch (error) {
       console.error("Error accepting booking:", error);
@@ -398,11 +372,32 @@ const BookingListForStaff = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Spin size="large" />
+      </div>
+    );
+  }
+
   return (
-    <div className="p-6" style={{ marginTop: "100px" }}>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Booking List</h1>
-        <Space>
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 pt-40 pb-12 px-4 sm:px-6 lg:px-8">
+      {/* Back Navigation */}
+      <div className="max-w-7xl mx-auto mb-8">
+        <div
+          onClick={handleGoBack}
+          className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 cursor-pointer transition-colors duration-200"
+        >
+          <ArrowLeftOutlined />
+          <span className="text-sm font-medium">Back</span>
+        </div>
+      </div>
+
+      {/* Header Section */}
+      <div className="max-w-7xl mx-auto mb-6">
+        <div className="flex justify-between items-center">
+          <h1 className="text-2xl font-bold text-gray-800">Accepted Tours</h1>
+          <Space>
           <div style={{ marginRight: "16px" }}>
             <span style={{ marginRight: "8px" }}>Payment Status:</span>
             <Select
@@ -420,17 +415,23 @@ const BookingListForStaff = () => {
             onClick={() => navigate("/staff/checkin-service")}
           >
             View Check-ins
-          </Button>
-        </Space>
+            </Button>
+          </Space>
+        </div>
       </div>
 
-      <Table
-        columns={columns}
-        dataSource={filteredBookings}
-        rowKey="id"
-        pagination={{ pageSize: 10 }}
-      />
-
+      {/* Table Section */}
+      <div className="max-w-7xl mx-auto">
+        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+          <Table
+            columns={columns}
+            dataSource={filteredBookings}
+            rowKey="id"
+            pagination={{ pageSize: 10 }}
+            loading={loading}
+          />
+        </div>
+      </div>
       <Modal
         title={
           <div className="flex justify-between items-center border-b pb-3">
@@ -698,10 +699,9 @@ const BookingListForStaff = () => {
           </div>
         </div>
       </Modal>
-
       <ToastContainer />
     </div>
   );
 };
 
-export default BookingListForStaff;
+export default AcceptedTourList; 

@@ -356,8 +356,6 @@ const Tour = () => {
                 <div className="flex items-center gap-2">
                   <InputNumber
                     placeholder="Min"
-                    min={0}
-                    value={minPrice}
                     onChange={(value) => {
                       // Chỉ cho phép số và dấu chấm thập phân
                       if (value && /^[0-9]*\.?[0-9]*$/.test(value.toString())) {
@@ -379,8 +377,6 @@ const Tour = () => {
                   <span className="text-gray-400">-</span>
                   <InputNumber
                     placeholder="Max"
-                    min={0}
-                    value={maxPrice}
                     onChange={(value) => {
                       // Chỉ cho phép số và dấu chấm thập phân
                       if (value && /^[0-9]*\.?[0-9]*$/.test(value.toString())) {
