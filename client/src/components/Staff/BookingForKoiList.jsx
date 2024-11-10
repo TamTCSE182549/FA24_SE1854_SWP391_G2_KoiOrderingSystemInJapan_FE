@@ -25,7 +25,7 @@ const BookingForKoiList = () => {
     const fetchBookings = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:8080/bookings/BookingForKoi`,
+          `http://localhost:8080/bookings/koi/list/staff`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -138,6 +138,22 @@ const BookingForKoiList = () => {
       ),
     },
     {
+      title: "Booking Date",
+      dataIndex: "bookingDate",
+      key: "bookingDate",
+      render: (date) => (
+        <span style={{ fontSize: "1rem" }}>
+          {new Date(date).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          })}
+        </span>
+      ),
+    },
+    {
       title: "Customer",
       dataIndex: "nameCus",
       key: "nameCus",
@@ -159,82 +175,9 @@ const BookingForKoiList = () => {
       ),
     },
     {
-      title: 'Deposit Status',
-      key: 'depositStatus',
-      render: (_, record) => {
-        console.log(`Rendering deposit status for booking ${record.id}:`, {
-          paymentStatus: record.paymentStatus,
-          depositInfo: depositsInfo[record.id]
-        });
-        
-        if (record.paymentStatus === 'cancelled') {
-          return <Tag color="default">N/A</Tag>;
-        }
-        
-        if (record.paymentStatus === 'pending') {
-          return (
-            <div className="flex items-center space-x-2">
-              <span className="w-2 h-2 rounded-full bg-gray-400" />
-              <Tag 
-                color="default"
-                style={{ fontSize: '0.9rem', padding: '4px 12px' }}
-              >
-                NOT CREATED
-              </Tag>
-            </div>
-          );
-        }
-        
-        const hasDeposit = depositsInfo[record.id] !== null;
-        
-        if (record.paymentStatus === 'processing') {
-          if (!hasDeposit) {
-            return (
-              <div className="flex items-center space-x-2">
-                <span className="w-2 h-2 rounded-full bg-red-500" />
-                <Tag 
-                  color="error"
-                  style={{ fontSize: '0.9rem', padding: '4px 12px' }}
-                >
-                  NO DEPOSIT
-                </Tag>
-              </div>
-            );
-          } else {
-            return (
-              <div className="flex items-center space-x-2">
-                <span className="w-2 h-2 rounded-full bg-yellow-500" />
-                <Tag 
-                  color="warning"
-                  style={{ fontSize: '0.9rem', padding: '4px 12px' }}
-                >
-                  PENDING APPROVAL
-                </Tag>
-              </div>
-            );
-          }
-        }
-
-        if (record.paymentStatus === 'shipping' || record.paymentStatus === 'complete') {
-          return (
-            <div className="flex items-center space-x-2">
-              <span className="w-2 h-2 rounded-full bg-green-500" />
-              <Tag 
-                color="success"
-                style={{ fontSize: '0.9rem', padding: '4px 12px' }}
-              >
-                APPROVED
-              </Tag>
-            </div>
-          );
-        }
-      },
-    },
-    {
       title: 'Status',
       dataIndex: 'paymentStatus',
       key: 'paymentStatus',
-
       render: (status) => {
         return (
           <Tag
@@ -259,44 +202,105 @@ const BookingForKoiList = () => {
       },
     },
     {
+      title: 'Deposit Status',
+      key: 'depositStatus',
+      render: (_, record) => {
+        if (record.paymentStatus === 'cancelled') {
+          return (
+            <Tag color="default" style={{ fontSize: '0.9rem', padding: '4px 12px' }}>
+              CANCELLED
+            </Tag>
+          );
+        }
+
+        if (record.paymentStatus === 'pending') {
+          return (
+            <Tag color="default" style={{ fontSize: '0.9rem', padding: '4px 12px' }}>
+              WAITING
+            </Tag>
+          );
+        }
+
+        const hasDeposit = depositsInfo[record.id] !== null;
+
+        if (record.paymentStatus === 'processing' && !hasDeposit) {
+          return (
+            <Tag color="orange" style={{ fontSize: '0.9rem', padding: '4px 12px' }}>
+              NO DEPOSIT
+            </Tag>
+          );
+        }
+
+        if (record.paymentStatus === 'processing' && hasDeposit) {
+          return (
+            <Tag color="blue" style={{ fontSize: '0.9rem', padding: '4px 12px' }}>
+              PENDING
+            </Tag>
+          );
+        }
+
+        if (record.paymentStatus === 'shipping' || record.paymentStatus === 'complete') {
+          return (
+            <Tag color="green" style={{ fontSize: '0.9rem', padding: '4px 12px' }}>
+              APPROVED
+            </Tag>
+          );
+        }
+      },
+    },
+    {
+      title: "Confirmed Date",
+      dataIndex: "updatedDate",
+      key: "updatedDate",
+      render: (date, record) => (
+        <span style={{ fontSize: "1rem" }}>
+          {record.paymentStatus === 'pending' ? (
+            'Not confirmed yet'
+          ) : (
+            new Date(date).toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            })
+          )}
+        </span>
+      ),
+    },
+    {
       title: "Actions",
       key: "actions",
       align: "right",
       render: (_, record) => (
         <Space>
-          <Button
-            type="default"
-            icon={<EyeOutlined />}
-            onClick={() => handleViewDetail(record.id)}
-            size="large"
-            className="font-medium"
-          >
-            View Details
-          </Button>
+          {record.paymentStatus !== 'cancelled' && (
+            <Button
+              type="default"
+              icon={<CarOutlined />}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleNavigateToDelivery(record.id);
+              }}
+              size="large"
+              className="font-medium"
+            >
+              Delivery
+            </Button>
+          )}
           
           {(record.paymentStatus === 'pending' || record.paymentStatus === 'processing') && (
             <Button
               type="default"
               danger
               icon={<DeleteOutlined />}
-              onClick={() => handleDelete(record.id)}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDelete(record.id);
+              }}
               size="large"
               className="font-medium"
-            >
-              Cancel
-            </Button>
-          )}
-          
-          {record.paymentStatus !== 'cancelled' && (
-            <Button
-              type="default"
-              icon={<CarOutlined />}
-              onClick={() => handleNavigateToDelivery(record.id)}
-              size="large"
-              className="font-medium"
-            >
-              Delivery
-            </Button>
+            />
           )}
         </Space>
       ),
@@ -307,6 +311,11 @@ const BookingForKoiList = () => {
     .custom-table {
       background: white;
       border-radius: 8px;
+      width: 100%;
+    }
+    
+    .custom-table .ant-table {
+      width: 100%;
     }
     
     .custom-table .ant-table-thead > tr > th {
@@ -315,6 +324,7 @@ const BookingForKoiList = () => {
       font-weight: 500;
       font-size: 1rem;
       padding: 16px;
+      white-space: nowrap;
     }
     
     .custom-table .ant-table-tbody > tr > td {
@@ -323,7 +333,7 @@ const BookingForKoiList = () => {
     }
     
     .custom-table .ant-table-tbody > tr:hover > td {
-      background: #fafafa;
+      background: #f5f5f5;
     }
     
     .ant-btn {
@@ -335,7 +345,7 @@ const BookingForKoiList = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 pt-40">
-      <div className="max-w-full px-6 py-8">
+      <div className="px-4 py-8 w-full">
         <ToastContainer />
 
         {/* Header Section */}
@@ -349,7 +359,7 @@ const BookingForKoiList = () => {
         </div>
 
         {/* Stats Card */}
-        <Card className="mb-8">
+        <Card className="mb-8 w-full">
           <Statistic
             title="Total Bookings"
             value={bookings.length}
@@ -381,6 +391,11 @@ const BookingForKoiList = () => {
           bordered
           size="large"
           className="custom-table"
+          scroll={{ x: true }}
+          onRow={(record) => ({
+            onClick: () => handleViewDetail(record.id),
+            style: { cursor: 'pointer' }
+          })}
         />
       </div>
     </div>
