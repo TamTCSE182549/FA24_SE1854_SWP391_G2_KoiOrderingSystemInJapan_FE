@@ -4,7 +4,7 @@ import { Table, Tag, Button, Spin, Space, Modal, Input, Select } from "antd";
 import { useNavigate } from "react-router-dom";
 import { useCookies } from "react-cookie";
 import { ToastContainer, toast } from "react-toastify";
-import { ArrowLeftOutlined, DollarOutlined, InfoCircleOutlined, SaveOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined, DollarOutlined, InfoCircleOutlined, SaveOutlined, CreditCardOutlined, BankOutlined } from '@ant-design/icons';
 
 const AcceptedTourList = () => {
   const [acceptedTours, setAcceptedTours] = useState([]);
