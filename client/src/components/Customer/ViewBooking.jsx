@@ -25,6 +25,10 @@ import {
   UserOutlined,
 } from "@ant-design/icons";
 
+const formatVND = (price) => {
+  return price?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + " VND";
+};
+
 const BookingInformation = () => {
   const [cookies] = useCookies(["token"]);
   const token = cookies.token;
@@ -285,7 +289,7 @@ const BookingInformation = () => {
                             Original Price
                           </p>
                           <p className="font-semibold text-lg text-blue-700">
-                            ${booking.totalAmount}
+                            {formatVND(booking.totalAmount)}
                           </p>
                         </div>
 
@@ -293,7 +297,7 @@ const BookingInformation = () => {
                         <div className="bg-green-50 p-2 rounded-lg">
                           <p className="text-gray-600 text-sm">Discount</p>
                           <p className="font-semibold text-lg text-green-600">
-                            ${booking.discountAmount}
+                            {formatVND(booking.discountAmount)}
                           </p>
                         </div>
 
@@ -313,7 +317,7 @@ const BookingInformation = () => {
                             Total (Inc. VAT)
                           </p>
                           <p className="font-bold text-lg text-indigo-600">
-                            ${booking.totalAmountWithVAT}
+                            {formatVND(booking.totalAmountWithVAT)}
                           </p>
                         </div>
                       </div>
@@ -351,26 +355,26 @@ const BookingInformation = () => {
                       <div className="text-center mb-3">
                         <p className="text-gray-600 text-sm">Total Payment</p>
                         <p className="text-2xl font-bold text-blue-700">
-                          ${booking.totalAmountWithVAT}
+                          {formatVND(booking.totalAmountWithVAT)}
                         </p>
                       </div>
                       <div className="text-sm bg-white p-3 rounded-lg shadow-sm">
                         <div className="flex justify-between mb-2 text-gray-600">
                           <span>Subtotal:</span>
                           <span className="font-medium">
-                            ${booking.totalAmount}
+                            {formatVND(booking.totalAmount)}
                           </span>
                         </div>
                         <div className="flex justify-between mb-2 text-gray-600">
                           <span>VAT:</span>
                           <span className="font-medium text-purple-600">
-                            ${booking.vatAmount}
+                            {formatVND(booking.vatAmount)}
                           </span>
                         </div>
                         <div className="flex justify-between text-gray-600">
                           <span>Discount:</span>
                           <span className="font-medium text-green-600">
-                            - ${booking.discountAmount}
+                            - {formatVND(booking.discountAmount)}
                           </span>
                         </div>
                       </div>

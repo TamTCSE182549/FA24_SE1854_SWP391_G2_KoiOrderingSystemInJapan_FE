@@ -107,19 +107,19 @@ const Navbar = () => {
           <span>Booking Koi</span>
         </Link>
       </Menu.Item>
-      <Menu.Item key="4">
+      {/* <Menu.Item key="4">
         <Link to="/Quotation" className="flex items-center space-x-2">
           <FileTextOutlined className="text-purple-500" />
           <span>Quotations</span>
         </Link>
-      </Menu.Item>
-      <Menu.Item key="5">
+      </Menu.Item> */}
+      <Menu.Item key="4">
         <Link to="/reviews" className="flex items-center space-x-2">
           <StarOutlined className="text-yellow-500" />
           <span>Reviews</span>
         </Link>
       </Menu.Item>
-      <Menu.Item key="6">
+      <Menu.Item key="5">
         <Link to="/ViewCheckin" className="flex items-center space-x-2">
           <CheckCircleOutlined className="text-cyan-500" />
           <span>Check-in</span>
@@ -142,7 +142,7 @@ const Navbar = () => {
         </Menu.Item>
       )}
       <Menu.Divider />
-      <Menu.Item key="7" onClick={handleSignOut} danger>
+      <Menu.Item key="6" onClick={handleSignOut} danger>
         <div className="flex items-center space-x-2 text-red-500">
           <LogoutOutlined />
           <span>Sign out</span>

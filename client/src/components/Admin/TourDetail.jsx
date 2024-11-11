@@ -21,6 +21,10 @@ import moment from "moment"; // Import moment for date manipulation
 const { TextArea } = Input;
 const { Option } = Select;
 
+const formatVND = (price) => {
+  return price?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + " VND";
+};
+
 function TourDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -259,7 +263,7 @@ function TourDetail() {
           <strong>Description:</strong> {tour.description}
         </p>
         <p>
-          <strong>Price:</strong> {tour.unitPrice}
+          <strong>Price:</strong> {formatVND(tour.unitPrice)}
         </p>
         <p>
           <strong>Max Participants:</strong> {tour.maxParticipants}
@@ -333,7 +337,13 @@ function TourDetail() {
             label="Price"
             rules={[{ required: true, message: "Please input the price!" }]}
           >
-            <InputNumber min={0} style={{ width: "100%" }} />
+            <InputNumber
+              min={0}
+              style={{ width: "100%" }}
+              formatter={(value) => value ? `${value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}` : ''}
+              parser={(value) => value?.replace(/\./g, '')}
+              placeholder="Enter price in VND"
+            />
           </Form.Item>
           <Form.Item
             name="maxParticipants"

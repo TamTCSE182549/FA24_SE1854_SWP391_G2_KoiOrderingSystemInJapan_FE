@@ -3,14 +3,19 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import { useCookies } from "react-cookie";
-import { Table, Modal, Button, Tag, Space, Select, Input } from "antd";
+import { Table, Modal, Button, Tag, Space, Select, Input, Tooltip } from "antd";
 import {
   DollarOutlined,
   CreditCardOutlined,
   BankOutlined,
   SaveOutlined,
   InfoCircleOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
+
+const formatVND = (price) => {
+  return price?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + " VND";
+};
 
 const BookingListForStaff = () => {
   const [cookies] = useCookies(["token"]);
@@ -21,6 +26,9 @@ const BookingListForStaff = () => {
   const navigate = useNavigate();
   const [filteredStatus, setFilteredStatus] = useState("all");
   const [editedBooking, setEditedBooking] = useState(null);
+  const [isViewParticipantsModalVisible, setIsViewParticipantsModalVisible] = useState(false);
+  const [currentParticipants, setCurrentParticipants] = useState([]);
+  const [selectedBookingForParticipants, setSelectedBookingForParticipants] = useState(null);
 
   const statusOptions = [
     { value: "all", label: "All Status" },
@@ -71,17 +79,9 @@ const BookingListForStaff = () => {
     setIsModalOpen(true);
   };
 
-  const handleCreateCheckin = (bookingId) => {
-    navigate(`/create-checkin/${bookingId}`); // Updated path with hyphen
-  };
   const handleCreateBookingKoi = (bookingId) => {
     navigate(`/booking-koi/${bookingId}`);
   };
-
-  // Mỗi booking sẽ có nút Create Checkin
-  // Nút sẽ bị vô hiệu hóa nếu booking chưa được thanh toán
-  // Khi nhấn vào nút, người dùng sẽ được chuyển đến trang CreateCheckin với bookingId tương ứng
-  // CreateCheckin component sẽ nhận bookingId từ URL params và sử dụng nó để tạo checkin mới
 
   const columns = [
     {
@@ -98,7 +98,7 @@ const BookingListForStaff = () => {
       title: "Total Amount",
       dataIndex: "totalAmount",
       key: "totalAmount",
-      render: (amount) => `$${amount}`,
+      render: (totalAmount) => formatVND(totalAmount),
     },
     {
       title: "Payment Status",
@@ -132,6 +132,14 @@ const BookingListForStaff = () => {
             View Details
           </Button>
 
+          <Button
+            type="default"
+            onClick={() => handleViewParticipants(record)}
+            icon={<UserOutlined />}
+          >
+            View Participants
+          </Button>
+
           {record.paymentStatus.toLowerCase() === "pending" && record.updatedBy === '' && (
             <div>
               <Button
@@ -145,22 +153,13 @@ const BookingListForStaff = () => {
           )}
 
           {record.paymentStatus.toLowerCase() === "complete" && (
-            <>
-              <Button
-                type="default"
-                onClick={() => handleCreateCheckin(record.id)}
-              >
-                Create Checkin
-              </Button>
-
-              <Button
-                type="primary"
-                onClick={() => handleCreateBookingKoi(record.id)}
-                style={{ backgroundColor: "#10B981" }}
-              >
-                Create Koi Booking
-              </Button>
-            </>
+            <Button
+              type="primary"
+              onClick={() => handleCreateBookingKoi(record.id)}
+              style={{ backgroundColor: "#10B981" }}
+            >
+              Create Koi Booking
+            </Button>
           )}
         </Space>
       ),
@@ -330,6 +329,51 @@ const BookingListForStaff = () => {
     }
   };
 
+  const handleViewParticipants = async (booking) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:8080/checkins/${booking.id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setCurrentParticipants(response.data);
+      setSelectedBookingForParticipants(booking);
+      setIsViewParticipantsModalVisible(true);
+    } catch (error) {
+      console.error('Error fetching participants:', error);
+      toast.error(error.response?.data || 'Failed to fetch participants');
+    }
+  };
+
+  const handleUpdateCheckinStatus = async (checkinId) => {
+    try {
+      const response = await axios.put(
+        `http://localhost:8080/checkins/status/${checkinId}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      
+      // Update the participant's status in the current list
+      setCurrentParticipants(prevParticipants =>
+        prevParticipants.map(participant =>
+          participant.id === checkinId ? { ...participant, status: 'CHECKED' } : participant
+        )
+      );
+      
+      toast.success('Check-in status updated successfully');
+    } catch (error) {
+      console.error('Error updating check-in status:', error);
+      toast.error('Failed to update check-in status');
+    }
+  };
+
   return (
     <div className="p-6" style={{ marginTop: "100px" }}>
       <div className="flex justify-between items-center mb-6">
@@ -460,7 +504,7 @@ const BookingListForStaff = () => {
                       Total Amount:
                     </span>
                     <span className="font-bold text-green-600">
-                      ${selectedBooking.totalAmount}
+                      {formatVND(selectedBooking.totalAmount)}
                     </span>
                   </div>
                   <div className="flex items-center">
@@ -542,7 +586,7 @@ const BookingListForStaff = () => {
                       Total With VAT:
                     </span>
                     <span className="font-bold text-green-600 text-lg">
-                      ${selectedBooking.totalAmountWithVAT}
+                      {formatVND(selectedBooking.totalAmountWithVAT)}
                     </span>
                   </div>
 
@@ -579,6 +623,85 @@ const BookingListForStaff = () => {
             </div>
           </div>
         )}
+      </Modal>
+
+      <Modal
+        title={
+          <div className="flex items-center justify-between">
+            <span>Participants for Booking #{selectedBookingForParticipants?.id || ''}</span>
+            {selectedBookingForParticipants?.paymentStatus.toLowerCase() === 'cancelled' && (
+              <Tag color="red">Cancelled Booking - Check-in Disabled</Tag>
+            )}
+            {selectedBookingForParticipants?.paymentStatus.toLowerCase() === 'pending' && (
+              <Tag color="gold">Pending Booking - Check-in Disabled</Tag>
+            )}
+          </div>
+        }
+        visible={isViewParticipantsModalVisible}
+        onCancel={() => setIsViewParticipantsModalVisible(false)}
+        footer={null}
+        width={700}
+      >
+        <div className="space-y-4">
+          {currentParticipants.length === 0 ? (
+            <div className="text-center py-4 text-gray-500">
+              No participants found for this booking
+            </div>
+          ) : (
+            currentParticipants.map((participant, index) => (
+              <div key={index} className="bg-white p-4 rounded-lg border border-gray-200">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs text-gray-500">First Name</label>
+                    <p className="font-medium">{participant.firstName}</p>
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-500">Last Name</label>
+                    <p className="font-medium">{participant.lastName}</p>
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-500">Email</label>
+                    <p className="font-medium">{participant.email || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-500">Phone</label>
+                    <p className="font-medium">{participant.phoneNumber}</p>
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-500">Passport</label>
+                    <p className="font-medium">{participant.passport}</p>
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-500">Created By</label>
+                    <p className="font-medium">{participant.createBy}</p>
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-500">Status</label>
+                    <p className="font-medium">{participant.status}</p>
+                  </div>
+                  <div>
+                    {(selectedBookingForParticipants?.paymentStatus.toLowerCase() !== 'cancelled' && 
+                      selectedBookingForParticipants?.paymentStatus.toLowerCase() !== 'pending') ? (
+                      <Button
+                        type="primary"
+                        onClick={() => handleUpdateCheckinStatus(participant.id)}
+                        disabled={participant.status === 'CHECKED'}
+                      >
+                        {participant.status === 'CHECKED' ? 'Checked In' : 'Mark as Checked'}
+                      </Button>
+                    ) : (
+                      <Tooltip title={`Check-in is disabled for ${selectedBookingForParticipants?.paymentStatus.toLowerCase()} bookings`}>
+                        <Button disabled>
+                          Check-in Disabled
+                        </Button>
+                      </Tooltip>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
       </Modal>
 
       <ToastContainer />
