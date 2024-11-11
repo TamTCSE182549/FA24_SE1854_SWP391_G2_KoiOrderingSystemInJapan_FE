@@ -10,7 +10,9 @@ import BookingListForStaff from "./BookingListForStaff";
 import CheckinService from "../SaleStaff/CheckinService";
 import BookingForKoiList from "./BookingForKoiList";
 import DepositList from "./DepositList";
-
+import BookingKoiForDelivery from "./BookingKoiForDelivery";
+import DeliveryManagement from "./DeliveryManagement";
+import AcceptedTourList from "./AcceptedTourList";
 const { Content } = Layout;
 
 const StaffDashboard = () => {
@@ -18,13 +20,13 @@ const StaffDashboard = () => {
   const token = cookies.token;
   const [bookingStats, setBookingStats] = useState({
     tourBookings: 0,
-    koiBookings: 0
+    koiBookings: 0,
   });
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     console.log("Current token:", token);
-    
+
     const fetchBookingStats = async () => {
       setIsLoading(true);
       try {
@@ -62,12 +64,12 @@ const StaffDashboard = () => {
 
         setBookingStats({
           tourBookings: tourResponse.data.length,
-          koiBookings: koiResponse.data.length
+          koiBookings: koiResponse.data.length,
         });
-        
+
         console.log("Updated booking stats:", {
           tourBookings: tourResponse.data.length,
-          koiBookings: koiResponse.data.length
+          koiBookings: koiResponse.data.length,
         });
         setIsLoading(false);
       } catch (error) {
@@ -94,7 +96,7 @@ const StaffDashboard = () => {
         <Layout>
           {/* Sidebar */}
           <SiderBoard />
-          
+
           {/* Main Content Area */}
           <Layout className="ml-[280px]">
             <Content className="mx-auto px-4 sm:px-6 lg:px-8 w-full max-w-9xl">
@@ -106,14 +108,28 @@ const StaffDashboard = () => {
                     <div className="bg-white rounded-lg shadow-lg p-6">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm text-gray-500 font-semibold">TOUR BOOKINGS</p>
+                          <p className="text-sm text-gray-500 font-semibold">
+                            TOUR BOOKINGS
+                          </p>
                           <h5 className="text-xl font-bold text-gray-800">
-                            {isLoading ? "Loading..." : bookingStats.tourBookings}
+                            {isLoading
+                              ? "Loading..."
+                              : bookingStats.tourBookings}
                           </h5>
                         </div>
                         <div className="p-3 bg-blue-500/10 rounded-full">
-                          <svg className="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                          <svg
+                            className="w-6 h-6 text-blue-500"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+                            />
                           </svg>
                         </div>
                       </div>
@@ -127,12 +143,26 @@ const StaffDashboard = () => {
                     <div className="bg-white rounded-lg shadow-lg p-6">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm text-gray-500 font-semibold">KOI BOOKINGS</p>
-                          <h5 className="text-xl font-bold text-gray-800">{bookingStats.koiBookings}</h5>
+                          <p className="text-sm text-gray-500 font-semibold">
+                            KOI BOOKINGS
+                          </p>
+                          <h5 className="text-xl font-bold text-gray-800">
+                            {bookingStats.koiBookings}
+                          </h5>
                         </div>
                         <div className="p-3 bg-red-500/10 rounded-full">
-                          <svg className="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" />
+                          <svg
+                            className="w-6 h-6 text-red-500"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5"
+                            />
                           </svg>
                         </div>
                       </div>
@@ -146,14 +176,27 @@ const StaffDashboard = () => {
                     <div className="bg-white rounded-lg shadow-lg p-6">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm text-gray-500 font-semibold">TOTAL BOOKINGS</p>
+                          <p className="text-sm text-gray-500 font-semibold">
+                            TOTAL BOOKINGS
+                          </p>
                           <h5 className="text-xl font-bold text-gray-800">
-                            {bookingStats.tourBookings + bookingStats.koiBookings}
+                            {bookingStats.tourBookings +
+                              bookingStats.koiBookings}
                           </h5>
                         </div>
                         <div className="p-3 bg-green-500/10 rounded-full">
-                          <svg className="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                          <svg
+                            className="w-6 h-6 text-green-500"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                            />
                           </svg>
                         </div>
                       </div>
@@ -178,10 +221,34 @@ const StaffDashboard = () => {
                           <Routes>
                             <Route path="dashboard" element={<Dashboard2 />} />
                             <Route path="quotation" element={<Quotation />} />
-                            <Route path="booking-list-for-staff" element={<BookingListForStaff />} />
-                            <Route path="checkin-service" element={<CheckinService />} />
-                            <Route path="booking-for-koi-list" element={<BookingForKoiList />} />
-                            <Route path="deposit-list" element={<DepositList />} />
+                            <Route
+                              path="booking-list-for-staff"
+                              element={<BookingListForStaff />}
+                            />
+                            <Route
+                              path="checkin-service"
+                              element={<CheckinService />}
+                            />
+                            <Route
+                              path="booking-for-koi-list"
+                              element={<BookingForKoiList />}
+                            />
+                            <Route
+                              path="deposit-list"
+                              element={<DepositList />}
+                            />
+                            <Route
+                              path="booking-koi-for-delivery"
+                              element={<BookingKoiForDelivery />}
+                            />
+                            <Route
+                              path="delivery-management"
+                              element={<DeliveryManagement />}
+                            />
+                            <Route
+                              path="accepted-tour-list"
+                              element={<AcceptedTourList />}
+                            />
                           </Routes>
                         </div>
                       </div>
@@ -193,7 +260,7 @@ const StaffDashboard = () => {
           </Layout>
         </Layout>
       </div>
-      
+
       {/* Footer */}
       <footer className="block py-4 bg-white shadow-lg rounded-lg mx-4 -mb-4">
         <div className="container mx-auto px-4">

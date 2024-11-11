@@ -53,7 +53,7 @@ const Login = () => {
     } else if (
       ["SALES_STAFF", "DELIVERING_STAFF", "CONSULTING_STAFF"].includes(role)
     ) {
-      navigate("/staff/dashboard");
+      navigate("/staff");
     } else {
       toast.error("Unauthorized role");
     }
@@ -118,7 +118,7 @@ const Login = () => {
         </div>
 
         <ToastContainer />
-        
+
         <Form
           name="login"
           initialValues={{ remember: true }}
@@ -181,7 +181,9 @@ const Login = () => {
             <div className="w-full border-t border-gray-200"></div>
           </div>
           <div className="relative flex justify-center">
-            <span className="bg-white px-4 text-gray-500 text-sm">Or continue with</span>
+            <span className="bg-white px-4 text-gray-500 text-sm">
+              Or continue with
+            </span>
           </div>
         </div>
 

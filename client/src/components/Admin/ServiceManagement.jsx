@@ -1,6 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { Card, Button, Tag, Space, Select, Table, Modal, Form, Input, message } from "antd";
-import { useLocation } from 'react-router-dom';
+import {
+  Card,
+  Button,
+  Tag,
+  Space,
+  Select,
+  Table,
+  Modal,
+  Form,
+  Input,
+  message,
+} from "antd";
+import { useLocation } from "react-router-dom";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useCookies } from "react-cookie";
@@ -31,8 +42,8 @@ const ServiceManagement = () => {
     try {
       const response = await axios.get("http://localhost:8080/quotations/all", {
         headers: {
-          'Authorization': `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
       setQuotations(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
@@ -49,11 +60,14 @@ const ServiceManagement = () => {
 
   const fetchBookingDetails = async (bookingId) => {
     try {
-      const response = await axios.get(`http://localhost:8080/bookings/BookingForTour/${bookingId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
+      const response = await axios.get(
+        `http://localhost:8080/bookings/BookingForTour/${bookingId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
-      });
+      );
       setBookingDetails(response.data);
     } catch (error) {
       console.error("Error fetching booking details:", error);
@@ -67,18 +81,21 @@ const ServiceManagement = () => {
     updateForm.setFieldsValue({
       status: record.isApprove,
       amount: record.amount,
-      description: record.description
+      description: record.description,
     });
     await fetchBookingDetails(record.bookingId);
   };
 
   const handleViewDetails = async (id) => {
     try {
-      const response = await axios.get(`http://localhost:8080/quotations/${id}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
+      const response = await axios.get(
+        `http://localhost:8080/quotations/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
-      });
+      );
       setSelectedQuotation(response.data);
       setIsModalVisible(true);
     } catch (error) {
@@ -92,18 +109,18 @@ const ServiceManagement = () => {
   };
 
   const handleUpdateSubmit = async (values) => {
-    if (values.status === 'PROCESS') {
-      message.error('You must change the status to update Status');
+    if (values.status === "PROCESS") {
+      message.error("You must change the status to update Status");
       return;
     }
 
-    if (values.status === 'REJECTED') {
-      if (!values.description || values.description.trim() === '') {
-        message.error('Please provide a reason for rejection');
+    if (values.status === "REJECTED") {
+      if (!values.description || values.description.trim() === "") {
+        message.error("Please provide a reason for rejection");
         return;
       }
-      if (values.description.trim() === 'Quotation being in Process') {
-        message.error('Please provide a reason why rejected');
+      if (values.description.trim() === "Quotation being in Process") {
+        message.error("Please provide a reason why rejected");
         return;
       }
     }
@@ -111,9 +128,10 @@ const ServiceManagement = () => {
     try {
       const payload = {
         amount: values.amount,
-        description: values.status === 'FINISH' 
-          ? "Quotation has been accept"
-          : values.description
+        description:
+          values.status === "FINISH"
+            ? "Quotation has been accept"
+            : values.description,
       };
 
       await axios.put(
@@ -121,60 +139,72 @@ const ServiceManagement = () => {
         payload,
         {
           headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         }
       );
-      message.success('Quotation status updated successfully');
+      message.success("Quotation status updated successfully");
       setUpdateModalVisible(false);
       fetchQuotations();
     } catch (error) {
-      console.error('Error updating quotation:', error);
-      message.error('Failed to update quotation status');
+      console.error("Error updating quotation:", error);
+      message.error("Failed to update quotation status");
     }
   };
 
   useEffect(() => {
-    const status = updateForm.getFieldValue('status');
-    if (status === 'FINISH') {
-      updateForm.setFieldValue('description', '');
+    const status = updateForm.getFieldValue("status");
+    if (status === "FINISH") {
+      updateForm.setFieldValue("description", "");
     }
-  }, [updateForm.getFieldValue('status')]);
+  }, [updateForm.getFieldValue("status")]);
+
+  const formatVND = (amount) => {
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(amount);
+  };
 
   const columns = [
     {
-      title: 'Booking ID',
-      dataIndex: 'bookingId',
-      key: 'bookingId',
+      title: "Booking ID",
+      dataIndex: "bookingId",
+      key: "bookingId",
     },
     {
-      title: 'Amount',
-      dataIndex: 'amount',
-      key: 'amount',
-      render: (amount) => `$${amount}`,
+      title: "Amount",
+      dataIndex: "amount",
+      key: "amount",
+      render: (amount) => formatVND(amount),
     },
     {
-      title: 'Staff',
-      dataIndex: 'staffName',
-      key: 'staffName',
+      title: "Staff",
+      dataIndex: "staffName",
+      key: "staffName",
     },
     {
-      title: 'Status',
-      dataIndex: 'isApprove',
-      key: 'isApprove',
+      title: "Status",
+      dataIndex: "isApprove",
+      key: "isApprove",
       render: (status) => (
-        <Tag color={
-          status === "PROCESS" ? "blue" :
-          status === "FINISH" ? "green" : "red"
-        }>
+        <Tag
+          color={
+            status === "PROCESS"
+              ? "blue"
+              : status === "FINISH"
+              ? "green"
+              : "red"
+          }
+        >
           {status}
         </Tag>
       ),
     },
     {
-      title: 'Actions',
-      key: 'actions',
+      title: "Actions",
+      key: "actions",
       render: (_, record) => (
         <Space>
           <Button onClick={() => handleViewDetails(record.id)}>
@@ -190,8 +220,9 @@ const ServiceManagement = () => {
     },
   ];
 
-  const filteredQuotations = quotations.filter(quotation => {
-    if (statusFilter !== "ALL" && quotation.isApprove !== statusFilter) return false;
+  const filteredQuotations = quotations.filter((quotation) => {
+    if (statusFilter !== "ALL" && quotation.isApprove !== statusFilter)
+      return false;
     return true;
   });
 
@@ -233,21 +264,39 @@ const ServiceManagement = () => {
         footer={[
           <Button key="close" onClick={handleModalClose}>
             Close
-          </Button>
+          </Button>,
         ]}
       >
         {selectedQuotation && (
           <div>
-            <p><strong>Booking ID:</strong> {selectedQuotation.bookingId}</p>
-            <p><strong>Amount:</strong> ${selectedQuotation.amount}</p>
-            <p><strong>Description:</strong> {selectedQuotation.description}</p>
-            <p><strong>Staff Name:</strong> {selectedQuotation.staffName}</p>
-            <p><strong>Manager Name:</strong> {selectedQuotation.managerName}</p>
-            <p><strong>Status:</strong> {selectedQuotation.isApprove}</p>
+            <p>
+              <strong>Booking ID:</strong> {selectedQuotation.bookingId}
+            </p>
+            <p>
+              <strong>Amount:</strong> {formatVND(selectedQuotation.amount)}
+            </p>
+            <p>
+              <strong>Description:</strong> {selectedQuotation.description}
+            </p>
+            <p>
+              <strong>Staff Name:</strong> {selectedQuotation.staffName}
+            </p>
+            <p>
+              <strong>Manager Name:</strong> {selectedQuotation.managerName}
+            </p>
+            <p>
+              <strong>Status:</strong> {selectedQuotation.isApprove}
+            </p>
             {selectedQuotation.approveTime && (
               <>
-                <p><strong>Approve Date:</strong> {new Date(selectedQuotation.approveTime).toLocaleDateString()}</p>
-                <p><strong>Approve Time:</strong> {new Date(selectedQuotation.approveTime).toLocaleTimeString()}</p>
+                <p>
+                  <strong>Approve Date:</strong>{" "}
+                  {new Date(selectedQuotation.approveTime).toLocaleDateString()}
+                </p>
+                <p>
+                  <strong>Approve Time:</strong>{" "}
+                  {new Date(selectedQuotation.approveTime).toLocaleTimeString()}
+                </p>
               </>
             )}
           </div>
@@ -270,46 +319,80 @@ const ServiceManagement = () => {
             <h3 className="text-lg font-bold mb-4">Booking Information</h3>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="mb-2"><strong>Customer Name:</strong> {bookingDetails.nameCus}</p>
-                <p className="mb-2"><strong>Email:</strong> {bookingDetails.email}</p>
-                <p className="mb-2"><strong>Phone:</strong> {bookingDetails.phone}</p>
-                <p className="mb-2"><strong>Booking Type:</strong> {bookingDetails.bookingType}</p>
+                <p className="mb-2">
+                  <strong>Customer Name:</strong> {bookingDetails.nameCus}
+                </p>
+                <p className="mb-2">
+                  <strong>Email:</strong> {bookingDetails.email}
+                </p>
+                <p className="mb-2">
+                  <strong>Phone:</strong> {bookingDetails.phone}
+                </p>
+                <p className="mb-2">
+                  <strong>Booking Type:</strong> {bookingDetails.bookingType}
+                </p>
               </div>
               <div>
-                <p className="mb-2"><strong>Total Amount:</strong> ${bookingDetails.totalAmount}</p>
-                <p className="mb-2"><strong>VAT (%):</strong> {bookingDetails.vat}</p>
-                <p className="mb-2"><strong>VAT Amount:</strong> ${bookingDetails.vatAmount}</p>
-                <p className="mb-2"><strong>Discount Amount:</strong> ${bookingDetails.discountAmount}</p>
-                <p className="mb-2"><strong>Total with VAT:</strong> ${bookingDetails.totalAmountWithVAT}</p>
+                <p className="mb-2">
+                  <strong>Total Amount:</strong>{" "}
+                  {formatVND(bookingDetails.totalAmount)}
+                </p>
+                <p className="mb-2">
+                  <strong>VAT (%):</strong> {bookingDetails.vat}
+                </p>
+                <p className="mb-2">
+                  <strong>VAT Amount:</strong>{" "}
+                  {formatVND(bookingDetails.vatAmount)}
+                </p>
+                <p className="mb-2">
+                  <strong>Discount Amount:</strong>{" "}
+                  {formatVND(bookingDetails.discountAmount)}
+                </p>
+                <p className="mb-2">
+                  <strong>Total with VAT:</strong>{" "}
+                  {formatVND(bookingDetails.totalAmountWithVAT)}
+                </p>
               </div>
               <div className="col-span-2">
-                <p className="mb-2"><strong>Payment Method:</strong> {bookingDetails.paymentMethod}</p>
-                <p className="mb-2"><strong>Payment Status:</strong> {bookingDetails.paymentStatus}</p>
-                <p className="mb-2"><strong>Created Date:</strong> {bookingDetails.createdDate && new Date(bookingDetails.createdDate).toLocaleString()}</p>
-                <p className="mb-2"><strong>Updated Date:</strong> {bookingDetails.updatedDate && new Date(bookingDetails.updatedDate).toLocaleString()}</p>
+                <p className="mb-2">
+                  <strong>Payment Method:</strong>{" "}
+                  {bookingDetails.paymentMethod}
+                </p>
+                <p className="mb-2">
+                  <strong>Payment Status:</strong>{" "}
+                  {bookingDetails.paymentStatus}
+                </p>
+                <p className="mb-2">
+                  <strong>Created Date:</strong>{" "}
+                  {bookingDetails.createdDate &&
+                    new Date(bookingDetails.createdDate).toLocaleString()}
+                </p>
+                <p className="mb-2">
+                  <strong>Updated Date:</strong>{" "}
+                  {bookingDetails.updatedDate &&
+                    new Date(bookingDetails.updatedDate).toLocaleString()}
+                </p>
               </div>
             </div>
           </div>
         )}
 
-        <Form
-          form={updateForm}
-          onFinish={handleUpdateSubmit}
-          layout="vertical"
-        >
+        <Form form={updateForm} onFinish={handleUpdateSubmit} layout="vertical">
           <Form.Item
             name="status"
             label="Status"
             rules={[
-              { required: true, message: 'Please select a status' },
-              { 
+              { required: true, message: "Please select a status" },
+              {
                 validator: (_, value) => {
-                  if (value === 'PROCESS') {
-                    return Promise.reject('You must change the status to update Status');
+                  if (value === "PROCESS") {
+                    return Promise.reject(
+                      "You must change the status to update Status"
+                    );
                   }
                   return Promise.resolve();
-                }
-              }
+                },
+              },
             ]}
           >
             <Select>
@@ -320,34 +403,36 @@ const ServiceManagement = () => {
 
           <Form.Item
             name="amount"
-            label="Amount"
+            label="Amount (VND)"
             rules={[
               {
                 validator(_, value) {
                   if (!value) {
-                    return Promise.reject('Amount is required');
+                    return Promise.reject("Amount is required");
                   }
                   if (isNaN(value)) {
-                    return Promise.reject('Amount must be a number');
+                    return Promise.reject("Amount must be a number");
                   }
                   const numValue = parseFloat(value);
                   if (numValue <= 0) {
-                    return Promise.reject('Amount must be greater than 0');
+                    return Promise.reject("Amount must be greater than 0");
                   }
-                  if (numValue > 100000) {
-                    return Promise.reject('Amount cannot exceed 100,000');
+                  if (numValue > 10000000000) {
+                    return Promise.reject(
+                      "Amount cannot exceed 10,000,000,000 VND"
+                    );
                   }
                   return Promise.resolve();
                 },
               },
             ]}
           >
-            <Input 
+            <Input
               type="number"
               min="0"
-              max="100000"
-              step="0.01"
-              placeholder="Enter amount"
+              max="10000000000"
+              step="1000"
+              placeholder="Enter amount in VND"
             />
           </Form.Item>
 
@@ -357,12 +442,16 @@ const ServiceManagement = () => {
             rules={[
               ({ getFieldValue }) => ({
                 validator(_, value) {
-                  if (getFieldValue('status') === 'REJECTED') {
-                    if (!value || value.trim() === '') {
-                      return Promise.reject('Please provide a reason for rejection');
+                  if (getFieldValue("status") === "REJECTED") {
+                    if (!value || value.trim() === "") {
+                      return Promise.reject(
+                        "Please provide a reason for rejection"
+                      );
                     }
-                    if (value.trim() === 'Quotation being in Process') {
-                      return Promise.reject('Please provide a reason why rejected');
+                    if (value.trim() === "Quotation being in Process") {
+                      return Promise.reject(
+                        "Please provide a reason why rejected"
+                      );
                     }
                   }
                   return Promise.resolve();
@@ -370,19 +459,25 @@ const ServiceManagement = () => {
               }),
             ]}
           >
-            <TextArea 
-              disabled={updateForm.getFieldValue('status') === 'FINISH'}
-              placeholder={updateForm.getFieldValue('status') === 'REJECTED' ? 'Enter reason for rejection' : ''}
+            <TextArea
+              disabled={updateForm.getFieldValue("status") === "FINISH"}
+              placeholder={
+                updateForm.getFieldValue("status") === "REJECTED"
+                  ? "Enter reason for rejection"
+                  : ""
+              }
               rows={4}
             />
           </Form.Item>
 
           <Form.Item className="flex justify-end">
             <Space>
-              <Button onClick={() => {
-                setUpdateModalVisible(false);
-                updateForm.resetFields();
-              }}>
+              <Button
+                onClick={() => {
+                  setUpdateModalVisible(false);
+                  updateForm.resetFields();
+                }}
+              >
                 Cancel
               </Button>
               <Button type="primary" htmlType="submit">

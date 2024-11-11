@@ -100,6 +100,13 @@ const Delivery = () => {
     };
 
     fetchData();
+
+    // Cleanup function
+    return () => {
+      setDeliveries([]);
+      setCheckoutInfo(null);
+      setError(null);
+    };
   }, [bookingId, token]); // Ensure the dependency array is empty to run only once on mount
 
   const formatDateTime = (dateTimeString) => {
@@ -234,6 +241,16 @@ const Delivery = () => {
       errors.reason = "Reason is required for cancelled status";
     }
 
+    // if (!data.address || !data.address.trim()) {
+    //   errors.address = "Address is required";
+    // } else if (data.address.length > 200) {
+    //   errors.address = "Address cannot exceed 200 characters";
+    // }
+
+    if (data.reason && data.reason.length > 200) {
+      errors.reason = "Reason cannot exceed 200 characters";
+    }
+
     return errors;
   };
 
@@ -347,6 +364,22 @@ const Delivery = () => {
     return ROUTE_OPTIONS[route]?.split(" ").join("\n") || route;
   };
 
+  // Reset states when closing modals
+  const handleCloseModals = () => {
+    setIsCheckoutModalVisible(false);
+    setIsUpdateCheckoutModalVisible(false);
+    setIsAddModalVisible(false);
+    setIsUpdateModalVisible(false);
+    setCheckoutCustomerName("");
+    setCheckoutReceiveDate(null);
+    setCheckoutHealthDescription("");
+    setCheckoutStatus("");
+    setCheckoutReason("");
+    setCheckoutAddress("");
+    setNewDeliveryRoute("");
+    setNewDeliveryDescription("");
+  };
+
   return (
     <div
       className="mt-60"
@@ -394,7 +427,7 @@ const Delivery = () => {
                     fontSize: "12px",
                     lineHeight: "1.2",
                     textAlign: "center",
-                    maxWidth: "120px", // Đi���u chỉnh độ rộng phù hợp
+                    maxWidth: "120px", // Điu chỉnh độ rộng phù hợp
                     margin: "0 auto",
                   }}
                 >
@@ -523,42 +556,45 @@ const Delivery = () => {
           </div>
         </Card>
       )}
+      <div style={{ marginTop: "20px", textAlign: "center" }}>
+        {!loading &&
+          !error &&
+          deliveries.length > 0 &&
+          role === "DELIVERING_STAFF" && (
+            <>
+              {!checkoutInfo && (
+                <Button
+                  type="primary"
+                  size="large"
+                  onClick={showCheckoutModal}
+                  style={{ marginRight: "10px" }}
+                >
+                  Checkout Delivery
+                </Button>
+              )}
 
-      {!loading &&
-        !error &&
-        deliveries.length > 0 &&
-        role === "DELIVERING_STAFF" && (
-          <div style={{ marginTop: "20px", textAlign: "center" }}>
-            {!checkoutInfo && (
-              <Button
-                type="primary"
-                size="large"
-                onClick={showCheckoutModal}
-                style={{ marginRight: "10px" }}
-              >
-                Checkout Delivery
-              </Button>
-            )}
-
-            {checkoutInfo && (
-              <Button
-                type="default"
-                size="large"
-                onClick={showUpdateCheckoutModal}
-                style={{ marginRight: "10px" }}
-              >
-                Update Checkout Info
-              </Button>
-            )}
-            <Button
-              type="default"
-              size="large"
-              onClick={() => navigate("/staff/booking-for-koi-list")}
-            >
-              Back to Booking For Koi
-            </Button>
-          </div>
+              {checkoutInfo && (
+                <Button
+                  type="default"
+                  size="large"
+                  onClick={showUpdateCheckoutModal}
+                  style={{ marginRight: "10px" }}
+                >
+                  Update Checkout Info
+                </Button>
+              )}
+            </>
+          )}
+        {role === "DELIVERING_STAFF" && (
+          <Button
+            type="default"
+            size="large"
+            onClick={() => navigate("/staff/booking-koi-for-delivery")}
+          >
+            Back to Booking For Koi
+          </Button>
         )}
+      </div>
 
       {/* Back to BookingForKoi Button */}
 
@@ -567,7 +603,7 @@ const Delivery = () => {
         title="Checkout Delivery"
         visible={isCheckoutModalVisible}
         onOk={handleCheckout}
-        onCancel={() => setIsCheckoutModalVisible(false)}
+        onCancel={handleCloseModals}
       >
         <Input
           value={checkoutCustomerName}
@@ -584,9 +620,6 @@ const Delivery = () => {
           placeholder="Receive Date"
           showTime={{ format: "HH:mm" }}
           format="DD/MM/YYYY HH:mm"
-          disabledDate={(current) => {
-            return current && current < moment().startOf("day");
-          }}
         />
         <Input.TextArea
           value={checkoutHealthDescription}
@@ -621,7 +654,7 @@ const Delivery = () => {
         title="Update Checkout Information"
         visible={isUpdateCheckoutModalVisible}
         onOk={handleUpdateCheckout}
-        onCancel={() => setIsUpdateCheckoutModalVisible(false)}
+        onCancel={handleCloseModals}
       >
         <Input
           value={checkoutCustomerName}
@@ -638,9 +671,6 @@ const Delivery = () => {
           placeholder="Receive Date"
           showTime={{ format: "HH:mm" }}
           format="DD/MM/YYYY HH:mm"
-          disabledDate={(current) => {
-            return current && current < moment().startOf("day");
-          }}
         />
         <Input.TextArea
           value={checkoutHealthDescription}
@@ -681,7 +711,7 @@ const Delivery = () => {
         title="Add New Delivery"
         visible={isAddModalVisible}
         onOk={handleAdd}
-        onCancel={() => setIsAddModalVisible(false)}
+        onCancel={handleCloseModals}
       >
         <Select
           value={newDeliveryRoute}
@@ -708,7 +738,7 @@ const Delivery = () => {
         title="Update Delivery"
         visible={isUpdateModalVisible}
         onOk={handleUpdate}
-        onCancel={() => setIsUpdateModalVisible(false)}
+        onCancel={handleCloseModals}
       >
         <Input.TextArea
           value={newDescription}
