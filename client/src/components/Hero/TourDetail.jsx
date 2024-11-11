@@ -1,5 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { DatePicker, InputNumber, Select, Card, Typography, Descriptions, Tag, Divider, Modal } from "antd";
+import {
+  DatePicker,
+  InputNumber,
+  Select,
+  Card,
+  Typography,
+  Descriptions,
+  Tag,
+  Divider,
+  Modal,
+} from "antd";
 import "antd/dist/reset.css"; // Import Ant Design CSS if not already done
 import { FaPlane } from "react-icons/fa"; // Import plane icon from react-icons
 import { getTourById } from "../../services/tourservice"; // Import the API function
@@ -13,7 +23,14 @@ import { useParams, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify"; // Import ToastContainer và toast
 import "react-toastify/dist/ReactToastify.css"; // Import CSS cho Toast
-import { GlobalOutlined, PhoneOutlined, EnvironmentOutlined, ClockCircleOutlined, InfoCircleOutlined, RightOutlined } from '@ant-design/icons';
+import {
+  GlobalOutlined,
+  PhoneOutlined,
+  EnvironmentOutlined,
+  ClockCircleOutlined,
+  InfoCircleOutlined,
+  RightOutlined,
+} from "@ant-design/icons";
 
 const { Option } = Select; // Ensure Option is imported
 
@@ -38,22 +55,27 @@ const TourDetail = () => {
   const [isViewModalVisible, setIsViewModalVisible] = useState(false);
 
   // Thêm state tạm thời để lưu thông tin participant mới
-  const [newParticipant, setNewParticipant] = useState({ firstName: '', lastName: '' });
+  const [newParticipant, setNewParticipant] = useState({
+    firstName: "",
+    lastName: "",
+  });
 
   // Thêm state để quản lý nhiều participant mới
-  const [newParticipants, setNewParticipants] = useState([{ 
-    firstName: '', 
-    lastName: '', 
-    email: '', 
-    phoneNumber: '', 
-    passport: '' 
-  }]);
+  const [newParticipants, setNewParticipants] = useState([
+    {
+      firstName: "",
+      lastName: "",
+      email: "",
+      phoneNumber: "",
+      passport: "",
+    },
+  ]);
 
   // Thêm state cho thông tin chung
   const [commonInfo, setCommonInfo] = useState({
-    airline: '',
-    airport: '',
-    checkinDate: format(new Date(tour?.startTime || new Date()), 'yyyy-MM-dd')
+    airline: "",
+    airport: "",
+    checkinDate: format(new Date(tour?.startTime || new Date()), "yyyy-MM-dd"),
   });
 
   useEffect(() => {
@@ -124,27 +146,29 @@ const TourDetail = () => {
   const handleBack = () => {
     navigate(-1); // Di chuyển về trang trước đó
   };
-  
+
   const handleAddParticipant = () => {
     if (participantInfo.length >= tour.remaining) {
       toast.dismiss();
       toast.warning(`Maximum number of participants is ${tour.remaining}`);
       return;
     }
-    setParticipantInfo([...participantInfo, { firstName: '', lastName: '' }]);
+    setParticipantInfo([...participantInfo, { firstName: "", lastName: "" }]);
   };
 
   const handleParticipantChange = (index, field, value) => {
     const newParticipants = [...participantInfo];
     newParticipants[index] = {
       ...newParticipants[index],
-      [field]: value
+      [field]: value,
     };
     setParticipantInfo(newParticipants);
   };
 
   const handleRemoveParticipant = (indexToRemove) => {
-    const newParticipantInfo = participantInfo.filter((_, index) => index !== indexToRemove);
+    const newParticipantInfo = participantInfo.filter(
+      (_, index) => index !== indexToRemove
+    );
     setParticipantInfo(newParticipantInfo);
   };
 
@@ -172,12 +196,11 @@ const TourDetail = () => {
   const handleCommonInfoChange = (e) => {
     setCommonInfo({
       ...commonInfo,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
   const handleBooking = async (tour) => {
-
     // Kiểm tra nếu người dùng chưa đăng nhập
     if (!token) {
       toast.error("Need to login for view");
@@ -204,18 +227,27 @@ const TourDetail = () => {
 
     // Add validation before booking
     for (const participant of participantInfo) {
-      if (!validateName(participant.firstName) || !validateName(participant.lastName)) {
-        toast.error("First name and last name are required for all participants");
+      if (
+        !validateName(participant.firstName) ||
+        !validateName(participant.lastName)
+      ) {
+        toast.error(
+          "First name and last name are required for all participants"
+        );
         return;
       }
 
       if (!participant.phoneNumber || !validatePhone(participant.phoneNumber)) {
-        toast.error("Phone number is required and must be in format 09xxxxxxxx");
+        toast.error(
+          "Phone number is required and must be in format 09xxxxxxxx"
+        );
         return;
       }
 
       if (!participant.passport || !validatePassport(participant.passport)) {
-        toast.error("Passport is required and must be in format B2700000 (B followed by 7 digits)");
+        toast.error(
+          "Passport is required and must be in format B2700000 (B followed by 7 digits)"
+        );
         return;
       }
 
@@ -226,14 +258,24 @@ const TourDetail = () => {
     }
 
     for (let i = 0; i < participantInfo.length; i++) {
-      if (!participantInfo[i].firstName.trim() || !participantInfo[i].lastName.trim()) {
+      if (
+        !participantInfo[i].firstName.trim() ||
+        !participantInfo[i].lastName.trim()
+      ) {
         toast.dismiss();
-        toast.warning(`Please fill in all participant information for participant ${i + 1}`);
+        toast.warning(
+          `Please fill in all participant information for participant ${i + 1}`
+        );
         return;
       }
-      if (containsSpecialChars(participantInfo[i].firstName) || containsSpecialChars(participantInfo[i].lastName)) {
+      if (
+        containsSpecialChars(participantInfo[i].firstName) ||
+        containsSpecialChars(participantInfo[i].lastName)
+      ) {
         toast.dismiss();
-        toast.warning(`Names can only contain letters and spaces for participant ${i + 1}`);
+        toast.warning(
+          `Names can only contain letters and spaces for participant ${i + 1}`
+        );
         return;
       }
     }
@@ -243,12 +285,12 @@ const TourDetail = () => {
       toast.error("Airline is required");
       return;
     }
-    
+
     if (!commonInfo.airport.trim()) {
       toast.error("Airport is required");
       return;
     }
-    
+
     if (!commonInfo.checkinDate) {
       toast.error("Check-in Date is required");
       return;
@@ -278,35 +320,37 @@ const TourDetail = () => {
             },
           }
         );
-        
+
         if (response.data) {
           const bookingId = response.data.id;
-          
-          await Promise.all(participantInfo.map(participant => {
-            const checkinData = {
-              firstName: participant.firstName,
-              lastName: participant.lastName,
-              email: participant.email,
-              phoneNumber: participant.phoneNumber,
-              passport: participant.passport,
-              airline: commonInfo.airline,
-              airport: commonInfo.airport,
-              checkinDate: commonInfo.checkinDate,
-              bookingTour: bookingId,
-              bookingKoi: null
-            };
-            
-            return axios.post(
-              `http://localhost:8080/checkins/${bookingId}`,
-              checkinData,
-              {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                  'Content-Type': 'application/json'
+
+          await Promise.all(
+            participantInfo.map((participant) => {
+              const checkinData = {
+                firstName: participant.firstName,
+                lastName: participant.lastName,
+                email: participant.email,
+                phoneNumber: participant.phoneNumber,
+                passport: participant.passport,
+                airline: commonInfo.airline,
+                airport: commonInfo.airport,
+                checkinDate: commonInfo.checkinDate,
+                bookingTour: bookingId,
+                bookingKoi: null,
+              };
+
+              return axios.post(
+                `http://localhost:8080/checkins/${bookingId}`,
+                checkinData,
+                {
+                  headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                  },
                 }
-              }
-            );
-          }));
+              );
+            })
+          );
 
           console.log("Booking successful:", response.data);
           navigate("/tour", { state: { toastMessage: "Booking successful!" } });
@@ -333,8 +377,6 @@ const TourDetail = () => {
     } finally {
       setIsLoading(false);
     }
-
-    
   };
 
   // Thêm hàm kiểm tra ký tự đặc biệt
@@ -355,18 +397,27 @@ const TourDetail = () => {
   const handleAddModalOk = () => {
     // Validate all participants
     for (const participant of newParticipants) {
-      if (!validateName(participant.firstName) || !validateName(participant.lastName)) {
-        toast.error("First name and last name are required for all participants");
+      if (
+        !validateName(participant.firstName) ||
+        !validateName(participant.lastName)
+      ) {
+        toast.error(
+          "First name and last name are required for all participants"
+        );
         return;
       }
 
       if (!participant.phoneNumber || !validatePhone(participant.phoneNumber)) {
-        toast.error("Phone number is required and must be in format 09xxxxxxxx");
+        toast.error(
+          "Phone number is required and must be in format 09xxxxxxxx"
+        );
         return;
       }
 
       if (!participant.passport || !validatePassport(participant.passport)) {
-        toast.error("Passport is required and must be in format B2700000 (B followed by 7 digits)");
+        toast.error(
+          "Passport is required and must be in format B2700000 (B followed by 7 digits)"
+        );
         return;
       }
 
@@ -377,7 +428,9 @@ const TourDetail = () => {
     }
 
     setParticipantInfo([...participantInfo, ...newParticipants]);
-    setNewParticipants([{ firstName: '', lastName: '', email: '', phoneNumber: '', passport: '' }]);
+    setNewParticipants([
+      { firstName: "", lastName: "", email: "", phoneNumber: "", passport: "" },
+    ]);
     setIsAddModalVisible(false);
   };
 
@@ -403,7 +456,10 @@ const TourDetail = () => {
       toast.warning(`Maximum number of participants is ${tour.remaining}`);
       return;
     }
-    setNewParticipants([...newParticipants, { firstName: '', lastName: '', email: '', phoneNumber: '', passport: '' }]);
+    setNewParticipants([
+      ...newParticipants,
+      { firstName: "", lastName: "", email: "", phoneNumber: "", passport: "" },
+    ]);
   };
 
   const handleNewParticipantChange = (index, field, value) => {
@@ -415,7 +471,9 @@ const TourDetail = () => {
   // Thêm hàm xử lý remove participant form
   const removeParticipantForm = (indexToRemove) => {
     if (newParticipants.length > 1) {
-      const updatedParticipants = newParticipants.filter((_, index) => index !== indexToRemove);
+      const updatedParticipants = newParticipants.filter(
+        (_, index) => index !== indexToRemove
+      );
       setNewParticipants(updatedParticipants);
     } else {
       toast.info("At least one participant is required");
@@ -424,21 +482,42 @@ const TourDetail = () => {
 
   // Thêm options cho airline với label và value giống nhau
   const airlineOptions = [
-    { value: 'Vietnam Airlines', label: 'Vietnam Airlines' },
-    { value: 'Vietjet Air', label: 'Vietjet Air' },
-    { value: 'Jetstar Pacific', label: 'Jetstar Pacific' },
-    { value: 'Bamboo Airways', label: 'Bamboo Airways' }
+    { value: "Vietnam Airlines", label: "Vietnam Airlines" },
+    { value: "Vietjet Air", label: "Vietjet Air" },
+    { value: "Jetstar Pacific", label: "Jetstar Pacific" },
+    { value: "Bamboo Airways", label: "Bamboo Airways" },
   ];
 
   // Thêm options cho airport
   const airportOptions = [
-    { value: 'Noi Bai International Airport (Hanoi)', label: 'Noi Bai International Airport (Hanoi)' },
-    { value: 'Tan Son Nhat International Airport (Ho Chi Minh City)', label: 'Tan Son Nhat International Airport (Ho Chi Minh City)' },
-    { value: 'Da Nang International Airport', label: 'Da Nang International Airport' },
-    { value: 'Cam Ranh International Airport (Khanh Hoa)', label: 'Cam Ranh International Airport (Khanh Hoa)' },
-    { value: 'Phu Bai International Airport (Thua Thien Hue)', label: 'Phu Bai International Airport (Thua Thien Hue)' },
-    { value: 'Lien Khuong International Airport (Da Lat)', label: 'Lien Khuong International Airport (Da Lat)' },
-    { value: 'Cat Bi International Airport (Hai Phong)', label: 'Cat Bi International Airport (Hai Phong)' }
+    {
+      value: "Noi Bai International Airport (Hanoi)",
+      label: "Noi Bai International Airport (Hanoi)",
+    },
+    {
+      value: "Tan Son Nhat International Airport (Ho Chi Minh City)",
+      label: "Tan Son Nhat International Airport (Ho Chi Minh City)",
+    },
+    {
+      value: "Da Nang International Airport",
+      label: "Da Nang International Airport",
+    },
+    {
+      value: "Cam Ranh International Airport (Khanh Hoa)",
+      label: "Cam Ranh International Airport (Khanh Hoa)",
+    },
+    {
+      value: "Phu Bai International Airport (Thua Thien Hue)",
+      label: "Phu Bai International Airport (Thua Thien Hue)",
+    },
+    {
+      value: "Lien Khuong International Airport (Da Lat)",
+      label: "Lien Khuong International Airport (Da Lat)",
+    },
+    {
+      value: "Cat Bi International Airport (Hai Phong)",
+      label: "Cat Bi International Airport (Hai Phong)",
+    },
   ];
 
   return (
@@ -538,7 +617,9 @@ const TourDetail = () => {
                   <h2 className="text-3xl font-bold text-gray-800">
                     Included Destinations
                   </h2>
-                  <p className="text-gray-500 mt-2">Explore the unique farms and locations included in this tour</p>
+                  <p className="text-gray-500 mt-2">
+                    Explore the unique farms and locations included in this tour
+                  </p>
                 </div>
                 <Tag color="blue" className="text-base px-4 py-1">
                   {farmDetails.length} Locations
@@ -547,7 +628,7 @@ const TourDetail = () => {
 
               <div className="grid grid-cols-1 gap-8">
                 {farmDetails.map((farm, index) => (
-                  <Card 
+                  <Card
                     key={index}
                     className="overflow-hidden hover:shadow-xl transition-all duration-300 border-none"
                     bodyStyle={{ padding: 0 }}
@@ -583,14 +664,14 @@ const TourDetail = () => {
                               </Typography.Text>
                             </div>
                           )}
-                          
+
                           {farm.website && (
                             <div className="flex items-center gap-3 group">
                               <div className="p-2 rounded-full bg-green-50 group-hover:bg-green-100 transition-colors">
                                 <GlobalOutlined className="text-green-600 text-lg" />
                               </div>
-                              <Typography.Link 
-                                href={farm.website} 
+                              <Typography.Link
+                                href={farm.website}
                                 target="_blank"
                                 className="text-gray-600 hover:text-blue-600"
                               >
@@ -598,7 +679,7 @@ const TourDetail = () => {
                               </Typography.Link>
                             </div>
                           )}
-                          
+
                           {farm.phone && (
                             <div className="flex items-center gap-3 group">
                               <div className="p-2 rounded-full bg-purple-50 group-hover:bg-purple-100 transition-colors">
@@ -622,18 +703,22 @@ const TourDetail = () => {
                                 About this location
                               </Typography.Text>
                             </div>
-                            <Typography.Paragraph 
+                            <Typography.Paragraph
                               className="text-gray-600 leading-relaxed"
-                              ellipsis={{ rows: 4, expandable: true, symbol: 'Read more' }}
+                              ellipsis={{
+                                rows: 4,
+                                expandable: true,
+                                symbol: "Read more",
+                              }}
                             >
                               {farm.description}
                             </Typography.Paragraph>
                           </div>
-                          
+
                           {/* Add View Details Button */}
                           <div className="mt-6 pt-4 border-t border-gray-200">
                             <button
-                              onClick={() => handleViewFarmDetail(farm.id)}
+                              onClick={() => handleViewFarmDetail(farm.farmId)}
                               className="group w-full flex items-center justify-center gap-2 bg-white hover:bg-blue-50 text-blue-600 font-medium py-2 px-4 rounded-lg border-2 border-blue-100 transition-all duration-300"
                             >
                               View Farm Details
@@ -659,21 +744,24 @@ const TourDetail = () => {
               <div className="space-y-6">
                 {/* Common Information Section */}
                 <div className="space-y-4">
-                  <h3 className="text-lg font-medium text-gray-700">Travel Information</h3>
-                  
+                  <h3 className="text-lg font-medium text-gray-700">
+                    Travel Information
+                  </h3>
+
                   <div>
                     <label className="block text-gray-600 text-sm font-medium mb-2">
                       Airline
                     </label>
                     <Select
                       value={commonInfo.airline}
-                      onChange={(value) => setCommonInfo(prev => ({ ...prev, airline: value }))}
+                      onChange={(value) =>
+                        setCommonInfo((prev) => ({ ...prev, airline: value }))
+                      }
                       className="w-full"
                       placeholder="Select airline"
                       options={airlineOptions}
                       size="large"
-                    >
-                    </Select>
+                    ></Select>
                   </div>
 
                   <div>
@@ -682,13 +770,14 @@ const TourDetail = () => {
                     </label>
                     <Select
                       value={commonInfo.airport}
-                      onChange={(value) => setCommonInfo(prev => ({ ...prev, airport: value }))}
+                      onChange={(value) =>
+                        setCommonInfo((prev) => ({ ...prev, airport: value }))
+                      }
                       className="w-full"
                       placeholder="Select airport"
                       options={airportOptions}
                       size="large"
-                    >
-                    </Select>
+                    ></Select>
                   </div>
 
                   <div>
@@ -720,7 +809,9 @@ const TourDetail = () => {
 
                 <div>
                   <div className="flex justify-between items-center mb-2">
-                    <label className="block text-gray-700">Participant Information</label>
+                    <label className="block text-gray-700">
+                      Participant Information
+                    </label>
                     <div className="space-x-2">
                       <button
                         type="button"
@@ -738,7 +829,7 @@ const TourDetail = () => {
                       </button>
                     </div>
                   </div>
-                  
+
                   {/* Add Participant Modal */}
                   <Modal
                     title="Add New Participant"
@@ -758,7 +849,13 @@ const TourDetail = () => {
                                 placeholder="First Name *"
                                 className="border rounded-lg p-2 text-black w-full"
                                 value={participant.firstName}
-                                onChange={(e) => handleNewParticipantChange(index, 'firstName', e.target.value)}
+                                onChange={(e) =>
+                                  handleNewParticipantChange(
+                                    index,
+                                    "firstName",
+                                    e.target.value
+                                  )
+                                }
                               />
                             </div>
                             <div>
@@ -767,7 +864,13 @@ const TourDetail = () => {
                                 placeholder="Last Name *"
                                 className="border rounded-lg p-2 text-black w-full"
                                 value={participant.lastName}
-                                onChange={(e) => handleNewParticipantChange(index, 'lastName', e.target.value)}
+                                onChange={(e) =>
+                                  handleNewParticipantChange(
+                                    index,
+                                    "lastName",
+                                    e.target.value
+                                  )
+                                }
                               />
                             </div>
                           </div>
@@ -778,7 +881,13 @@ const TourDetail = () => {
                                 placeholder="Email (optional)"
                                 className="border rounded-lg p-2 text-black w-full"
                                 value={participant.email}
-                                onChange={(e) => handleNewParticipantChange(index, 'email', e.target.value)}
+                                onChange={(e) =>
+                                  handleNewParticipantChange(
+                                    index,
+                                    "email",
+                                    e.target.value
+                                  )
+                                }
                               />
                             </div>
                             <div>
@@ -787,7 +896,13 @@ const TourDetail = () => {
                                 placeholder="Phone Number (09xxxxxxxx) *"
                                 className="border rounded-lg p-2 text-black w-full"
                                 value={participant.phoneNumber}
-                                onChange={(e) => handleNewParticipantChange(index, 'phoneNumber', e.target.value)}
+                                onChange={(e) =>
+                                  handleNewParticipantChange(
+                                    index,
+                                    "phoneNumber",
+                                    e.target.value
+                                  )
+                                }
                               />
                             </div>
                           </div>
@@ -797,7 +912,13 @@ const TourDetail = () => {
                               placeholder="Passport Number (Bxxxxxxx) (7-digit number after B) *"
                               className="border rounded-lg p-2 text-black w-full"
                               value={participant.passport}
-                              onChange={(e) => handleNewParticipantChange(index, 'passport', e.target.value)}
+                              onChange={(e) =>
+                                handleNewParticipantChange(
+                                  index,
+                                  "passport",
+                                  e.target.value
+                                )
+                              }
                             />
                           </div>
                           {newParticipants.length > 1 && (
@@ -838,9 +959,14 @@ const TourDetail = () => {
                         </div>
                       ) : (
                         participantInfo.map((participant, index) => (
-                          <div key={index} className="mb-4 p-4 border rounded-lg">
+                          <div
+                            key={index}
+                            className="mb-4 p-4 border rounded-lg"
+                          >
                             <div className="flex justify-between items-center mb-2">
-                              <h4 className="text-sm font-medium">Participant {index + 1}</h4>
+                              <h4 className="text-sm font-medium">
+                                Participant {index + 1}
+                              </h4>
                               <button
                                 type="button"
                                 onClick={() => handleRemoveParticipant(index)}
@@ -851,24 +977,44 @@ const TourDetail = () => {
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                               <div>
-                                <label className="text-xs text-gray-500">First Name</label>
-                                <p className="font-medium">{participant.firstName}</p>
+                                <label className="text-xs text-gray-500">
+                                  First Name
+                                </label>
+                                <p className="font-medium">
+                                  {participant.firstName}
+                                </p>
                               </div>
                               <div>
-                                <label className="text-xs text-gray-500">Last Name</label>
-                                <p className="font-medium">{participant.lastName}</p>
+                                <label className="text-xs text-gray-500">
+                                  Last Name
+                                </label>
+                                <p className="font-medium">
+                                  {participant.lastName}
+                                </p>
                               </div>
                               <div>
-                                <label className="text-xs text-gray-500">Email</label>
-                                <p className="font-medium">{participant.email}</p>
+                                <label className="text-xs text-gray-500">
+                                  Email
+                                </label>
+                                <p className="font-medium">
+                                  {participant.email}
+                                </p>
                               </div>
                               <div>
-                                <label className="text-xs text-gray-500">Phone</label>
-                                <p className="font-medium">{participant.phoneNumber}</p>
+                                <label className="text-xs text-gray-500">
+                                  Phone
+                                </label>
+                                <p className="font-medium">
+                                  {participant.phoneNumber}
+                                </p>
                               </div>
                               <div className="col-span-2">
-                                <label className="text-xs text-gray-500">Passport</label>
-                                <p className="font-medium">{participant.passport}</p>
+                                <label className="text-xs text-gray-500">
+                                  Passport
+                                </label>
+                                <p className="font-medium">
+                                  {participant.passport}
+                                </p>
                               </div>
                             </div>
                           </div>
@@ -879,12 +1025,16 @@ const TourDetail = () => {
 
                   {/* Display current participants count */}
                   <div className="mt-2 p-4 bg-gray-100 rounded-lg">
-                    <p className="text-gray-600">Current Participants: {participantInfo.length}</p>
+                    <p className="text-gray-600">
+                      Current Participants: {participantInfo.length}
+                    </p>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-gray-700 mb-2">Payment Method</label>
+                  <label className="block text-gray-700 mb-2">
+                    Payment Method
+                  </label>
                   <Select
                     value={paymentMethod}
                     onChange={(value) => setPaymentMethod(value)}
