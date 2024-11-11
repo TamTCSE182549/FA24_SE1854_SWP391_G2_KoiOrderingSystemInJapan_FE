@@ -394,7 +394,27 @@ const TourDetail = () => {
     setIsAddModalVisible(true);
   };
 
+  // Add this function to check for duplicate passports
+  const isDuplicatePassport = (passport, index) => {
+    return newParticipants.some(
+      (participant, idx) => 
+        idx !== index && 
+        participant.passport && 
+        participant.passport.toLowerCase() === passport.toLowerCase()
+    );
+  };
+
   const handleAddModalOk = () => {
+    // Check for duplicate passports
+    const hasDuplicates = newParticipants.some((participant, index) => 
+      isDuplicatePassport(participant.passport, index)
+    );
+
+    if (hasDuplicates) {
+      toast.error("Please fix duplicate passport numbers before continuing");
+      return;
+    }
+
     // Validate all participants
     for (const participant of newParticipants) {
       if (
@@ -833,7 +853,7 @@ const TourDetail = () => {
                   {/* Add Participant Modal */}
                   <Modal
                     title="Add New Participant"
-                    open={isAddModalVisible}
+                    visible={isAddModalVisible}
                     onOk={handleAddModalOk}
                     onCancel={handleAddModalCancel}
                     okText="Add"
@@ -907,19 +927,30 @@ const TourDetail = () => {
                             </div>
                           </div>
                           <div className="mt-4">
-                            <input
-                              type="text"
-                              placeholder="Passport Number (Bxxxxxxx) (7-digit number after B) *"
-                              className="border rounded-lg p-2 text-black w-full"
-                              value={participant.passport}
-                              onChange={(e) =>
-                                handleNewParticipantChange(
-                                  index,
-                                  "passport",
-                                  e.target.value
-                                )
-                              }
-                            />
+                            <div className="relative">
+                              <input
+                                type="text"
+                                placeholder="Passport Number (Bxxxxxxx) (7-digit number after B) *"
+                                className={`border rounded-lg p-2 text-black w-full ${
+                                  isDuplicatePassport(participant.passport, index) 
+                                    ? 'border-red-500' 
+                                    : ''
+                                }`}
+                                value={participant.passport}
+                                onChange={(e) =>
+                                  handleNewParticipantChange(
+                                    index,
+                                    "passport",
+                                    e.target.value
+                                  )
+                                }
+                              />
+                              {isDuplicatePassport(participant.passport, index) && (
+                                <p className="text-red-500 text-sm mt-1">
+                                  This passport number is already used by another participant
+                                </p>
+                              )}
+                            </div>
                           </div>
                           {newParticipants.length > 1 && (
                             <button

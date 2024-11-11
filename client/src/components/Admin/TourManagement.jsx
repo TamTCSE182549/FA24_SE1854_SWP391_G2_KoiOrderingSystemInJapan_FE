@@ -17,6 +17,10 @@ import { PlusOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom"; // Import useNavigate
 import uploadFile from "../../utils/upload"; // Import hàm uploadFile
 
+const formatVND = (price) => {
+  return price?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + " VND";
+};
+
 const TourManagement = () => {
   const [tours, setTours] = useState([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -160,6 +164,7 @@ const TourManagement = () => {
       title: "Price",
       dataIndex: "unitPrice",
       key: "unitPrice",
+      render: (price) => formatVND(price),
     },
     {
       title: "Max Participants",
@@ -249,7 +254,13 @@ const TourManagement = () => {
             label="Price"
             rules={[{ required: true, message: "Please input the price!" }]}
           >
-            <InputNumber min={0} style={{ width: "100%" }} />
+            <InputNumber 
+              min={0} 
+              style={{ width: "100%" }}
+              formatter={(value) => value ? `${value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}` : ''}
+              parser={(value) => value?.replace(/\./g, '')}
+              placeholder="Enter price in VND"
+            />
           </Form.Item>
           <Form.Item
             name="maxParticipants"

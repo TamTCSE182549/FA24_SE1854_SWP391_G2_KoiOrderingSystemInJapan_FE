@@ -6,6 +6,10 @@ import { useCookies } from "react-cookie";
 import { ToastContainer, toast } from "react-toastify";
 import { ArrowLeftOutlined, DollarOutlined, InfoCircleOutlined, SaveOutlined, CreditCardOutlined, BankOutlined } from '@ant-design/icons';
 
+const formatVND = (price) => {
+  return price?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + " VND";
+};
+
 const AcceptedTourList = () => {
   const vatOptions = [
     { value: "0", label: "0%" },
@@ -97,9 +101,6 @@ const AcceptedTourList = () => {
     }
   };
 
-  const handleCreateCheckin = (bookingId) => {
-    navigate(`/create-checkin/${bookingId}`); // Updated path with hyphen
-  };
   const handleCreateBookingKoi = (bookingId) => {
     navigate(`/booking-koi/${bookingId}`);
   };
@@ -332,7 +333,7 @@ const AcceptedTourList = () => {
       align: "right",
       render: (amount) => (
         <span className="font-semibold text-green-600">
-          ${amount.toFixed(2)}
+          {formatVND(amount)}
         </span>
       ),
     },
@@ -354,7 +355,6 @@ const AcceptedTourList = () => {
               className="italic"
               disabled={createdQuotations.has(record.id)}
               style={{
-                // Thêm style cho trạng thái disabled
                 opacity: createdQuotations.has(record.id) ? 0.5 : 1,
                 cursor: createdQuotations.has(record.id) ? 'not-allowed' : 'pointer'
               }}
@@ -364,22 +364,13 @@ const AcceptedTourList = () => {
           )}
 
           {record.paymentStatus.toLowerCase() === "complete" && (
-            <>
-              <Button 
-                type="default"
-                onClick={() => handleCreateCheckin(record.id)}
-              >
-                Create Checkin
-              </Button>
-
-              <Button
-                type="primary"
-                onClick={() => handleCreateBookingKoi(record.id)}
-                style={{ backgroundColor: "#10B981" }}
-              >
-                Create Koi Booking
-              </Button>
-            </>
+            <Button
+              type="primary"
+              onClick={() => handleCreateBookingKoi(record.id)}
+              style={{ backgroundColor: "#10B981" }}
+            >
+              Create Koi Booking
+            </Button>
           )}
         </Space>
       ),
@@ -579,7 +570,7 @@ const AcceptedTourList = () => {
                       Total Amount:
                     </span>
                     <span className="font-bold text-green-600">
-                      ${selectedBooking.totalAmount}
+                      {formatVND(selectedBooking.totalAmount)}
                     </span>
                   </div>
                   <div className="flex items-center">
@@ -604,8 +595,8 @@ const AcceptedTourList = () => {
                         handleFieldChange("discountAmount", e.target.value)
                       }
                       className="w-32 ml-2 bg-white border-gray-200 text-gray-800"
-                      prefix="$"
                       placeholder="≥ 0"
+                      prefix="VND"
                       status={
                         editedBooking?.discountAmount &&
                         parseFloat(editedBooking.discountAmount) < 0
@@ -641,7 +632,7 @@ const AcceptedTourList = () => {
                       Total With VAT:
                     </span>
                     <span className="font-bold text-green-600 text-lg">
-                      ${selectedBooking.totalAmountWithVAT}
+                      {formatVND(selectedBooking.totalAmountWithVAT)}
                     </span>
                   </div>
 

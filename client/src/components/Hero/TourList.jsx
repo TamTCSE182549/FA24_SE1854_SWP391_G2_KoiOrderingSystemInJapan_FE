@@ -18,6 +18,10 @@ import { format } from "date-fns";
 const { RangePicker } = DatePicker;
 const { Option } = Select;
 
+const formatVND = (price) => {
+  return price?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + " VND";
+};
+
 const Tour = () => {
   const [tours, setTours] = useState([]); // State to store tour data
   const [farms, setFarms] = useState([]);
@@ -460,7 +464,7 @@ const Tour = () => {
                 
                 {/* Price Tag */}
                 <div className="absolute top-4 right-4 px-4 py-1 rounded-full bg-blue-600/90 backdrop-blur-sm">
-                  <span className="text-white font-semibold">${tour.unitPrice}</span>
+                  <span className="text-white font-semibold">{formatVND(tour.unitPrice)}</span>
                 </div>
               </div>
 
