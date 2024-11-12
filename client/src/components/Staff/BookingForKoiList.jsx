@@ -143,13 +143,11 @@ const BookingForKoiList = () => {
       key: "bookingDate",
       render: (date) => (
         <span style={{ fontSize: "1rem" }}>
-          {new Date(date).toLocaleDateString('en-US', {
+          {new Date(date).toLocaleDateString('vi-VN', {
             year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-          })}
+            month: '2-digit',
+            day: '2-digit',
+          }).split('/').reverse().join('-')}
         </span>
       ),
     },
@@ -165,12 +163,11 @@ const BookingForKoiList = () => {
       key: "totalAmountWithVAT",
       render: (amount) => (
         <span style={{ color: "#059669", fontWeight: 500, fontSize: "1rem" }}>
-          {new Intl.NumberFormat("en-US", {
-            style: "currency",
-            currency: "USD",
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          }).format(amount)}
+          {new Intl.NumberFormat("vi-VN", {
+            style: "decimal",
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0,
+          }).format(amount)} VND
         </span>
       ),
     },
@@ -257,13 +254,11 @@ const BookingForKoiList = () => {
           {record.paymentStatus === 'pending' ? (
             'Not confirmed yet'
           ) : (
-            new Date(date).toLocaleDateString('en-US', {
+            new Date(date).toLocaleDateString('vi-VN', {
               year: 'numeric',
-              month: 'short',
-              day: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit'
-            })
+              month: '2-digit',
+              day: '2-digit',
+            }).split('/').reverse().join('-')
           )}
         </span>
       ),

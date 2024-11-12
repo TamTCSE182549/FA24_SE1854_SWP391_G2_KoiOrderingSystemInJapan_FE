@@ -141,12 +141,12 @@ const ViewDetailDeposit = () => {
           <Descriptions bordered column={1} className="mb-6">
             <Descriptions.Item label="Deposit Amount">
               <Tag color="green" className="text-lg px-3 py-1">
-                ${deposit?.depositAmount}
+                {deposit?.depositAmount?.toLocaleString()} VND
               </Tag>
             </Descriptions.Item>
             <Descriptions.Item label="Remain Amount">
               <Tag color="orange" className="text-lg px-3 py-1">
-                ${deposit?.remainAmount}
+                {deposit?.remainAmount?.toLocaleString()} VND
               </Tag>
             </Descriptions.Item>
             <Descriptions.Item label="Deposit Date">
@@ -160,8 +160,7 @@ const ViewDetailDeposit = () => {
             <div>
               <Text strong className="mb-2 block">Shipping Fee</Text>
               <Input
-                prefix={<DollarOutlined className="text-gray-400" />}
-                type="number"
+                prefix={<span className="text-gray-400">VND</span>}
                 name="shippingFee"
                 value={editableDeposit.shippingFee}
                 onChange={handleInputChange}
@@ -257,20 +256,20 @@ const ViewDetailDeposit = () => {
               {BookingDetails?.nameCus}
             </Descriptions.Item>
             <Descriptions.Item label="Total Amount">
-              ${BookingDetails?.totalAmount}
+              {BookingDetails?.totalAmount?.toLocaleString()} VND
             </Descriptions.Item>
             <Descriptions.Item label="VAT">
               {BookingDetails?.vat}%
             </Descriptions.Item>
             <Descriptions.Item label="VAT Amount">
-              ${BookingDetails?.vatAmount}
+              {BookingDetails?.vatAmount?.toLocaleString()} VND
             </Descriptions.Item>
             <Descriptions.Item label="Discount">
-              ${BookingDetails?.discountAmount}
+              {BookingDetails?.discountAmount?.toLocaleString()} VND
             </Descriptions.Item>
             <Descriptions.Item label="Total with VAT">
               <Text strong className="text-lg">
-                ${BookingDetails?.totalAmountWithVAT}
+                {BookingDetails?.totalAmountWithVAT?.toLocaleString()} VND
               </Text>
             </Descriptions.Item>
             <Descriptions.Item label="Payment Status">
@@ -286,10 +285,12 @@ const ViewDetailDeposit = () => {
           {BookingDetails?.koiDetails.map((koi) => (
             <Card key={koi.id} size="small" className="mb-2">
               <Descriptions size="small" column={1}>
-                <Descriptions.Item label="Koi ID">{koi.id}</Descriptions.Item>
+              <Descriptions.Item label="Farm Name">{koi.farmName}</Descriptions.Item>
+                <Descriptions.Item label="Koi Name">{koi.koiName}</Descriptions.Item>
+                <Descriptions.Item label="Koi Origin">{koi.origin}</Descriptions.Item>
                 <Descriptions.Item label="Quantity">{koi.quantity}</Descriptions.Item>
-                <Descriptions.Item label="Unit Price">${koi.unitPrice}</Descriptions.Item>
-                <Descriptions.Item label="Total">${koi.totalAmount}</Descriptions.Item>
+                <Descriptions.Item label="Unit Price">{koi.unitPrice?.toLocaleString()} VND</Descriptions.Item>
+                <Descriptions.Item label="Total">{koi.totalAmount?.toLocaleString()} VND</Descriptions.Item>
               </Descriptions>
             </Card>
           ))}

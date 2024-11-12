@@ -433,19 +433,19 @@ const BookingDetail = () => {
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <div>
                             <label className="text-sm text-gray-500">Total Amount</label>
-                            <p className="text-gray-900 font-medium mt-1">${bookingDetails?.totalAmount}</p>
+                            <p className="text-gray-900 font-medium mt-1">{bookingDetails?.totalAmount?.toLocaleString('vi-VN')} VND</p>
                         </div>
                         <div>
                             <label className="text-sm text-gray-500">VAT Amount</label>
-                            <p className="text-gray-900 font-medium mt-1">${bookingDetails?.vatAmount}</p>
+                            <p className="text-gray-900 font-medium mt-1">{bookingDetails?.vatAmount?.toLocaleString('vi-VN')} VND</p>
                         </div>
                         <div>
                             <label className="text-sm text-gray-500">Discount</label>
-                            <p className="text-gray-900 font-medium mt-1">${bookingDetails?.discountAmount}</p>
+                            <p className="text-gray-900 font-medium mt-1">{bookingDetails?.discountAmount?.toLocaleString('vi-VN')} VND</p>
                         </div>
                         <div>
                             <label className="text-sm text-gray-500">Final Amount</label>
-                            <p className="text-green-600 font-semibold mt-1">${bookingDetails?.totalAmountWithVAT}</p>
+                            <p className="text-green-600 font-semibold mt-1">{bookingDetails?.totalAmountWithVAT?.toLocaleString('vi-VN')} VND</p>
                         </div>
                     </div>
                 </div>
@@ -458,8 +458,8 @@ const BookingDetail = () => {
                         <div key={koiDetail.bookingKoiDetailId} className="grid grid-cols-1 md:grid-cols-5 gap-4 p-4 bg-gray-50 rounded-lg">
                             <div className="md:col-span-3">
                                 <h4 className="text-lg font-semibold text-gray-900">{koiDetail.koiName}</h4>
+                                <p className="text-sm text-gray-500">Origin: {koiDetail.farmName}</p>
                                 <p className="text-sm text-gray-500">Origin: {koiDetail.origin}</p>
-                                <p className="text-sm text-gray-500">Description: {koiDetail.description}</p>
                             </div>
                             <div>
                                 <label className="text-sm text-gray-500 mb-1 block">Quantity</label>
@@ -475,15 +475,15 @@ const BookingDetail = () => {
                                 />
                             </div>
                             <div>
-                                <label className="text-sm text-gray-500 mb-1 block">Unit Price ($)</label>
+                                <label className="text-sm text-gray-500 mb-1 block">Unit Price (VND)</label>
                                 <input 
                                     type="number" 
                                     name="unitPrice" 
                                     value={koiDetail.unitPrice || ''} 
                                     onChange={(e) => handleInputChange(e, koiDetail.bookingKoiDetailId)} 
                                     className={inputClasses}
-                                    min="0.01"
-                                    step="0.01"
+                                    min="1000"
+                                    step="1000"
                                     required
                                     disabled={!isEditableStatus(bookingDetails?.paymentStatus)}
                                 />
@@ -491,8 +491,8 @@ const BookingDetail = () => {
                             <div>
                                 <label className="text-sm text-gray-500 mb-1 block">Total</label>
                                 <input 
-                                    type="number" 
-                                    value={koiDetail.quantity * koiDetail.unitPrice || 0} 
+                                    type="text"
+                                    value={`${(koiDetail.quantity * koiDetail.unitPrice || 0).toLocaleString('vi-VN')} VND`}
                                     readOnly 
                                     className={readOnlyClasses}
                                 />
