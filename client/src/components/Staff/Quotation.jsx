@@ -168,6 +168,7 @@ const Quotation = () => {
           vat: Number(values.vat) / 100,
           discountAmount: parseFloat(values.discountAmount),
           amount: selectedQuotation.amount,
+          quoId: selectedQuotation.id,
         },
         {
           headers: {
@@ -259,7 +260,7 @@ const Quotation = () => {
                 <Button onClick={() => handleViewDetails(quotation.id)}>
                   View Detail
                 </Button>
-                {quotation.isApprove === "FINISH" &&
+                {quotation.isApprove === "FINISH" && !quotation.send &&
                   !completedPayments.has(quotation.id) && (
                     <Button
                       onClick={() => handleSendPayment(quotation)}

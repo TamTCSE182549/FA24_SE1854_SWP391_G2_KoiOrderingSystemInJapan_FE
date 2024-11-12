@@ -533,6 +533,10 @@ const BookingInformation = () => {
                     <label className="text-xs text-gray-500">Created By</label>
                     <p className="font-medium">{participant.createBy}</p>
                   </div>
+                  <div>
+                    <label className="text-xs text-gray-500">Status</label>
+                    <p className="font-medium">{participant.status}</p>
+                  </div>
                 </div>
               </div>
             ))
