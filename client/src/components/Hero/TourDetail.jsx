@@ -46,7 +46,7 @@ const TourDetail = () => {
   // State for departure date and number of guests
   const { id } = useParams(); // Get the id from the URL
 
-  const [paymentMethod, setPaymentMethod] = useState("CASH");
+  const [paymentMethod, setPaymentMethod] = useState("Choose Payment Method");
   const [participantInfo, setParticipantInfo] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [farmDetails, setFarmDetails] = useState([]);
@@ -1072,7 +1072,7 @@ const TourDetail = () => {
                     className="w-full"
                     size="large"
                   >
-                    <Option value="CASH">💵 Cash</Option>
+                    {/* <Option value="CASH">💵 Cash</Option> */}
                     <Option value="VISA">💳 Visa</Option>
                     <Option value="TRANSFER">🏦 Transfer</Option>
                   </Select>
