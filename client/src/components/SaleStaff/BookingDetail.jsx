@@ -103,7 +103,7 @@ const BookingDetail = () => {
         console.log("Current depositDetail:", depositDetail);
     }, [depositDetail]);
 
-    const handleInputChange = (e, koiDetailId = null) => {
+    const handleInputChange = (e, bookingKoiDetailId = null) => {
         const { name, value } = e.target;
         
         // Validation cho VAT
@@ -154,16 +154,23 @@ const BookingDetail = () => {
             return;
         }
         
-        if (koiDetailId) {
+        if (bookingKoiDetailId) {
             setBookingDetails(prev => {
                 const updatedKoiDetails = prev.koiDetails.map(koi => {
-                    if (koi.id === koiDetailId) {
-                        return { ...koi, [name]: value };
+                    if (koi.bookingKoiDetailId === bookingKoiDetailId) {
+                        const numericValue = name === 'quantity' || name === 'unitPrice' 
+                            ? parseFloat(value) || 0
+                            : value;
+                        return { ...koi, [name]: numericValue };
                     }
                     return koi;
                 });
+                
+                console.log('Updated Koi Details:', updatedKoiDetails);
+                
                 return { ...prev, koiDetails: updatedKoiDetails };
             });
+            return;
         } else {
             setBookingDetails(prev => ({
                 ...prev,
@@ -175,8 +182,18 @@ const BookingDetail = () => {
     
 
     const handleUpdateKoiDetail = async (bookingKoiDetailId) => {
-        const updatedKoiDetail = bookingDetails.koiDetails.find(koi => koi.id === bookingKoiDetailId);
+        // Tìm koi detail cần update bằng bookingKoiDetailId
+        const updatedKoiDetail = bookingDetails.koiDetails.find(
+            koi => koi.bookingKoiDetailId === bookingKoiDetailId
+        );
         
+        console.log('Updating koi detail:', updatedKoiDetail); // Debug log
+
+        if (!updatedKoiDetail) {
+            console.error('Could not find koi detail with id:', bookingKoiDetailId);
+            return;
+        }
+
         if (parseInt(updatedKoiDetail.quantity) === 0) {
             toast.warning("If you want to remove this Koi, please use the Delete button instead.", {
                 autoClose: 3000
@@ -199,27 +216,37 @@ const BookingDetail = () => {
         }
 
         const payload = [{
-            id: updatedKoiDetail.id,
+            id: updatedKoiDetail.bookingKoiDetailId, // Sử dụng bookingKoiDetailId thay vì id
             koiId: updatedKoiDetail.koiId,
-            quantity: updatedKoiDetail.quantity,
-            unitPrice: updatedKoiDetail.unitPrice,
+            quantity: parseInt(updatedKoiDetail.quantity),
+            unitPrice: parseFloat(updatedKoiDetail.unitPrice),
         }];
 
+        console.log('Sending payload:', payload); // Debug log
+
         try {
-            await axios.put(`http://localhost:8080/BookingKoiDetail/update/${bookingId}`, payload, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-            
+            const response = await axios.put(
+                `http://localhost:8080/BookingKoiDetail/update/${bookingId}`,
+                payload,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                }
+            );
+
+            console.log('Update response:', response); // Debug log
+
+            // Refresh booking details
             await fetchBookingDetails();
             
             toast.success("Koi Detail updated successfully!", {
                 autoClose: 2000
             });
         } catch (err) {
-            setError('Failed to update Koi Detail');
-            toast.error("Failed to update Koi Detail", {
+            console.error('Error updating koi detail:', err); // Debug log
+            toast.error(err.response?.data?.message || "Failed to update Koi Detail", {
                 autoClose: 2000
             });
         }
@@ -439,7 +466,7 @@ const BookingDetail = () => {
                                 <input 
                                     type="number" 
                                     name="quantity" 
-                                    value={koiDetail.quantity} 
+                                    value={koiDetail.quantity || ''} 
                                     onChange={(e) => handleInputChange(e, koiDetail.bookingKoiDetailId)} 
                                     className={inputClasses}
                                     min="1"
@@ -452,7 +479,7 @@ const BookingDetail = () => {
                                 <input 
                                     type="number" 
                                     name="unitPrice" 
-                                    value={koiDetail.unitPrice} 
+                                    value={koiDetail.unitPrice || ''} 
                                     onChange={(e) => handleInputChange(e, koiDetail.bookingKoiDetailId)} 
                                     className={inputClasses}
                                     min="0.01"
@@ -465,7 +492,7 @@ const BookingDetail = () => {
                                 <label className="text-sm text-gray-500 mb-1 block">Total</label>
                                 <input 
                                     type="number" 
-                                    value={koiDetail.quantity * koiDetail.unitPrice} 
+                                    value={koiDetail.quantity * koiDetail.unitPrice || 0} 
                                     readOnly 
                                     className={readOnlyClasses}
                                 />
