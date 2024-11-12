@@ -26,7 +26,6 @@ const Farm = () => {
         );
         setFarm(response.data);
         console.log(response.data);
-
       } catch (error) {
         console.error(
           "Error fetching farm data:",
@@ -45,8 +44,8 @@ const Farm = () => {
   };
 
   // Add search filter function
-  const filteredFarms = Array.isArray(farm) 
-    ? farm.filter(farmItem => 
+  const filteredFarms = Array.isArray(farm)
+    ? farm.filter((farmItem) =>
         farmItem.farmName.toLowerCase().includes(searchTerm.toLowerCase())
       )
     : [];
@@ -67,7 +66,7 @@ const Farm = () => {
     // Scroll to top of the page smoothly
     window.scrollTo({
       top: 0,
-      behavior: 'smooth'
+      behavior: "smooth",
     });
   };
 
@@ -80,9 +79,10 @@ const Farm = () => {
             Koi Farms
           </h1>
           <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-            Discover traditional Japanese koi farms and their exceptional collections
+            Discover traditional Japanese koi farms and their exceptional
+            collections
           </p>
-          
+
           {/* Update search input with better styling */}
           <div className="mt-8 max-w-md mx-auto relative">
             <div className="relative">
@@ -100,40 +100,40 @@ const Farm = () => {
               />
               {/* Search icon */}
               <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
-                <svg 
-                  className="w-5 h-5 text-gray-500" 
-                  fill="none" 
-                  stroke="currentColor" 
+                <svg
+                  className="w-5 h-5 text-gray-500"
+                  fill="none"
+                  stroke="currentColor"
                   viewBox="0 0 24 24"
                 >
-                  <path 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    strokeWidth={2} 
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" 
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
                   />
                 </svg>
               </div>
-              
+
               {/* Clear button */}
               {searchTerm && (
                 <button
-                  onClick={() => setSearchTerm('')}
+                  onClick={() => setSearchTerm("")}
                   className="absolute right-4 top-1/2 transform -translate-y-1/2
                              text-gray-500 hover:text-gray-700
                              transition-colors duration-200"
                 >
-                  <svg 
-                    className="w-5 h-5" 
-                    fill="none" 
-                    stroke="currentColor" 
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
                     viewBox="0 0 24 24"
                   >
-                    <path 
-                      strokeLinecap="round" 
-                      strokeLinejoin="round" 
-                      strokeWidth={2} 
-                      d="M6 18L18 6M6 6l12 12" 
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
                     />
                   </svg>
                 </button>
@@ -149,24 +149,32 @@ const Farm = () => {
               {error}
             </div>
           )}
-          
+
           {filteredFarms.length > 0 ? (
             currentFarms.map((farmItem, index) => {
-              const mainImage = farmItem.koiFarmImages?.[0]?.imageUrl || "default-image-url";
+              const mainImage =
+                farmItem.koiFarmImages?.[0]?.imageUrl || "default-image-url";
 
               return (
-                <div key={farmItem.id || index} 
-                     className="group bg-white rounded-2xl overflow-hidden 
+                <div
+                  key={farmItem.id || index}
+                  className="group bg-white rounded-2xl overflow-hidden 
                               shadow-sm hover:shadow-xl transition-all duration-300
-                              border border-gray-100">
+                              border border-gray-100"
+                >
                   <div className="flex flex-col sm:flex-row h-full">
                     {/* Image container */}
-                    <div className="sm:w-2/5 lg:w-1/3 relative overflow-hidden">
+                    <div className="sm:w-2/5 lg:w-1/3 relative overflow-hidden h-[300px]">
                       <img
                         src={mainImage}
                         alt={`${farmItem.farmName}`}
-                        className="w-full h-64 sm:h-full object-cover transform 
+                        className="w-full h-full object-cover transform 
                                  group-hover:scale-105 transition-transform duration-500"
+                        onError={(e) => {
+                          e.target.src =
+                            "https://via.placeholder.com/400x300?text=No+Image"; // Fallback image
+                          e.target.onerror = null;
+                        }}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
                     </div>
@@ -174,11 +182,13 @@ const Farm = () => {
                     {/* Content container */}
                     <div className="sm:w-3/5 lg:w-2/3 p-6 sm:p-8 flex flex-col justify-between">
                       <div>
-                        <h2 className="text-2xl sm:text-3xl font-bold text-indigo-950 mb-4 
-                                     group-hover:text-indigo-600 transition-colors duration-300">
+                        <h2
+                          className="text-2xl sm:text-3xl font-bold text-indigo-950 mb-4 
+                                     group-hover:text-indigo-600 transition-colors duration-300"
+                        >
                           {farmItem.farmName}
                         </h2>
-                        
+
                         {/* Info grid with modern icons */}
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 text-gray-600">
                           {farmItem.farmAddress && (
@@ -186,7 +196,9 @@ const Farm = () => {
                               <div className="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center">
                                 <span className="text-indigo-600">📍</span>
                               </div>
-                              <p className="line-clamp-1">{farmItem.farmAddress}</p>
+                              <p className="line-clamp-1">
+                                {farmItem.farmAddress}
+                              </p>
                             </div>
                           )}
                           {farmItem.farmPhoneNumber && (
@@ -202,7 +214,9 @@ const Farm = () => {
                               <div className="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center">
                                 <span className="text-indigo-600">📧</span>
                               </div>
-                              <p className="line-clamp-1">{farmItem.farmEmail}</p>
+                              <p className="line-clamp-1">
+                                {farmItem.farmEmail}
+                              </p>
                             </div>
                           )}
                           {farmItem.website && (
@@ -245,8 +259,8 @@ const Farm = () => {
           ) : (
             <div className="text-center py-20 bg-gray-50 rounded-2xl">
               <p className="text-gray-600 text-xl">
-                {searchTerm 
-                  ? "No farms found matching your search" 
+                {searchTerm
+                  ? "No farms found matching your search"
                   : "No farms available at the moment"}
               </p>
             </div>
@@ -255,7 +269,7 @@ const Farm = () => {
 
         {/* Modern Pagination */}
         <div className="flex justify-center mt-10 sm:mt-12 lg:mt-16">
-          <Pagination 
+          <Pagination
             current={currentPage}
             onChange={handlePageChange}
             total={filteredFarms.length}
@@ -270,7 +284,7 @@ const Farm = () => {
                        [&_.ant-pagination-item_a]:hover:!text-indigo-600
                        [&_.ant-pagination-prev_button]:!rounded-lg
                        [&_.ant-pagination-next_button]:!rounded-lg"
-            size={window.innerWidth < 640 ? 'small' : 'default'}
+            size={window.innerWidth < 640 ? "small" : "default"}
             responsive={true}
           />
         </div>
