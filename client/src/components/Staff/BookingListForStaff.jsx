@@ -12,6 +12,7 @@ import {
   InfoCircleOutlined,
   UserOutlined,
 } from "@ant-design/icons";
+import { jwtDecode } from "jwt-decode";
 
 const formatVND = (price) => {
   return price?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + " VND";
@@ -20,6 +21,7 @@ const formatVND = (price) => {
 const BookingListForStaff = () => {
   const [cookies] = useCookies(["token"]);
   const token = cookies.token;
+  const [userRole, setUserRole] = useState(null);
   const [bookingList, setBookingList] = useState([]);
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -73,6 +75,13 @@ const BookingListForStaff = () => {
   useEffect(() => {
     bookingListResponse();
   }, []);
+
+  useEffect(() => {
+    if (cookies.token) {
+      const decodedToken = jwtDecode(cookies.token);
+      setUserRole(decodedToken.role);
+    }
+  }, [cookies.token]);
 
   const handleViewDetailBooking = (booking) => {
     setSelectedBooking(booking);
@@ -166,115 +175,6 @@ const BookingListForStaff = () => {
     },
   ];
 
-  const handleFieldChange = (field, value) => {
-    if (field === "vat") {
-      // Chỉ cho phép số và dấu chấm
-      const numericValue = value.replace(/[^\d.]/g, "");
-      if (
-        numericValue === "" ||
-        (parseFloat(numericValue) >= 0 && parseFloat(numericValue) <= 100)
-      ) {
-        setEditedBooking((prev) => ({
-          ...prev,
-          [field]: numericValue,
-        }));
-      } else {
-        toast.error("VAT must be between 0 and 100");
-      }
-    } else if (field === "discountAmount") {
-      // Chỉ cho phép số và dấu chấm
-      const numericValue = value.replace(/[^\d.]/g, "");
-      if (numericValue === "" || parseFloat(numericValue) >= 0) {
-        setEditedBooking((prev) => ({
-          ...prev,
-          [field]: numericValue,
-        }));
-      } else {
-        toast.error("Discount amount must be greater than or equal to 0");
-      }
-    } else {
-      setEditedBooking((prev) => ({
-        ...prev,
-        [field]: value,
-      }));
-    }
-  };
-
-  const handleUpdateBooking = async (bookingId) => {
-    try {
-      if (!bookingId) {
-        toast.error("Booking ID not found");
-        return;
-      }
-
-      // Validate VAT
-      if (
-        !editedBooking.vat ||
-        parseFloat(editedBooking.vat) < 0 ||
-        parseFloat(editedBooking.vat) > 100
-      ) {
-        toast.error("VAT must be between 0 and 100");
-        return;
-      }
-
-      // Validate Discount Amount
-      if (
-        !editedBooking.discountAmount ||
-        parseFloat(editedBooking.discountAmount) < 0
-      ) {
-        toast.error("Discount amount must be greater than or equal to 0");
-        return;
-      }
-
-      const bookingUpdateRequestStaff = {
-        bookingID: bookingId,
-        vat: parseFloat(editedBooking.vat) / 100,
-        paymentMethod: editedBooking.paymentMethod,
-        paymentStatus: "processing",
-        discountAmount: parseFloat(editedBooking.discountAmount),
-      };
-
-      const response = await axios.put(
-        "http://localhost:8080/bookings/admin/updateResponseFormStaff",
-        bookingUpdateRequestStaff,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (response.status === 200) {
-        toast.success("Booking updated successfully!");
-        setIsModalOpen(false);
-        bookingListResponse();
-      }
-    } catch (error) {
-      console.error("Error updating booking:", error);
-      toast.error("Failed to update booking.");
-    }
-  };
-
-  // When modal opens, initialize editedBooking with selected booking values
-  useEffect(() => {
-    if (selectedBooking) {
-      setEditedBooking({
-        vat: (selectedBooking.vat * 100).toString(),
-        paymentMethod: selectedBooking.paymentMethod,
-        discountAmount: selectedBooking.discountAmount,
-      });
-    }
-  }, [selectedBooking]);
-
-  // Thêm styles cho input disabled
-  const disabledInputStyle = {
-    backgroundColor: "white",
-    color: "black",
-    borderColor: "#d9d9d9",
-    cursor: "not-allowed",
-    opacity: 0.8,
-  };
-
   // Add this helper function to get payment method icon and color
   const getPaymentMethodInfo = (method) => {
     switch (method?.toUpperCase()) {
@@ -349,6 +249,11 @@ const BookingListForStaff = () => {
   };
 
   const handleUpdateCheckinStatus = async (checkinId) => {
+    if (userRole !== 'CONSULTING_STAFF') {
+      toast.error('Only Consulting Staff can perform check-ins');
+      return;
+    }
+
     try {
       const response = await axios.put(
         `http://localhost:8080/checkins/status/${checkinId}`,
@@ -360,7 +265,6 @@ const BookingListForStaff = () => {
         }
       );
       
-      // Update the participant's status in the current list
       setCurrentParticipants(prevParticipants =>
         prevParticipants.map(participant =>
           participant.id === checkinId ? { ...participant, status: 'CHECKED' } : participant
@@ -418,20 +322,7 @@ const BookingListForStaff = () => {
         open={isModalOpen}
         onCancel={() => setIsModalOpen(false)}
         footer={[
-          <div key="footer" className="flex justify-end space-x-2">
-            {selectedBooking &&
-              selectedBooking.paymentStatus.toLowerCase() === "pending" && (
-                <Button
-                  type="primary"
-                  onClick={() => handleUpdateBooking(selectedBooking.id)}
-                  className="flex items-center gap-2 transform hover:scale-105 active:scale-95 transition-all duration-200 bg-indigo-600 hover:bg-indigo-700"
-                >
-                  <SaveOutlined />
-                  Save Update
-                </Button>
-              )}
-            <Button onClick={() => setIsModalOpen(false)}>Close</Button>
-          </div>,
+          <Button key="close" onClick={() => setIsModalOpen(false)}>Close</Button>
         ]}
         width={800}
       >
@@ -512,21 +403,10 @@ const BookingListForStaff = () => {
                       VAT (%):
                     </span>
                     <Input
-                      value={editedBooking?.vat}
-                      onChange={(e) => handleFieldChange("vat", e.target.value)}
-                      className="w-24 ml-2 bg-white border-gray-200 text-gray-800"
-                      placeholder="0-100"
-                      status={
-                        editedBooking?.vat &&
-                        (parseFloat(editedBooking.vat) < 0 ||
-                          parseFloat(editedBooking.vat) > 100)
-                          ? "error"
-                          : ""
-                      }
-                      readOnly={
-                        selectedBooking.paymentStatus.toLowerCase() !==
-                        "pending"
-                      }
+                      value={selectedBooking.vat * 100}
+                      className="w-24 ml-2"
+                      disabled
+                      style={{ backgroundColor: '#f5f5f5', cursor: 'not-allowed' }}
                     />
                   </div>
                   <div className="flex items-center">
@@ -534,23 +414,10 @@ const BookingListForStaff = () => {
                       Discount:
                     </span>
                     <Input
-                      value={editedBooking?.discountAmount}
-                      onChange={(e) =>
-                        handleFieldChange("discountAmount", e.target.value)
-                      }
-                      className="w-32 ml-2 bg-white border-gray-200 text-gray-800"
-                      prefix="$"
-                      placeholder="≥ 0"
-                      status={
-                        editedBooking?.discountAmount &&
-                        parseFloat(editedBooking.discountAmount) < 0
-                          ? "error"
-                          : ""
-                      }
-                      readOnly={
-                        selectedBooking.paymentStatus.toLowerCase() !==
-                        "pending"
-                      }
+                      value={formatVND(selectedBooking.discountAmount)}
+                      className="w-32 ml-2"
+                      disabled
+                      style={{ backgroundColor: '#f5f5f5', cursor: 'not-allowed' }}
                     />
                   </div>
                 </div>
@@ -682,13 +549,15 @@ const BookingListForStaff = () => {
                   <div>
                     {(selectedBookingForParticipants?.paymentStatus.toLowerCase() !== 'cancelled' && 
                       selectedBookingForParticipants?.paymentStatus.toLowerCase() !== 'pending') ? (
-                      <Button
-                        type="primary"
-                        onClick={() => handleUpdateCheckinStatus(participant.id)}
-                        disabled={participant.status === 'CHECKED'}
-                      >
-                        {participant.status === 'CHECKED' ? 'Checked In' : 'Mark as Checked'}
-                      </Button>
+                      <Tooltip title={userRole !== 'CONSULTING_STAFF' ? 'Only Consulting Staff can perform check-ins' : ''}>
+                        <Button
+                          type="primary"
+                          onClick={() => handleUpdateCheckinStatus(participant.id)}
+                          disabled={participant.status === 'CHECKED' || userRole !== 'CONSULTING_STAFF'}
+                        >
+                          {participant.status === 'CHECKED' ? 'Checked In' : 'Mark as Checked'}
+                        </Button>
+                      </Tooltip>
                     ) : (
                       <Tooltip title={`Check-in is disabled for ${selectedBookingForParticipants?.paymentStatus.toLowerCase()} bookings`}>
                         <Button disabled>

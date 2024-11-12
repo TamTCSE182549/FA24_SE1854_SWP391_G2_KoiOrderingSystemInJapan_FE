@@ -387,7 +387,7 @@ const Quotation = () => {
                 <p className="mb-2">
                   <strong>Discount Amount:</strong> -{bookingDetails.discountAmount} VND
                   <span className="text-gray-500 text-sm ml-2">
-                    ({(bookingDetails.discountAmount / (bookingDetails.totalAmount + bookingDetails.vatAmount) * 100).toFixed(1)}% of ${bookingDetails.totalAmount + bookingDetails.vatAmount})
+                    ({(bookingDetails.discountAmount / (bookingDetails.totalAmount + bookingDetails.vatAmount) * 100).toFixed(1)}% )
                   </span>
                 </p>
                 <p className="mb-2 text-lg font-bold border-t pt-2">
@@ -446,24 +446,28 @@ const Quotation = () => {
           >
             <Select placeholder="Select VAT rate">
               <Option value="0">NO VAT (0%)</Option>
-              <Option value="5">5%</Option>
+              {/* <Option value="5">5%</Option> */}
               <Option value="10">10%</Option>
             </Select>
           </Form.Item>
           <Form.Item
             name="discountAmount"
             label="Discount Amount"
-            tooltip="Enter discount amount (100,000 to 50,000,000 VND)"
+            tooltip="Enter discount amount (0 to 50,000,000 VND, not exceeding 70% of the original amount)"
             rules={[
               { required: true, message: 'Please input discount amount' },
               {
                 validator: (_, value) => {
                   const amount = parseFloat(value);
-                  if (isNaN(amount) || amount < 100000) {
-                    return Promise.reject('Discount amount must be at least 100,000 VND');
+                  const originalAmount = selectedQuotation?.amount || 0;
+                  if (isNaN(amount) || amount < 0) {
+                    return Promise.reject('Discount amount cannot be negative');
                   }
                   if (amount > 50000000) {
                     return Promise.reject('Discount amount cannot exceed 50,000,000 VND');
+                  }
+                  if (amount > originalAmount * 0.7) {
+                    return Promise.reject('Discount amount cannot exceed 70% of the original amount');
                   }
                   return Promise.resolve();
                 }
@@ -472,12 +476,11 @@ const Quotation = () => {
           >
             <Input 
               type="number" 
-              min="100000"
-              max="50000000"
-              step="100000"  // Thay đổi step size thành 100000
+              min="0"
+              max={selectedQuotation ? Math.min(50000000, selectedQuotation.amount * 0.7) : 50000000}
+              step="100000"
               placeholder="Enter discount amount (e.g., 1000000)" 
               onKeyDown={(e) => {
-                // Ngăn chặn người dùng nhập trực tiếp để đảm bảo step size
                 if (e.key === 'e' || e.key === '.' || e.key === '-' || e.key === '+') {
                   e.preventDefault();
                 }

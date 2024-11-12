@@ -23,7 +23,6 @@ const AcceptedTourList = () => {
   const [isQuotationModalOpen, setIsQuotationModalOpen] = useState(false);
   const [selectedBookingForQuotation, setSelectedBookingForQuotation] = useState(null);
   const [quotationAmount, setQuotationAmount] = useState("");
-  const [editedBooking, setEditedBooking] = useState(null);
   const [quotationDescription, setQuotationDescription] = useState("Quotation being in Process...");
   const [amountError, setAmountError] = useState("");
   const [loading, setLoading] = useState(true);
@@ -108,82 +107,6 @@ const AcceptedTourList = () => {
 
   const handleCreateBookingKoi = (bookingId) => {
     navigate(`/booking-koi/${bookingId}`);
-  };
-
-  const handleFieldChange = (field, value) => {
-    if (field === "vat") {
-      setEditedBooking((prev) => ({
-        ...prev,
-        [field]: value,
-      }));
-    } else if (field === "discountAmount") {
-      // Chỉ cho phép số và dấu chấm
-      const numericValue = value.replace(/[^\d.]/g, "");
-      if (numericValue === "" || parseFloat(numericValue) >= 0) {
-        setEditedBooking((prev) => ({
-          ...prev,
-          [field]: numericValue,
-        }));
-      } else {
-        toast.error("Discount amount must be greater than or equal to 0");
-      }
-    } else {
-      setEditedBooking((prev) => ({
-        ...prev,
-        [field]: value,
-      }));
-    }
-  };
-
-  const handleUpdateBooking = async (bookingId) => {
-    try {
-      if (!bookingId) {
-        toast.error("Booking ID not found");
-        return;
-      }
-
-      // Validate VAT (chỉ cho phép 0 hoặc 10)
-      if (!["0", "10"].includes(editedBooking.vat)) {
-        toast.error("VAT must be either 0% or 10%");
-        return;
-      }
-
-      // Validate Discount Amount
-      if (
-        !editedBooking.discountAmount ||
-        parseFloat(editedBooking.discountAmount) < 0
-      ) {
-        toast.error("Discount amount must be greater than or equal to 0");
-        return;
-      }
-
-      const bookingUpdateRequestStaff = {
-        bookingID: bookingId,
-        vat: parseFloat(editedBooking.vat) / 100,
-        paymentMethod: editedBooking.paymentMethod,
-        paymentStatus: "processing",
-        discountAmount: parseFloat(editedBooking.discountAmount),
-      };
-
-      const response = await axios.put(
-        "http://localhost:8080/bookings/admin/updateResponseFormStaff",
-        bookingUpdateRequestStaff,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (response.status === 200) {
-        toast.success("Booking updated successfully!");
-        setIsModalOpen(false);
-        bookingListResponse();
-      }
-    } catch (error) {
-      console.error("Error updating booking:", error);
-      toast.error("Failed to update booking.");
-    }
   };
 
   const getPaymentMethodInfo = (method) => {
@@ -280,7 +203,7 @@ const AcceptedTourList = () => {
   const fetchAcceptedTours = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:8080/bookings/BookingForTourAccepted", // Điều chỉnh endpoint theo API của bạn
+        "http://localhost:8080/bookings/BookingForTourAccepted",
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -288,7 +211,9 @@ const AcceptedTourList = () => {
           },
         }
       );
-      setAcceptedTours(response.data);
+      // Sắp xếp danh sách theo ID giảm dần (mới nhất lên đầu)
+      const sortedTours = response.data.sort((a, b) => b.id - a.id);
+      setAcceptedTours(sortedTours);
       setLoading(false);
     } catch (error) {
       toast.error("Failed to fetch accepted tours");
@@ -540,21 +465,7 @@ const AcceptedTourList = () => {
         open={isModalOpen}
         onCancel={() => setIsModalOpen(false)}
         footer={[
-          <div key="footer" className="flex justify-end space-x-2">
-            {selectedBooking &&
-              selectedBooking.paymentStatus.toLowerCase() === "pending" && 
-              !createdQuotations.has(selectedBooking.id) && (
-                <Button
-                  type="primary"
-                  onClick={() => handleUpdateBooking(selectedBooking.id)}
-                  className="flex items-center gap-2 transform hover:scale-105 active:scale-95 transition-all duration-200 bg-indigo-600 hover:bg-indigo-700"
-                >
-                  <SaveOutlined />
-                  Save Update
-                </Button>
-            )}
-            <Button onClick={() => setIsModalOpen(false)}>Close</Button>
-          </div>,
+          <Button key="close" onClick={() => setIsModalOpen(false)}>Close</Button>
         ]}
         width={800}
       >
@@ -635,11 +546,11 @@ const AcceptedTourList = () => {
                       VAT (%):
                     </span>
                     <Select
-                      value={editedBooking?.vat || "0"}
-                      onChange={(value) => handleFieldChange("vat", value)}
+                      value={selectedBooking.vat * 100}
                       className="w-24 ml-2"
+                      disabled
+                      style={{ backgroundColor: '#f5f5f5' }}
                       options={vatOptions}
-                      disabled={selectedBooking.paymentStatus.toLowerCase() !== "pending"}
                     />
                   </div>
                   <div className="flex items-center">
@@ -647,23 +558,11 @@ const AcceptedTourList = () => {
                       Discount:
                     </span>
                     <Input
-                      value={editedBooking?.discountAmount}
-                      onChange={(e) =>
-                        handleFieldChange("discountAmount", e.target.value)
-                      }
-                      className="w-32 ml-2 bg-white border-gray-200 text-gray-800"
-                      placeholder="≥ 0"
+                      value={formatVND(selectedBooking.discountAmount)}
+                      className="w-32 ml-2"
+                      disabled
+                      style={{ backgroundColor: '#f5f5f5' }}
                       prefix="VND"
-                      status={
-                        editedBooking?.discountAmount &&
-                        parseFloat(editedBooking.discountAmount) < 0
-                          ? "error"
-                          : ""
-                      }
-                      readOnly={
-                        selectedBooking.paymentStatus.toLowerCase() !==
-                        "pending"
-                      }
                     />
                   </div>
                 </div>
