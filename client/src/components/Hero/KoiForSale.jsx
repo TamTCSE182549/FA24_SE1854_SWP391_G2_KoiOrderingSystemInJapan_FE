@@ -12,9 +12,8 @@ const ProductCard = ({ koi }) => {
   const navigate = useNavigate();
   const { id, koiName, koiImageList, variety, size, farm } = koi;
 
-  const imageUrl = koiImageList?.length > 0 
-    ? koiImageList[0].imageUrl 
-    : "default-image-url";
+  const imageUrl =
+    koiImageList?.length > 0 ? koiImageList[0].imageUrl : "default-image-url";
 
   return (
     <Card
@@ -23,10 +22,10 @@ const ProductCard = ({ koi }) => {
       bodyStyle={{ padding: 0 }}
       cover={
         <div className="relative group">
-          <img 
-            src={imageUrl} 
-            alt={koiName} 
-            className="h-[300px] w-full object-cover transition-transform duration-500 group-hover:scale-110"
+          <img
+            src={imageUrl}
+            alt={koiName}
+            className="h-[500px] w-full object-cover transition-transform duration-500 group-hover:scale-110"
           />
           <div className="absolute inset-0 bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
             <button
@@ -41,9 +40,7 @@ const ProductCard = ({ koi }) => {
       }
     >
       <div className="p-4">
-        <h3 className="text-lg font-semibold mb-2 text-gray-800">
-          {koiName}
-        </h3>
+        <h3 className="text-lg font-semibold mb-2 text-gray-800">{koiName}</h3>
         <div className="space-y-1 text-sm text-gray-600">
           {variety && <p>Variety: {variety}</p>}
           {size && <p>Size: {size} cm</p>}
@@ -55,9 +52,19 @@ const ProductCard = ({ koi }) => {
 };
 
 // ProductGrid với thiết kế mới
-const ProductGrid = ({ products, currentPage, itemsPerPage, onPageChange, onSearch, loading }) => {
+const ProductGrid = ({
+  products,
+  currentPage,
+  itemsPerPage,
+  onPageChange,
+  onSearch,
+  loading,
+}) => {
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const displayedProducts = products.slice(startIndex, startIndex + itemsPerPage);
+  const displayedProducts = products.slice(
+    startIndex,
+    startIndex + itemsPerPage
+  );
 
   return (
     <div className="space-y-8">
@@ -67,7 +74,7 @@ const ProductGrid = ({ products, currentPage, itemsPerPage, onPageChange, onSear
           Premium Koi Collection
         </Title>
         <p className="text-gray-600 max-w-2xl mx-auto">
-          Discover our carefully curated selection of high-quality Koi fish, 
+          Discover our carefully curated selection of high-quality Koi fish,
           each one unique and beautiful in its own way.
         </p>
       </div>
@@ -126,7 +133,9 @@ const KoiForSale = () => {
     const fetchKois = async () => {
       try {
         setLoading(true);
-        const response = await axios.get("http://localhost:8080/kois/all/active");
+        const response = await axios.get(
+          "http://localhost:8080/kois/all/active"
+        );
         setProducts(response.data);
         setFilteredProducts(response.data);
       } catch (error) {
@@ -140,10 +149,12 @@ const KoiForSale = () => {
   }, [cookies]);
 
   const handleSearch = (searchTerm) => {
-    const filtered = products.filter(koi => 
-      koi.koiName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (koi.variety && koi.variety.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (koi.farm && koi.farm.toLowerCase().includes(searchTerm.toLowerCase()))
+    const filtered = products.filter(
+      (koi) =>
+        koi.koiName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (koi.variety &&
+          koi.variety.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (koi.farm && koi.farm.toLowerCase().includes(searchTerm.toLowerCase()))
     );
     setFilteredProducts(filtered);
     setCurrentPage(1);

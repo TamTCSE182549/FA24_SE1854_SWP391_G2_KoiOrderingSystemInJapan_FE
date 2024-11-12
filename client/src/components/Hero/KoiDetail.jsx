@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Tabs } from "antd";
+import { LeftOutlined } from "@ant-design/icons";
 
 const { TabPane } = Tabs;
 
@@ -35,9 +36,20 @@ const KoiDetail = () => {
   }
 
   return (
-    <div className="flex justify-center pt-4 mt-20 ">
-      <div className="w-full max-w-4xl mx-auto px-6 py-12 bg-white shadow-lg rounded-lg ">
-        <div className="flex flex-wrap -mx-4">
+    <div className="flex justify-center pt-4 mt-20">
+      <div className="w-full max-w-4xl mx-auto px-6 py-12 bg-white shadow-lg rounded-lg relative">
+        {/* Back Button - Đặt ở đầu component */}
+        <button
+          onClick={() => navigate(-1)}
+          className="absolute top-4 left-4 flex items-center space-x-2 px-6 py-2 rounded-full bg-white hover:bg-gray-50 text-gray-700 transition duration-300 shadow-sm border border-gray-200 hover:shadow-md"
+        >
+          <LeftOutlined />
+          <span>Back</span>
+        </button>
+
+        <div className="flex flex-wrap -mx-4 mt-8">
+          {" "}
+          {/* Thêm mt-8 để tạo khoảng cách với button Back */}
           {/* Image Gallery */}
           <div className="w-full lg:w-1/2 px-4 mb-8">
             <div className="flex-1 mb-4">
@@ -60,7 +72,6 @@ const KoiDetail = () => {
                 ))}
             </div>
           </div>
-
           {/* Koi Information */}
           <div className="w-full lg:w-1/2 px-4 bg-white bg-opacity-90">
             <h1 className="text-4xl font-bold mb-4 text-black">
@@ -97,15 +108,11 @@ const KoiDetail = () => {
                 </li>
               </ul>
             </div>
-            <button className="bg-blue-600 text-white px-8 py-3 rounded-full hover:bg-blue-700 transition duration-300 shadow-md">
-              Contact Us
-            </button>
-            <button
-              onClick={() => navigate("/koiforsale")}
-              className="bg-gray-600 text-white px-8 py-3 rounded-full hover:bg-gray-700 transition duration-300 shadow-md ml-4"
-            >
-              Back
-            </button>
+            <div className="flex space-x-4">
+              <button className="bg-blue-600 text-white px-8 py-3 rounded-full hover:bg-blue-700 transition duration-300 shadow-md">
+                Contact Us
+              </button>
+            </div>
           </div>
         </div>
 
