@@ -164,21 +164,34 @@ const FarmDetail = () => {
                 <div key={fish.id} className="p-2">
                   <Card
                     hoverable
-                    className="mx-2 rounded-lg overflow-hidden shadow-lg"
+                    className="mx-2 rounded-lg overflow-hidden shadow-lg transition-transform duration-300 hover:scale-105"
                     cover={
                       <img
                         src={fish.koiImageList[0].imageUrl}
                         alt={fish.name}
-                        style={{ height: "400px" }} // Adjusted height for smaller cards
+                        style={{ height: "400px" }}
                         className="object-cover rounded-t-lg w-full"
                       />
                     }
+                    onClick={() => navigate(`/koi/${fish.id}`)}
                   >
                     <Card.Meta
                       title={
-                        <span className="text-lg font-bold">
-                          {fish.koiName}
-                        </span>
+                        <div className="flex justify-between items-center">
+                          <span className="text-lg font-bold">
+                            {fish.koiName}
+                          </span>
+                          <Button
+                            type="link"
+                            className="text-blue-600 hover:text-blue-800"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/koi/${fish.id}`);
+                            }}
+                          >
+                            View Details →
+                          </Button>
+                        </div>
                       }
                       description={
                         <div className="text-gray-600">
