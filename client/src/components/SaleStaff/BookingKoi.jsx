@@ -550,7 +550,7 @@ const BookingKoi = () => {
                       </label>
                       <div className="relative">
                         <span className="absolute left-3 top-3 text-gray-500">
-                          $
+                          VND
                         </span>
                         <input
                           id="unitPrice"
@@ -561,7 +561,7 @@ const BookingKoi = () => {
                           onChange={(e) => {
                             setUnitPrice(e.target.value);
                           }}
-                          className="w-full pl-8 pr-4 py-3 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all text-gray-900"
+                          className="w-full pl-16 pr-4 py-3 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all text-gray-900"
                           placeholder="Enter unit price"
                         />
                       </div>
@@ -644,7 +644,7 @@ const BookingKoi = () => {
                                     Unit Price
                                   </p>
                                   <p className="text-base font-medium text-gray-900">
-                                    ${detail.unitPrice.toLocaleString()}
+                                    {detail.unitPrice.toLocaleString()} VND
                                   </p>
                                 </div>
                               </div>
@@ -655,10 +655,7 @@ const BookingKoi = () => {
                                     Subtotal:
                                   </span>
                                   <span className="text-lg font-bold text-emerald-600">
-                                    $
-                                    {(
-                                      detail.quantity * detail.unitPrice
-                                    ).toLocaleString()}
+                                    {(detail.quantity * detail.unitPrice).toLocaleString()} VND
                                   </span>
                                 </div>
                               </div>
@@ -692,7 +689,7 @@ const BookingKoi = () => {
                       <div className="flex justify-between items-center text-lg font-bold">
                         <span>Total Amount:</span>
                         <span className="text-emerald-600">
-                          ${calculateTotal(bookingDetails).toLocaleString()}
+                          {calculateTotal(bookingDetails).toLocaleString()} VND
                         </span>
                       </div>
                     </div>
@@ -749,7 +746,7 @@ const BookingKoi = () => {
                     </label>
                     <div className="relative">
                       <span className="absolute left-3 top-3 text-gray-500">
-                        $
+                        VND
                       </span>
                       <input
                         id="discountAmount"
@@ -769,7 +766,7 @@ const BookingKoi = () => {
                           }
                           setDiscountAmount(value);
                         }}
-                        className="w-full pl-8 pr-4 py-3 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all text-gray-900"
+                        className="w-full pl-16 pr-4 py-3 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all text-gray-900"
                         placeholder="Enter discount amount"
                       />
                     </div>

@@ -168,7 +168,7 @@ const CreateDeposit = () => {
               tooltip="Shipping fee must be positive"
             >
               <Input 
-                prefix={<DollarOutlined className="text-gray-400" />}
+                prefix={<span className="text-gray-400">VND</span>}
                 type="number"
                 placeholder="Enter shipping fee"
                 className="h-11 rounded-lg"
