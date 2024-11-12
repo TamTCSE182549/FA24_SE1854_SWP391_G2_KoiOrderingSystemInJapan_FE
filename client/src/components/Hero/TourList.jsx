@@ -136,12 +136,6 @@ const Tour = () => {
     }
   };
 
-  let role;
-  if (token) {
-    const decodedToken = jwtDecode(token);
-    role = decodedToken.role;
-  }
-
   const hardcodedTours = [
     // {
     //   id: 1,
@@ -194,7 +188,6 @@ const Tour = () => {
       navigate(`/login`);
     } else {
       navigate(`/tourdetail`, { state: { tour } });
-      // navigate("/bookings", { state: { tour } });
     }
   };
 
@@ -204,20 +197,6 @@ const Tour = () => {
   // Tính toán ngày bắt đầu hợp lệ (5 ngày sau ngày hiện tại)
   const futureDate = new Date(today);
   futureDate.setDate(today.getDate() + 7);
-  const minStartDate = futureDate.toISOString().split("T")[0]; // Định dạng YYYY-MM-DD
-
-  // Đảm bảo End Date chỉ sau Start Date
-  const handleStartDateChange = (e) => {
-    setStartDate(e.target.value);
-    // Nếu ngày kết thúc nhỏ hơn ngày bắt đầu, reset endDate
-    if (endDate && e.target.value > endDate) {
-      setEndDate("");
-    }
-  };
-
-  const handleEndDateChange = (e) => {
-    setEndDate(e.target.value);
-  };
 
   useEffect(() => {
     const fetchFarms = async () => {
@@ -474,9 +453,9 @@ const Tour = () => {
                   {tour.tourName}
                 </h3>
                 
-                <p className="mt-3 text-gray-600 line-clamp-2 group-hover:text-gray-700 transition-colors duration-300">
+                {/* <p className="mt-3 text-gray-600 line-clamp-2 group-hover:text-gray-700 transition-colors duration-300">
                   {tour.description}
-                </p>
+                </p> */}
 
                 {/* Date Display */}
                 <div className="flex items-center space-x-2 mt-4 text-sm text-gray-500">

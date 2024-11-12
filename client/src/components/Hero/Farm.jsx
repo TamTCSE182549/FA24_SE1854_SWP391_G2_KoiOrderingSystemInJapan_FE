@@ -13,6 +13,9 @@ const Farm = () => {
   const [currentPage, setCurrentPage] = useState(1); // Thêm state cho trang hiện tại
   const farmsPerPage = 8; // Số farm mỗi trang
 
+  // Add new state for search
+  const [searchTerm, setSearchTerm] = useState("");
+
   const navigate = useNavigate(); // Initialize navigate for redirection
 
   useEffect(() => {
@@ -41,10 +44,22 @@ const Farm = () => {
     navigate(`/farmdetail/${farmId}`); // Redirect to the farm details page using the farm ID
   };
 
-  // Tính toán farms cho trang hiện tại
+  // Add search filter function
+  const filteredFarms = Array.isArray(farm) 
+    ? farm.filter(farmItem => 
+        farmItem.farmName.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : [];
+
+  // Update pagination calculation to use filtered farms
   const indexOfLastFarm = currentPage * farmsPerPage;
   const indexOfFirstFarm = indexOfLastFarm - farmsPerPage;
-  const currentFarms = Array.isArray(farm) ? farm.slice(indexOfFirstFarm, indexOfLastFarm) : [];
+  const currentFarms = filteredFarms.slice(indexOfFirstFarm, indexOfLastFarm);
+
+  // Reset to first page when search term changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
 
   // Xử lý thay đổi trang
   const handlePageChange = (page) => {
@@ -67,6 +82,64 @@ const Farm = () => {
           <p className="text-gray-600 text-lg max-w-2xl mx-auto">
             Discover traditional Japanese koi farms and their exceptional collections
           </p>
+          
+          {/* Update search input with better styling */}
+          <div className="mt-8 max-w-md mx-auto relative">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search farms by name..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full px-12 py-4 rounded-full border-2 border-gray-200 
+                           bg-white/90 backdrop-blur-md
+                           text-gray-900 placeholder-gray-500
+                           focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 
+                           transition-all duration-300
+                           shadow-lg hover:shadow-xl"
+              />
+              {/* Search icon */}
+              <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
+                <svg 
+                  className="w-5 h-5 text-gray-500" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    strokeWidth={2} 
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" 
+                  />
+                </svg>
+              </div>
+              
+              {/* Clear button */}
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm('')}
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2
+                             text-gray-500 hover:text-gray-700
+                             transition-colors duration-200"
+                >
+                  <svg 
+                    className="w-5 h-5" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round" 
+                      strokeWidth={2} 
+                      d="M6 18L18 6M6 6l12 12" 
+                    />
+                  </svg>
+                </button>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Grid container */}
@@ -77,7 +150,7 @@ const Farm = () => {
             </div>
           )}
           
-          {Array.isArray(farm) && farm.length > 0 ? (
+          {filteredFarms.length > 0 ? (
             currentFarms.map((farmItem, index) => {
               const mainImage = farmItem.koiFarmImages?.[0]?.imageUrl || "default-image-url";
 
@@ -171,7 +244,11 @@ const Farm = () => {
             })
           ) : (
             <div className="text-center py-20 bg-gray-50 rounded-2xl">
-              <p className="text-gray-600 text-xl">No farms available at the moment</p>
+              <p className="text-gray-600 text-xl">
+                {searchTerm 
+                  ? "No farms found matching your search" 
+                  : "No farms available at the moment"}
+              </p>
             </div>
           )}
         </div>
@@ -181,7 +258,7 @@ const Farm = () => {
           <Pagination 
             current={currentPage}
             onChange={handlePageChange}
-            total={Array.isArray(farm) ? farm.length : 0}
+            total={filteredFarms.length}
             pageSize={farmsPerPage}
             className="[&_.ant-pagination-item-active]:!bg-indigo-600 
                        [&_.ant-pagination-item-active]:!border-none

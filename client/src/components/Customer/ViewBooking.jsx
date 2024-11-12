@@ -15,6 +15,7 @@ import {
   Modal,
   Rate,
   Input,
+  Tabs,
 } from "antd"; // Import Ant Design components
 import {
   EyeOutlined,
@@ -34,7 +35,7 @@ const BookingInformation = () => {
   const token = cookies.token;
   const [bookingList, setBookingList] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const bookingsPerPage = 3;
+  const bookingsPerPage = 4;
   const navigate = useNavigate();
   const [userRole, setUserRole] = useState("");
   const [isFeedbackModalVisible, setIsFeedbackModalVisible] = useState(false);
@@ -44,6 +45,7 @@ const BookingInformation = () => {
   const [isViewParticipantsModalVisible, setIsViewParticipantsModalVisible] = useState(false);
   const [currentParticipants, setCurrentParticipants] = useState([]);
   const [selectedBookingForParticipants, setSelectedBookingForParticipants] = useState(null);
+  const [activeTab, setActiveTab] = useState('other');
 
   useEffect(() => {
     if (token) {
@@ -73,7 +75,11 @@ const BookingInformation = () => {
       );
 
       if (response.status === 200) {
-        setBookingList(response.data);
+        // Sort bookings by createdDate in descending order (newest first)
+        const sortedBookings = response.data.sort((a, b) => 
+          new Date(b.createdDate) - new Date(a.createdDate)
+        );
+        setBookingList(sortedBookings);
       }
     } catch (error) {
       console.error("Error fetching Booking data:", error);
@@ -100,11 +106,17 @@ const BookingInformation = () => {
 
   const handleViewDetailBooking = (booking) => {
     if (!token) {
-      toast.warn("You not login to Booking");
+      toast.warn("You need to login first");
       navigate(`/login`);
-    } else {
-      navigate("/bookingTourDetail", { state: { booking } });
+      return;
     }
+    
+    if (booking.paymentStatus === "pending") {
+      toast.warn("Booking details are only available after pending status");
+      return;
+    }
+    
+    navigate("/bookingTourDetail", { state: { booking } });
   };
 
   const handleDeleteBooking = async (booking) => {
@@ -181,7 +193,23 @@ const BookingInformation = () => {
   // Calculate the bookings to display on the current page
   const indexOfLastBooking = currentPage * bookingsPerPage;
   const indexOfFirstBooking = indexOfLastBooking - bookingsPerPage;
-  const currentBookings = bookingList.slice(
+
+  const getFilteredBookings = () => {
+    let filteredList;
+    if (activeTab === 'other') {
+      filteredList = bookingList.filter(booking => booking.paymentStatus !== 'complete');
+    } else {
+      filteredList = bookingList.filter(booking => booking.paymentStatus === 'complete');
+    }
+
+    // Sort filtered bookings by createdDate
+    return filteredList.sort((a, b) => 
+      new Date(b.createdDate) - new Date(a.createdDate)
+    );
+  };
+
+  const filteredBookings = getFilteredBookings();
+  const currentBookings = filteredBookings.slice(
     indexOfFirstBooking,
     indexOfLastBooking
   );
@@ -233,161 +261,144 @@ const BookingInformation = () => {
         </p>
       </div>
 
-      <section>
-        <Row gutter={[24, 24]}>
-          {currentBookings.map((booking, index) => (
-            <Col key={index} xs={24} lg={12}>
-              <div className="bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden border border-gray-100">
-                {/* Header with curved design */}
-                <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-3 text-white">
-                  <h3 className="text-lg font-semibold">
-                    Booking #{booking.id}
-                  </h3>
-                  <p className="text-sm opacity-90">
-                    {formatDateTime(booking.createdDate)}
-                  </p>
-                </div>
+      <Tabs
+        activeKey={activeTab}
+        onChange={setActiveTab}
+        className="mb-6"
+        items={[
+          {
+            key: 'other',
+            label: (
+              <span className="px-4">
+                Other Status
+                <Tag className="ml-2" color="orange">
+                  {bookingList.filter(b => b.paymentStatus !== 'complete').length}
+                </Tag>
+              </span>
+            ),
+          },
+          {
+            key: 'complete',
+            label: (
+              <span className="px-4">
+                Complete
+                <Tag className="ml-2" color="green">
+                  {bookingList.filter(b => b.paymentStatus === 'complete').length}
+                </Tag>
+              </span>
+            ),
+          },
+        ]}
+      />
 
-                <div className="p-6 flex flex-col md:flex-row gap-6">
-                  {/* Left: Koi Image Section */}
-                  <div className="md:w-1/4">
-                    <div className="relative group">
-                      <img
-                        src="https://asiatourist.vn/wp-content/uploads/2021/04/khu-du-lich-la-phong-da-lat-5.jpg"
-                        alt="Koi Fish"
-                        className="w-full h-40 object-cover rounded-lg shadow-sm group-hover:opacity-90 transition-opacity duration-300"
-                      />
-                      {booking.paymentStatus === "pending" && (
-                        <div className="absolute bottom-2 left-2">
-                          <Tag color="orange" className="font-semibold text-xs">
-                            Awaiting Confirmation
-                          </Tag>
-                        </div>
-                      )}
-                    </div>
-                    {booking.paymentDate && (
-                      <div className="mt-2 bg-blue-50 p-2 rounded-md border border-blue-100">
-                        <p className="text-blue-600 text-sm font-medium mb-1">
-                          Payment Date
-                        </p>
-                        <span className="text-sm text-blue-700 font-semibold flex items-center gap-2">
-                          <FileTextOutlined className="text-blue-500" />
-                          {formatDateTime(booking.paymentDate)}
-                        </span>
-                      </div>
-                    )}
+      {filteredBookings.length === 0 ? (
+        <div className="text-center py-8">
+          <div className="text-gray-500">
+            No {activeTab === 'other' ? 'other status' : 'complete'} bookings found
+          </div>
+        </div>
+      ) : (
+        <section>
+          <Row gutter={[24, 24]}>
+            {currentBookings.map((booking, index) => (
+              <Col key={index} xs={24} md={12} xl={6}>
+                <div className="bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden border border-gray-100">
+                  {/* Header - giảm padding */}
+                  <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-2 text-white">
+                    <h3 className="text-base font-semibold">
+                      Booking #{booking.id}
+                    </h3>
+                    <p className="text-xs opacity-90">
+                      {formatDateTime(booking.createdDate)}
+                    </p>
                   </div>
 
-                  {/* Middle: Booking Details */}
-                  <div className="md:w-2/4 space-y-4">
-                    {/* Price Information */}
-                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                      <div className="grid grid-cols-2 gap-x-8 gap-y-3">
-                        {/* Original Price */}
+                  <div className="p-3 flex flex-col gap-3"> {/* Giảm padding và gap */}
+                    {/* Left: Koi Image Section - điều chỉnh chiều cao */}
+                    <div className="w-full">
+                      <div className="relative group">
+                        <img
+                          src="https://asiatourist.vn/wp-content/uploads/2021/04/khu-du-lich-la-phong-da-lat-5.jpg"
+                          alt="Koi Fish"
+                          className="w-full h-32 object-cover rounded-lg shadow-sm group-hover:opacity-90 transition-opacity duration-300"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Price Information - thêm lại VAT và tối ưu layout */}
+                    <div className="bg-gray-50 p-2 rounded-lg border border-gray-200">
+                      <div className="grid grid-cols-2 gap-2">
                         <div className="bg-blue-50 p-2 rounded-lg">
-                          <p className="text-gray-600 text-sm">
-                            Original Price
-                          </p>
-                          <p className="font-semibold text-lg text-blue-700">
+                          <p className="text-gray-600 text-xs">Original Price</p>
+                          <p className="font-semibold text-sm text-blue-700">
                             {formatVND(booking.totalAmount)}
                           </p>
                         </div>
 
-                        {/* Discount */}
+                        <div className="bg-purple-50 p-2 rounded-lg">
+                          <p className="text-gray-600 text-xs">VAT</p>
+                          <p className="font-semibold text-sm text-purple-700">
+                            {formatVND(booking.vatAmount)}
+                          </p>
+                        </div>
+
                         <div className="bg-green-50 p-2 rounded-lg">
-                          <p className="text-gray-600 text-sm">Discount</p>
-                          <p className="font-semibold text-lg text-green-600">
+                          <p className="text-gray-600 text-xs">Discount</p>
+                          <p className="font-semibold text-sm text-green-600">
                             {formatVND(booking.discountAmount)}
                           </p>
                         </div>
 
-                        {/* VAT Rate */}
-                        <div className="bg-purple-50 p-2 rounded-lg border-t">
-                          <div className="flex items-center gap-2">
-                            <p className="text-gray-600 text-sm pb-1">
-                              VAT percent
-                            </p>
-                          </div>
-                          <Tag color="purple">{booking.vat * 100}%</Tag>
-                        </div>
-
-                        {/* Final Total */}
-                        <div className="bg-indigo-50 p-2 rounded-lg border-t">
-                          <p className="text-gray-600 text-sm">
-                            Total (Inc. VAT)
-                          </p>
-                          <p className="font-bold text-lg text-indigo-600">
+                        <div className="bg-indigo-50 p-2 rounded-lg">
+                          <p className="text-gray-600 text-xs">Total (Inc. VAT)</p>
+                          <p className="font-semibold text-sm text-indigo-700">
                             {formatVND(booking.totalAmountWithVAT)}
                           </p>
                         </div>
                       </div>
                     </div>
 
-                    {/* Status and Payment Method */}
-                    <div className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+                    {/* Status and Payment Method - thu gọn padding */}
+                    <div className="flex items-center justify-between bg-gray-50 p-2 rounded-lg">
                       <div>
-                        <p className="text-gray-500 text-sm mb-1">Status</p>
+                        <p className="text-gray-500 text-xs mb-1">Status</p>
                         <Tag
                           color={getPaymentStatusColor(booking.paymentStatus)}
-                          className="text-sm"
+                          className="text-xs"
                         >
                           {booking.paymentStatus.toUpperCase()}
                         </Tag>
                       </div>
                       <div>
-                        <p className="text-gray-500 text-sm mb-1">
+                        <p className="text-gray-500 text-xs mb-1">
                           Payment Method
                         </p>
                         <Tag
                           color={getPaymentMethodColor(booking.paymentMethod)}
-                          className="text-sm"
+                          className="text-xs"
                         >
                           {booking.paymentMethod}
                         </Tag>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Right: Actions */}
-                  <div className="md:w-1/4 flex flex-col justify-between">
-                    {/* Total Amount Display */}
-                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-100">
-                      <div className="text-center mb-3">
-                        <p className="text-gray-600 text-sm">Total Payment</p>
-                        <p className="text-2xl font-bold text-blue-700">
-                          {formatVND(booking.totalAmountWithVAT)}
-                        </p>
-                      </div>
-                      <div className="text-sm bg-white p-3 rounded-lg shadow-sm">
-                        <div className="flex justify-between mb-2 text-gray-600">
-                          <span>Subtotal:</span>
-                          <span className="font-medium">
-                            {formatVND(booking.totalAmount)}
-                          </span>
-                        </div>
-                        <div className="flex justify-between mb-2 text-gray-600">
-                          <span>VAT:</span>
-                          <span className="font-medium text-purple-600">
-                            {formatVND(booking.vatAmount)}
-                          </span>
-                        </div>
-                        <div className="flex justify-between text-gray-600">
-                          <span>Discount:</span>
-                          <span className="font-medium text-green-600">
-                            - {formatVND(booking.discountAmount)}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div className="grid grid-cols-3 gap-1 mt-4">
-                      <Tooltip title="View booking details">
+                    {/* Action Buttons - giữ nguyên */}
+                    <div className="grid grid-cols-3 gap-1">
+                      <Tooltip title={
+                        booking.paymentStatus === "pending" 
+                          ? "Details available after pending status" 
+                          : "View booking details"
+                      }>
                         <Button
                           type="primary"
                           onClick={() => handleViewDetailBooking(booking)}
-                          className="!bg-blue-500 hover:!bg-blue-600 flex items-center justify-center"
+                          className={`flex items-center justify-center ${
+                            booking.paymentStatus === "pending"
+                              ? "!bg-gray-400 cursor-not-allowed"
+                              : "!bg-blue-500 hover:!bg-blue-600"
+                          }`}
                           icon={<EyeOutlined />}
+                          disabled={booking.paymentStatus === "pending"}
                         />
                       </Tooltip>
 
@@ -434,19 +445,22 @@ const BookingInformation = () => {
                     </div>
                   </div>
                 </div>
-              </div>
-            </Col>
-          ))}
-        </Row>
+              </Col>
+            ))}
+          </Row>
+        </section>
+      )}
 
+      {filteredBookings.length > 0 && (
         <Pagination
           current={currentPage}
           pageSize={bookingsPerPage}
-          total={bookingList.length}
+          total={filteredBookings.length}
           onChange={onPageChange}
           className="text-center mt-8 mb-12"
         />
-      </section>
+      )}
+
       <Modal
         title="Give Your Feedback"
         visible={isFeedbackModalVisible}
