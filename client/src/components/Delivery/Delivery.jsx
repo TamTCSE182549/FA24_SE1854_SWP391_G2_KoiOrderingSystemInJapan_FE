@@ -27,6 +27,7 @@ import {
   checkoutDelivery,
   updateDeliveryHistory,
 } from "../../services/deliveryService"; // Import the service functions
+import { LeftOutlined } from "@ant-design/icons"; // Thêm import này
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -224,9 +225,9 @@ const Delivery = () => {
     } else {
       const currentDate = new Date();
       const selectedDate = new Date(data.receiveDate);
-      if (selectedDate < currentDate) {
-        errors.receiveDate = "Receive date cannot be in the past";
-      }
+      // if (selectedDate < currentDate) {
+      //   errors.receiveDate = "Receive date cannot be in the past";
+      // }
     }
 
     if (!data.healthKoiDescription || !data.healthKoiDescription.trim()) {
@@ -393,6 +394,28 @@ const Delivery = () => {
         position: "relative",
       }}
     >
+      <Button
+        type="default"
+        onClick={() => navigate(-1)}
+        icon={<LeftOutlined />}
+        style={{
+          position: "absolute",
+          top: "20px",
+          left: "20px",
+          display: "flex",
+          alignItems: "center",
+          padding: "4px 15px",
+          borderRadius: "6px",
+          transition: "all 0.3s",
+          backgroundColor: "#fff",
+          border: "1px solid #d9d9d9",
+          boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
+        }}
+        className="hover:bg-gray-50 hover:border-gray-400 hover:shadow-md"
+      >
+        <span style={{ marginLeft: "4px" }}>Back</span>
+      </Button>
+
       <Title level={2} style={{ textAlign: "center", marginBottom: "20px" }}>
         Delivery History
       </Title>
