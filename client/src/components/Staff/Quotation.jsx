@@ -159,14 +159,18 @@ const Quotation = () => {
 
   const handlePaymentSubmit = async (values) => {
     try {
+      const baseAmount = selectedQuotation.amount;
+      const vatRate = Number(values.vat) / 100;
+      const vatAmount = baseAmount * vatRate;
+
       const response = await axios.put(
         "http://localhost:8080/bookings/admin/updateResponseFormStaff",
         {
           bookingID: selectedQuotation.bookingId,
           paymentStatus: "processing",
           paymentMethod: values.paymentMethod,
-          vat: Number(values.vat) / 100,
-          discountAmount: parseFloat(values.discountAmount),
+          vat: vatRate,
+          discountAmount: parseFloat(values.discountAmount), // Sử dụng trực tiếp giá trị discount amount
           amount: selectedQuotation.amount,
           quoId: selectedQuotation.id,
         },
@@ -188,9 +192,10 @@ const Quotation = () => {
     }
   };
 
-  // Thêm hàm tính discountAmount
-  const calculateDiscountAmount = (baseAmount, vatAmount, discountRate) => {
-    return (baseAmount + vatAmount) * discountRate;
+  // Thêm hàm format số
+  const formatNumber = (value) => {
+    if (!value) return '0';
+    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
   };
 
   return (
@@ -251,7 +256,7 @@ const Quotation = () => {
               }
             >
               <p>
-                <strong>Amount:</strong> ${quotation.amount}
+                <strong>Amount:</strong> {formatNumber(quotation.amount)} VND
               </p>
               <p>
                 <strong>Staff:</strong> {quotation.staffName}
@@ -321,7 +326,7 @@ const Quotation = () => {
               <strong>Booking ID:</strong> {selectedQuotation.bookingId}
             </p>
             <p>
-              <strong>Amount:</strong> ${selectedQuotation.amount}
+              <strong>Amount:</strong> {formatNumber(selectedQuotation.amount)} VND
             </p>
             <p>
               <strong>Description:</strong> {selectedQuotation.description}
@@ -373,20 +378,20 @@ const Quotation = () => {
                 <p className="mb-2"><strong>Booking Type:</strong> {bookingDetails.bookingType}</p>
               </div>
               <div>
-                <p className="mb-2"><strong>Base Amount:</strong> ${bookingDetails.totalAmount}</p>
+                <p className="mb-2"><strong>Base Amount:</strong> VND {bookingDetails.totalAmount}</p>
                 <p className="mb-2"><strong>VAT (%):</strong> {bookingDetails.vat * 100}%</p>
-                <p className="mb-2"><strong>VAT Amount:</strong> +${bookingDetails.vatAmount}</p>
+                <p className="mb-2"><strong>VAT Amount:</strong> +VND {bookingDetails.vatAmount}</p>
                 <p className="mb-2">
                   <strong>Discount Rate:</strong> {(bookingDetails.discountAmount / (bookingDetails.totalAmount + bookingDetails.vatAmount) * 100).toFixed(1)}%
                 </p>
                 <p className="mb-2">
-                  <strong>Discount Amount:</strong> -${bookingDetails.discountAmount}
+                  <strong>Discount Amount:</strong> -{bookingDetails.discountAmount} VND
                   <span className="text-gray-500 text-sm ml-2">
                     ({(bookingDetails.discountAmount / (bookingDetails.totalAmount + bookingDetails.vatAmount) * 100).toFixed(1)}% of ${bookingDetails.totalAmount + bookingDetails.vatAmount})
                   </span>
                 </p>
                 <p className="mb-2 text-lg font-bold border-t pt-2">
-                  <strong>Final Total:</strong> ${bookingDetails.totalAmountWithVAT}
+                  <strong>Final Total:</strong> {bookingDetails.totalAmountWithVAT} VND
                 </p>
               </div>
               <div className="col-span-2">
@@ -447,18 +452,18 @@ const Quotation = () => {
           </Form.Item>
           <Form.Item
             name="discountAmount"
-            label="Discount Rate"
-            tooltip="Enter discount rate (0 to 0.5, e.g., 0.1 for 10%)"
+            label="Discount Amount"
+            tooltip="Enter discount amount (100,000 to 50,000,000 VND)"
             rules={[
-              { required: true, message: 'Please input discount rate' },
+              { required: true, message: 'Please input discount amount' },
               {
                 validator: (_, value) => {
-                  const rate = parseFloat(value);
-                  if (isNaN(rate) || rate < 0) {
-                    return Promise.reject('Discount rate cannot be negative');
+                  const amount = parseFloat(value);
+                  if (isNaN(amount) || amount < 100000) {
+                    return Promise.reject('Discount amount must be at least 100,000 VND');
                   }
-                  if (rate > 0.5) {
-                    return Promise.reject('Discount rate cannot exceed 0.5');
+                  if (amount > 50000000) {
+                    return Promise.reject('Discount amount cannot exceed 50,000,000 VND');
                   }
                   return Promise.resolve();
                 }
@@ -467,16 +472,15 @@ const Quotation = () => {
           >
             <Input 
               type="number" 
-              step="0.01" 
-              min="0"
-              max="0.5"
-              placeholder="Enter discount rate (e.g., 0.1)" 
-              onChange={(e) => {
-                const rate = parseFloat(e.target.value);
-                const baseAmount = selectedQuotation.amount;
-                const vatAmount = baseAmount * (paymentForm.getFieldValue('vat') / 100);
-                const calculatedDiscount = calculateDiscountAmount(baseAmount, vatAmount, rate);
-                console.log(`Calculated discount: $${calculatedDiscount} (${rate * 100}%)`);
+              min="100000"
+              max="50000000"
+              step="100000"  // Thay đổi step size thành 100000
+              placeholder="Enter discount amount (e.g., 1000000)" 
+              onKeyDown={(e) => {
+                // Ngăn chặn người dùng nhập trực tiếp để đảm bảo step size
+                if (e.key === 'e' || e.key === '.' || e.key === '-' || e.key === '+') {
+                  e.preventDefault();
+                }
               }}
             />
           </Form.Item>
