@@ -119,12 +119,12 @@ const Navbar = () => {
           <span>Reviews</span>
         </Link>
       </Menu.Item>
-      <Menu.Item key="5">
+      {/* <Menu.Item key="5">
         <Link to="/ViewCheckin" className="flex items-center space-x-2">
           <CheckCircleOutlined className="text-cyan-500" />
           <span>Check-in</span>
         </Link>
-      </Menu.Item>
+      </Menu.Item> */}
       {isStaff && (
         <Menu.Item key="staff-dashboard">
           <Link to="/staff/dashboard" className="flex items-center space-x-2">
@@ -142,7 +142,7 @@ const Navbar = () => {
         </Menu.Item>
       )}
       <Menu.Divider />
-      <Menu.Item key="6" onClick={handleSignOut} danger>
+      <Menu.Item key="5" onClick={handleSignOut} danger>
         <div className="flex items-center space-x-2 text-red-500">
           <LogoutOutlined />
           <span>Sign out</span>

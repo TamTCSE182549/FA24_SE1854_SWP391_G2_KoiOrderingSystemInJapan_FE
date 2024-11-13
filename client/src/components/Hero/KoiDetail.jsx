@@ -109,7 +109,10 @@ const KoiDetail = () => {
               </ul>
             </div>
             <div className="flex space-x-4">
-              <button className="bg-blue-600 text-white px-8 py-3 rounded-full hover:bg-blue-700 transition duration-300 shadow-md">
+              <button 
+                onClick={() => navigate('/aboutus')}
+                className="bg-blue-600 text-white px-8 py-3 rounded-full hover:bg-blue-700 transition duration-300 shadow-md"
+              >
                 Contact Us
               </button>
             </div>
