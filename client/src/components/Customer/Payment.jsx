@@ -93,7 +93,7 @@ const TicketPaymentForm = () => {
   };
 
   return (
-    <div style={{ background: "#f0f2f5", padding: "50px 0" }}>
+    <div style={{ background: "#f0f2f5", padding: "50px 0", paddingTop: "100px" }}>
       <Card style={{ width: 800, margin: "0 auto" }}>
         <Title level={2}>Ticket Payment</Title>
         <Divider />
@@ -163,7 +163,7 @@ const TicketPaymentForm = () => {
                   block
                   onClick={handlePayment}
                 >
-                  Pay ${paymentInfo.totalAmountWithVAT}
+                  Pay {paymentInfo.totalAmountWithVAT.toLocaleString()} VND
                 </Button>
               </Card>
             </Col>
@@ -172,20 +172,20 @@ const TicketPaymentForm = () => {
                 <div style={{ marginBottom: 16 }}>
                   <Text>Ticket Price</Text>
                   <Text style={{ float: "right" }}>
-                    ${paymentInfo.totalAmount}
+                    {paymentInfo.totalAmount.toLocaleString()} VND
                   </Text>
                 </div>
                 <div style={{ marginBottom: 16 }}>
                   <Text>VAT Amount</Text>
                   <Text style={{ float: "right" }}>
-                    ${paymentInfo.vatAmount}
+                    {paymentInfo.vatAmount.toLocaleString()} VND
                   </Text>
                 </div>
                 <Divider />
                 <div>
                   <Text strong>Total with VAT</Text>
                   <Text strong style={{ float: "right" }}>
-                    ${paymentInfo.totalAmountWithVAT}
+                    {paymentInfo.totalAmountWithVAT.toLocaleString()} VND
                   </Text>
                 </div>
               </Card>
