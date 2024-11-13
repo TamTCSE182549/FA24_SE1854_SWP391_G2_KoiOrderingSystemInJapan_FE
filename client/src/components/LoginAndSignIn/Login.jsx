@@ -53,7 +53,7 @@ const Login = () => {
     } else if (
       ["SALES_STAFF", "DELIVERING_STAFF", "CONSULTING_STAFF"].includes(role)
     ) {
-      navigate("/staff");
+      navigate("/staff/dashboard");
     } else {
       toast.error("Unauthorized role");
     }

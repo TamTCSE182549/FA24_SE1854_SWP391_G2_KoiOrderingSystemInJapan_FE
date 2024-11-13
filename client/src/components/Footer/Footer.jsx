@@ -11,7 +11,7 @@ const Footer = () => {
           <div className="col-span-1">
             <div className="flex items-center gap-3 mb-4">
               <img src={Logo} alt="Koi Legend Logo" className="w-10 h-10" />
-              <span className="text-xl font-bold text-white">Koi Legend</span>
+              <span className="text-xl font-bold text-white">Koi Ordering System</span>
             </div>
             <p className="text-sm mb-4">
               Your trusted partner in Koi fish trading and farm management.
@@ -62,7 +62,7 @@ const Footer = () => {
               </li>
               <li className="flex items-center gap-2">
                 <i className="fas fa-envelope"></i>
-                <span>contact@koilegend.com</span>
+                <span>koiorderingsystem@gmail.com</span>
               </li>
             </ul>
           </div>

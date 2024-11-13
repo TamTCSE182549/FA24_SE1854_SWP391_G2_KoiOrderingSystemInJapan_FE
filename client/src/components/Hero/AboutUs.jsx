@@ -40,7 +40,7 @@ const AboutUs = () => {
       contact: {
         title: "Contact Us",
         phone: "Hotline: 0123.456.789",
-        email: "Email: contact@koiservice.com",
+        email: "Email: koiorderingsystem@gmail.com",
         address: "Address: 123 ABC Street, XYZ District, HCMC"
       }
     },
