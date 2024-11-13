@@ -284,6 +284,11 @@ const AcceptedTourList = () => {
   };
 
   const handleUpdateCheckinStatus = async (checkinId) => {
+    if (userRole !== 'CONSULTING_STAFF') {
+      toast.error('Only Consulting Staff can perform check-ins');
+      return;
+    }
+
     try {
       const response = await axios.put(
         `http://localhost:8080/checkins/status/${checkinId}`,
@@ -298,15 +303,15 @@ const AcceptedTourList = () => {
       setCurrentParticipants((prevParticipants) =>
         prevParticipants.map((participant) =>
           participant.id === checkinId
-            ? { ...participant, status: "CHECKED" }
+            ? { ...participant, status: 'CHECKED' }
             : participant
         )
       );
 
-      toast.success("Check-in status updated successfully");
+      toast.success('Check-in status updated successfully');
     } catch (error) {
-      console.error("Error updating check-in status:", error);
-      toast.error("Failed to update check-in status");
+      console.error('Error updating check-in status:', error);
+      toast.error('Failed to update check-in status');
     }
   };
 
@@ -811,26 +816,22 @@ const AcceptedTourList = () => {
                     <p className="font-medium">{participant.status}</p>
                   </div>
                   <div>
-                    {selectedBookingForParticipants?.paymentStatus.toLowerCase() !==
-                      "cancelled" &&
-                    selectedBookingForParticipants?.paymentStatus.toLowerCase() !==
-                      "pending" ? (
-                      <Button
-                        type="primary"
-                        onClick={() =>
-                          handleUpdateCheckinStatus(participant.id)
-                        }
-                        disabled={participant.status === "CHECKED"}
-                      >
-                        {participant.status === "CHECKED"
-                          ? "Checked In"
-                          : "Mark as Checked"}
-                      </Button>
+                    {(selectedBookingForParticipants?.paymentStatus.toLowerCase() !== 'cancelled' && 
+                      selectedBookingForParticipants?.paymentStatus.toLowerCase() !== 'pending') ? (
+                      <Tooltip title={userRole !== 'CONSULTING_STAFF' ? 'Only Consulting Staff can perform check-ins' : ''}>
+                        <Button
+                          type="primary"
+                          onClick={() => handleUpdateCheckinStatus(participant.id)}
+                          disabled={participant.status === 'CHECKED' || userRole !== 'CONSULTING_STAFF'}
+                        >
+                          {participant.status === 'CHECKED' ? 'Checked In' : 'Mark as Checked'}
+                        </Button>
+                      </Tooltip>
                     ) : (
-                      <Tooltip
-                        title={`Check-in is disabled for ${selectedBookingForParticipants?.paymentStatus.toLowerCase()} bookings`}
-                      >
-                        <Button disabled>Check-in Disabled</Button>
+                      <Tooltip title={`Check-in is disabled for ${selectedBookingForParticipants?.paymentStatus.toLowerCase()} bookings`}>
+                        <Button disabled>
+                          Check-in Disabled
+                        </Button>
                       </Tooltip>
                     )}
                   </div>

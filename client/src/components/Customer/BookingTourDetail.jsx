@@ -69,6 +69,11 @@ const BookingTourDetail = () => {
     return <div>Loading...</div>;
   }
 
+  // Thêm hàm format VND ở đầu component
+  const formatVND = (price) => {
+    return price?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + " VND";
+  };
+
   const columns = [
     {
       title: "Tour Name",
@@ -86,7 +91,7 @@ const BookingTourDetail = () => {
       title: "Total Amount",
       dataIndex: "totalAmount",
       key: "totalAmount",
-      render: (text) => <span>${text.toFixed(2)}</span>,
+      render: (amount) => formatVND(amount),
       align: "center",
     },
   ];
@@ -146,7 +151,7 @@ const BookingTourDetail = () => {
                     {tourDetails.tourStatus}
                   </span>
                   <span className="text-white bg-white/20 backdrop-blur-sm px-4 py-1.5 rounded-full text-sm font-medium">
-                    ${tourDetails.unitPrice}
+                    {formatVND(tourDetails.unitPrice)}
                   </span>
                 </div>
                 <h3 className="text-4xl font-bold text-white mb-2 drop-shadow-lg">{tourDetails.tourName}</h3>
