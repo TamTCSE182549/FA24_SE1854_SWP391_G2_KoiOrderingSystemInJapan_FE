@@ -1,10 +1,30 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Table, Tag, Button, Spin, Space, Modal, Input, Select, Tooltip } from "antd";
+import {
+  Table,
+  Tag,
+  Button,
+  Spin,
+  Space,
+  Modal,
+  Input,
+  Select,
+  Tooltip,
+} from "antd";
 import { useNavigate } from "react-router-dom";
 import { useCookies } from "react-cookie";
 import { ToastContainer, toast } from "react-toastify";
-import { ArrowLeftOutlined, DollarOutlined, InfoCircleOutlined, SaveOutlined, CreditCardOutlined, BankOutlined, UserOutlined } from '@ant-design/icons';
+import {
+  ArrowLeftOutlined,
+  DollarOutlined,
+  InfoCircleOutlined,
+  SaveOutlined,
+  CreditCardOutlined,
+  BankOutlined,
+  UserOutlined,
+  EyeOutlined,
+} from "@ant-design/icons";
+import { jwtDecode } from "jwt-decode";
 
 const formatVND = (price) => {
   return price?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + " VND";
@@ -13,17 +33,20 @@ const formatVND = (price) => {
 const AcceptedTourList = () => {
   const vatOptions = [
     { value: "0", label: "0%" },
-    { value: "10", label: "10%" }
+    { value: "10", label: "10%" },
   ];
 
   const [acceptedTours, setAcceptedTours] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedBooking, setSelectedBooking] = useState(null); 
+  const [selectedBooking, setSelectedBooking] = useState(null);
   const [filteredStatus, setFilteredStatus] = useState("all");
   const [isQuotationModalOpen, setIsQuotationModalOpen] = useState(false);
-  const [selectedBookingForQuotation, setSelectedBookingForQuotation] = useState(null);
+  const [selectedBookingForQuotation, setSelectedBookingForQuotation] =
+    useState(null);
   const [quotationAmount, setQuotationAmount] = useState("");
-  const [quotationDescription, setQuotationDescription] = useState("Quotation being in Process...");
+  const [quotationDescription, setQuotationDescription] = useState(
+    "Quotation being in Process..."
+  );
   const [amountError, setAmountError] = useState("");
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -34,9 +57,26 @@ const AcceptedTourList = () => {
   const [createdQuotations, setCreatedQuotations] = useState(new Set());
 
   // Add these new state variables
-  const [isViewParticipantsModalVisible, setIsViewParticipantsModalVisible] = useState(false);
+  const [isViewParticipantsModalVisible, setIsViewParticipantsModalVisible] =
+    useState(false);
   const [currentParticipants, setCurrentParticipants] = useState([]);
-  const [selectedBookingForParticipants, setSelectedBookingForParticipants] = useState(null);
+  const [selectedBookingForParticipants, setSelectedBookingForParticipants] =
+    useState(null);
+
+  // Thêm state để lưu role
+  const [userRole, setUserRole] = useState("");
+
+  // Thêm useEffect để decode token và lấy role khi component mount
+  useEffect(() => {
+    if (token) {
+      try {
+        const decoded = jwtDecode(token);
+        setUserRole(decoded.role);
+      } catch (error) {
+        console.error("Error decoding token:", error);
+      }
+    }
+  }, [token]);
 
   const handleGoBack = () => {
     navigate(-1);
@@ -56,7 +96,6 @@ const AcceptedTourList = () => {
       : booking.paymentStatus.toLowerCase() === filteredStatus
   );
 
-
   const handleViewDetailBooking = (booking) => {
     setSelectedBooking(booking);
     setIsModalOpen(true);
@@ -74,19 +113,19 @@ const AcceptedTourList = () => {
         {
           bookingId: booking.id,
           amount: booking.totalAmount,
-          description: "Quotation being in Process..."
+          description: "Quotation being in Process...",
         },
         {
           headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
           },
         }
       );
 
       if (response.status === 201) {
         // Thêm bookingId vào set các quotation đã tạo
-        setCreatedQuotations(prev => new Set([...prev, booking.id]));
+        setCreatedQuotations((prev) => new Set([...prev, booking.id]));
         toast.success("Quotation created successfully!");
         fetchAcceptedTours();
         toast.info(<span className="italic">Waiting to be accepted...</span>);
@@ -98,8 +137,8 @@ const AcceptedTourList = () => {
         navigate("/login");
       } else {
         toast.error(
-          "Failed to create quotation: " + 
-          (error.response?.data?.message || error.message)
+          "Failed to create quotation: " +
+            (error.response?.data?.message || error.message)
         );
       }
     }
@@ -111,29 +150,29 @@ const AcceptedTourList = () => {
 
   const getPaymentMethodInfo = (method) => {
     switch (method?.toUpperCase()) {
-      case 'VISA':
+      case "VISA":
         return {
           icon: <CreditCardOutlined />,
-          color: 'text-blue-500',
-          label: 'Visa'
+          color: "text-blue-500",
+          label: "Visa",
         };
-      case 'TRANSFER':
+      case "TRANSFER":
         return {
           icon: <BankOutlined />,
-          color: 'text-purple-500',
-          label: 'Transfer'
+          color: "text-purple-500",
+          label: "Transfer",
         };
-      case 'CASH':
+      case "CASH":
         return {
           icon: <DollarOutlined />,
-          color: 'text-green-500',
-          label: 'Cash'
+          color: "text-green-500",
+          label: "Cash",
         };
       default:
         return {
           icon: <DollarOutlined />,
-          color: 'text-gray-500',
-          label: method || 'Unknown'
+          color: "text-gray-500",
+          label: method || "Unknown",
         };
     }
   };
@@ -168,8 +207,8 @@ const AcceptedTourList = () => {
         },
         {
           headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
           },
         }
       );
@@ -187,8 +226,8 @@ const AcceptedTourList = () => {
         navigate("/login");
       } else {
         toast.error(
-          "Failed to create quotation: " + 
-          (error.response?.data?.message || error.message)
+          "Failed to create quotation: " +
+            (error.response?.data?.message || error.message)
         );
       }
     }
@@ -239,8 +278,8 @@ const AcceptedTourList = () => {
       setSelectedBookingForParticipants(booking);
       setIsViewParticipantsModalVisible(true);
     } catch (error) {
-      console.error('Error fetching participants:', error);
-      toast.error(error.response?.data || 'Failed to fetch participants');
+      console.error("Error fetching participants:", error);
+      toast.error(error.response?.data || "Failed to fetch participants");
     }
   };
 
@@ -255,17 +294,19 @@ const AcceptedTourList = () => {
           },
         }
       );
-      
-      setCurrentParticipants(prevParticipants =>
-        prevParticipants.map(participant =>
-          participant.id === checkinId ? { ...participant, status: 'CHECKED' } : participant
+
+      setCurrentParticipants((prevParticipants) =>
+        prevParticipants.map((participant) =>
+          participant.id === checkinId
+            ? { ...participant, status: "CHECKED" }
+            : participant
         )
       );
-      
-      toast.success('Check-in status updated successfully');
+
+      toast.success("Check-in status updated successfully");
     } catch (error) {
-      console.error('Error updating check-in status:', error);
-      toast.error('Failed to update check-in status');
+      console.error("Error updating check-in status:", error);
+      toast.error("Failed to update check-in status");
     }
   };
 
@@ -319,9 +360,21 @@ const AcceptedTourList = () => {
           <Button
             type="primary"
             onClick={() => handleViewDetailBooking(record)}
+            icon={<EyeOutlined />}
           >
             View Details
           </Button>
+
+          {/* Chỉ hiển thị button Create Booking Koi khi role là CONSULT_STAFF */}
+          {userRole === "CONSULT_STAFF" && (
+            <Button
+              type="primary"
+              onClick={() => handleCreateBookingKoi(record.id)}
+              className="bg-green-500 hover:bg-green-600"
+            >
+              Create Booking Koi
+            </Button>
+          )}
 
           <Button
             type="default"
@@ -332,26 +385,20 @@ const AcceptedTourList = () => {
           </Button>
 
           {record.paymentStatus.toLowerCase() === "pending" && (
-            <Button 
+            <Button
               onClick={() => handleCreateQuotation(record)}
               className="italic"
               disabled={createdQuotations.has(record.id)}
               style={{
                 opacity: createdQuotations.has(record.id) ? 0.5 : 1,
-                cursor: createdQuotations.has(record.id) ? 'not-allowed' : 'pointer'
+                cursor: createdQuotations.has(record.id)
+                  ? "not-allowed"
+                  : "pointer",
               }}
             >
-              {createdQuotations.has(record.id) ? 'Quotation Created' : 'Create Quotation'}
-            </Button>
-          )}
-
-          {record.paymentStatus.toLowerCase() === "complete" && (
-            <Button
-              type="primary"
-              onClick={() => handleCreateBookingKoi(record.id)}
-              style={{ backgroundColor: "#10B981" }}
-            >
-              Create Koi Booking
+              {createdQuotations.has(record.id)
+                ? "Quotation Created"
+                : "Create Quotation"}
             </Button>
           )}
         </Space>
@@ -383,7 +430,10 @@ const AcceptedTourList = () => {
       }
     } catch (error) {
       console.error("Error accepting booking:", error);
-      toast.error("Failed to accept booking: " + (error.response?.data?.message || error.message));
+      toast.error(
+        "Failed to accept booking: " +
+          (error.response?.data?.message || error.message)
+      );
     }
   };
 
@@ -420,23 +470,23 @@ const AcceptedTourList = () => {
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold text-gray-800">Accepted Tours</h1>
           <Space>
-          <div style={{ marginRight: "16px" }}>
-            <span style={{ marginRight: "8px" }}>Payment Status:</span>
-            <Select
-              defaultValue="all"
-              style={{ width: 200 }}
-              onChange={(value) => setFilteredStatus(value)}
-              options={statusOptions}
-            />
-          </div>
-          <Button type="primary" onClick={() => navigate("/staff/Quotation")}>
-            View Quotations
-          </Button>
-          <Button
-            type="primary"
-            onClick={() => navigate("/staff/checkin-service")}
-          >
-            View Check-ins
+            <div style={{ marginRight: "16px" }}>
+              <span style={{ marginRight: "8px" }}>Payment Status:</span>
+              <Select
+                defaultValue="all"
+                style={{ width: 200 }}
+                onChange={(value) => setFilteredStatus(value)}
+                options={statusOptions}
+              />
+            </div>
+            <Button type="primary" onClick={() => navigate("/staff/Quotation")}>
+              View Quotations
+            </Button>
+            <Button
+              type="primary"
+              onClick={() => navigate("/staff/checkin-service")}
+            >
+              View Check-ins
             </Button>
           </Space>
         </div>
@@ -465,7 +515,9 @@ const AcceptedTourList = () => {
         open={isModalOpen}
         onCancel={() => setIsModalOpen(false)}
         footer={[
-          <Button key="close" onClick={() => setIsModalOpen(false)}>Close</Button>
+          <Button key="close" onClick={() => setIsModalOpen(false)}>
+            Close
+          </Button>,
         ]}
         width={800}
       >
@@ -549,7 +601,7 @@ const AcceptedTourList = () => {
                       value={selectedBooking.vat * 100}
                       className="w-24 ml-2"
                       disabled
-                      style={{ backgroundColor: '#f5f5f5' }}
+                      style={{ backgroundColor: "#f5f5f5" }}
                       options={vatOptions}
                     />
                   </div>
@@ -561,26 +613,36 @@ const AcceptedTourList = () => {
                       value={formatVND(selectedBooking.discountAmount)}
                       className="w-32 ml-2"
                       disabled
-                      style={{ backgroundColor: '#f5f5f5' }}
+                      style={{ backgroundColor: "#f5f5f5" }}
                       prefix="VND"
                     />
                   </div>
                 </div>
-                
+
                 <div className="space-y-4">
                   <div className="flex items-center">
                     <span className="text-gray-600 w-32 font-medium">
                       Payment Method:
                     </span>
                     <div className="flex items-center gap-2">
-                      <span className={`text-lg ${getPaymentMethodInfo(selectedBooking.paymentMethod).color}`}>
-                        {getPaymentMethodInfo(selectedBooking.paymentMethod).icon}
+                      <span
+                        className={`text-lg ${
+                          getPaymentMethodInfo(selectedBooking.paymentMethod)
+                            .color
+                        }`}
+                      >
+                        {
+                          getPaymentMethodInfo(selectedBooking.paymentMethod)
+                            .icon
+                        }
                       </span>
                       <span className="font-semibold">
-                        {getPaymentMethodInfo(selectedBooking.paymentMethod).label}
+                        {
+                          getPaymentMethodInfo(selectedBooking.paymentMethod)
+                            .label
+                        }
                       </span>
                     </div>
-
                   </div>
 
                   <div className="flex items-center">
@@ -671,7 +733,9 @@ const AcceptedTourList = () => {
           </div>
 
           <div className="flex justify-end space-x-2">
-            <Button onClick={() => setIsQuotationModalOpen(false)}>Cancel</Button>
+            <Button onClick={() => setIsQuotationModalOpen(false)}>
+              Cancel
+            </Button>
             <Button
               type="primary"
               onClick={handleQuotationSubmit}
@@ -687,11 +751,16 @@ const AcceptedTourList = () => {
       <Modal
         title={
           <div className="flex items-center justify-between">
-            <span>Participants for Booking #{selectedBookingForParticipants?.id || ''}</span>
-            {selectedBookingForParticipants?.paymentStatus.toLowerCase() === 'cancelled' && (
+            <span>
+              Participants for Booking #
+              {selectedBookingForParticipants?.id || ""}
+            </span>
+            {selectedBookingForParticipants?.paymentStatus.toLowerCase() ===
+              "cancelled" && (
               <Tag color="red">Cancelled Booking - Check-in Disabled</Tag>
             )}
-            {selectedBookingForParticipants?.paymentStatus.toLowerCase() === 'pending' && (
+            {selectedBookingForParticipants?.paymentStatus.toLowerCase() ===
+              "pending" && (
               <Tag color="gold">Pending Booking - Check-in Disabled</Tag>
             )}
           </div>
@@ -708,7 +777,10 @@ const AcceptedTourList = () => {
             </div>
           ) : (
             currentParticipants.map((participant, index) => (
-              <div key={index} className="bg-white p-4 rounded-lg border border-gray-200">
+              <div
+                key={index}
+                className="bg-white p-4 rounded-lg border border-gray-200"
+              >
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="text-xs text-gray-500">First Name</label>
@@ -720,7 +792,7 @@ const AcceptedTourList = () => {
                   </div>
                   <div>
                     <label className="text-xs text-gray-500">Email</label>
-                    <p className="font-medium">{participant.email || 'N/A'}</p>
+                    <p className="font-medium">{participant.email || "N/A"}</p>
                   </div>
                   <div>
                     <label className="text-xs text-gray-500">Phone</label>
@@ -739,20 +811,26 @@ const AcceptedTourList = () => {
                     <p className="font-medium">{participant.status}</p>
                   </div>
                   <div>
-                    {(selectedBookingForParticipants?.paymentStatus.toLowerCase() !== 'cancelled' && 
-                      selectedBookingForParticipants?.paymentStatus.toLowerCase() !== 'pending') ? (
+                    {selectedBookingForParticipants?.paymentStatus.toLowerCase() !==
+                      "cancelled" &&
+                    selectedBookingForParticipants?.paymentStatus.toLowerCase() !==
+                      "pending" ? (
                       <Button
                         type="primary"
-                        onClick={() => handleUpdateCheckinStatus(participant.id)}
-                        disabled={participant.status === 'CHECKED'}
+                        onClick={() =>
+                          handleUpdateCheckinStatus(participant.id)
+                        }
+                        disabled={participant.status === "CHECKED"}
                       >
-                        {participant.status === 'CHECKED' ? 'Checked In' : 'Mark as Checked'}
+                        {participant.status === "CHECKED"
+                          ? "Checked In"
+                          : "Mark as Checked"}
                       </Button>
                     ) : (
-                      <Tooltip title={`Check-in is disabled for ${selectedBookingForParticipants?.paymentStatus.toLowerCase()} bookings`}>
-                        <Button disabled>
-                          Check-in Disabled
-                        </Button>
+                      <Tooltip
+                        title={`Check-in is disabled for ${selectedBookingForParticipants?.paymentStatus.toLowerCase()} bookings`}
+                      >
+                        <Button disabled>Check-in Disabled</Button>
                       </Tooltip>
                     )}
                   </div>
@@ -767,4 +845,4 @@ const AcceptedTourList = () => {
   );
 };
 
-export default AcceptedTourList; 
+export default AcceptedTourList;
