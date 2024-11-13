@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Button, Card, message } from "antd";
 import { useLocation, useNavigate } from "react-router-dom";
-// import { CheckCircleOutlined } from "@ant-design/icons";
 import { useCookies } from "react-cookie";
 
 const PaymentSuccess = () => {
@@ -11,8 +10,11 @@ const PaymentSuccess = () => {
   const [paymentDetails, setPaymentDetails] = useState({});
   const [cookies] = useCookies(["token"]);
   const token = cookies.token;
+  const [isConfirmed, setIsConfirmed] = useState(false);
 
   useEffect(() => {
+    if (isConfirmed) return;
+
     if (!token) {
       message.error("Authentication token is missing.");
       return;
@@ -31,14 +33,6 @@ const PaymentSuccess = () => {
       vnp_PayDate,
     });
 
-    console.log("Payment Details:", {
-      vnp_ResponseCode,
-      vnp_Amount,
-      vnp_OrderInfo,
-      vnp_PayDate,
-    });
-
-    // Call API to confirm payment
     const confirmPayment = async () => {
       try {
         const response = await axios.put(
@@ -57,7 +51,8 @@ const PaymentSuccess = () => {
         );
 
         if (response.status === 200) {
-          message.success("Payment confirmed successfully.");
+          setIsConfirmed(true);
+          // message.success("Payment confirmed successfully.");
         } else {
           message.error("Failed to confirm payment.");
         }
@@ -68,16 +63,15 @@ const PaymentSuccess = () => {
     };
 
     confirmPayment();
-  }, [location.search, token]);
+  }, [location.search, token, isConfirmed]);
 
   const handleGoBack = () => {
-    navigate("/"); // Navigate to the home page
+    navigate("/");
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 mt-20">
       <Card className="w-full max-w-lg p-8 text-center">
-        {/* <CheckCircleOutlined className="text-green-500 text-6xl mb-4" /> */}
         <h2 className="text-2xl font-semibold mb-2">Payment Done!</h2>
         <p className="text-gray-500 mb-6">
           Thank you for your payment. Your transaction was completed
