@@ -336,7 +336,7 @@ const BookingInformation = () => {
                         </div>
 
                         <div className="bg-purple-50 p-2 rounded-lg">
-                          <p className="text-gray-600 text-xs">VAT</p>
+                          <p className="text-gray-600 text-xs">VAT (10%)</p>
                           <p className="font-semibold text-sm text-purple-700">
                             {formatVND(booking.vatAmount)}
                           </p>
