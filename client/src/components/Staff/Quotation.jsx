@@ -159,27 +159,31 @@ const Quotation = () => {
 
   const handlePaymentSubmit = async (values) => {
     try {
-      const baseAmount = selectedQuotation.amount;
-      const vatRate = Number(values.vat) / 100;
-      const vatAmount = baseAmount * vatRate;
+      console.log('Form values:', values);
+      
+      const payload = {
+        bookingID: selectedQuotation.bookingId,
+        amount: parseFloat(values.amount), // Đảm bảo amount là số
+        vat: Number(values.vat) / 100,
+        paymentMethod: values.paymentMethod,
+        paymentStatus: "processing",
+        discountAmount: parseFloat(values.discountAmount),
+        quoId: selectedQuotation.id,
+      };
+
+      console.log('Sending payload:', payload);
 
       const response = await axios.put(
         "http://localhost:8080/bookings/admin/updateResponseFormStaff",
-        {
-          bookingID: selectedQuotation.bookingId,
-          paymentStatus: "processing",
-          paymentMethod: values.paymentMethod,
-          vat: vatRate,
-          discountAmount: parseFloat(values.discountAmount), // Sử dụng trực tiếp giá trị discount amount
-          amount: selectedQuotation.amount,
-          quoId: selectedQuotation.id,
-        },
+        payload,
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }
       );
+
+      console.log('Response:', response.data);
 
       setCompletedPayments((prev) => new Set([...prev, selectedQuotation.id]));
       message.success("Payment sent successfully!");
@@ -480,6 +484,38 @@ const Quotation = () => {
               max={selectedQuotation ? Math.min(50000000, selectedQuotation.amount * 0.7) : 50000000}
               step="100000"
               placeholder="Enter discount amount (e.g., 1000000)" 
+              onKeyDown={(e) => {
+                if (e.key === 'e' || e.key === '.' || e.key === '-' || e.key === '+') {
+                  e.preventDefault();
+                }
+              }}
+            />
+          </Form.Item>
+          <Form.Item
+            name="amount"
+            label="Amount"
+            initialValue={selectedQuotation?.amount}
+            rules={[
+              { required: true, message: 'Please input amount' },
+              {
+                validator: (_, value) => {
+                  const amount = parseFloat(value);
+                  if (isNaN(amount) || amount <= 0) {
+                    return Promise.reject('Amount must be greater than 0');
+                  }
+                  return Promise.resolve();
+                }
+              }
+            ]}
+          >
+            <Input
+              type="number"
+              min="0"
+              step="100000"
+              placeholder="Enter amount (VND)"
+              onChange={(e) => {
+                console.log('New amount value:', e.target.value);
+              }}
               onKeyDown={(e) => {
                 if (e.key === 'e' || e.key === '.' || e.key === '-' || e.key === '+') {
                   e.preventDefault();
