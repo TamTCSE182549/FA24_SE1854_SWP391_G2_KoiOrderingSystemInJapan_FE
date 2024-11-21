@@ -76,10 +76,11 @@ function BookingTourCustom() {
     };
 
     const handleFarmChange = (selectedOptions) => {
-        const selectedFarms = selectedOptions.map(option => option.value);
+        const selectedFarms = selectedOptions.map(option => option.label);
         setFormData({
             ...formData,
-            farmId: selectedFarms
+            farmId: selectedOptions.map(option => option.value),
+            description: selectedFarms.join(', ')
         });
     };
 
@@ -327,11 +328,11 @@ function BookingTourCustom() {
                         />
                     </div>
                     <div className="mb-4">
-                        <label className="block text-sm font-medium text-gray-700" htmlFor="description">Description</label>
+                        <label className="block text-sm font-medium text-gray-700" htmlFor="description">Description (Selected Farms)</label>
                         <textarea
                             name="description"
-                            onChange={handleChange}
-                            required
+                            value={formData.description}
+                            readOnly
                             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-gray-900"
                         />
                     </div>
