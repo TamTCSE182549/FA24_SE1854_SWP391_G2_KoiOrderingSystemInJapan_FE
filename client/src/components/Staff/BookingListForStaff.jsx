@@ -502,6 +502,9 @@ const BookingListForStaff = () => {
             {selectedBookingForParticipants?.paymentStatus.toLowerCase() === 'pending' && (
               <Tag color="gold">Pending Booking - Check-in Disabled</Tag>
             )}
+            {selectedBookingForParticipants?.paymentStatus.toLowerCase() === 'processing' && (
+              <Tag color="blue">Processing Booking - Check-in Disabled</Tag>
+            )}
           </div>
         }
         visible={isViewParticipantsModalVisible}
@@ -548,7 +551,8 @@ const BookingListForStaff = () => {
                   </div>
                   <div>
                     {(selectedBookingForParticipants?.paymentStatus.toLowerCase() !== 'cancelled' && 
-                      selectedBookingForParticipants?.paymentStatus.toLowerCase() !== 'pending') ? (
+                      selectedBookingForParticipants?.paymentStatus.toLowerCase() !== 'pending' &&
+                      selectedBookingForParticipants?.paymentStatus.toLowerCase() !== 'processing') ? (
                       <Tooltip title={userRole !== 'CONSULTING_STAFF' ? 'Only Consulting Staff can perform check-ins' : ''}>
                         <Button
                           type="primary"
