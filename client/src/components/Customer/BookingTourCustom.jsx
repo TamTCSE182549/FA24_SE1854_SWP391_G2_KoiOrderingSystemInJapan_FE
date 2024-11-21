@@ -24,6 +24,12 @@ const airportOptions = [
     { value: "Cat Bi International Airport (Hai Phong)", label: "Cat Bi International Airport (Hai Phong)" },
 ];
 
+const paymentOptions = [
+    { value: "CASH", label: "💵 Cash" },
+    { value: "VISA", label: "💳 Visa" },
+    { value: "TRANSFER", label: "🏦 Transfer" },
+];
+
 function BookingTourCustom() {
     const [formData, setFormData] = useState({
         startDate: '',
@@ -327,6 +333,29 @@ function BookingTourCustom() {
                             onChange={handleChange}
                             required
                             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-gray-900"
+                        />
+                    </div>
+                    <div className="mb-4">
+                        <label className="block text-gray-700 mb-2">Payment Method</label>
+                        <Select
+                            options={paymentOptions}
+                            onChange={(selectedOption) => setFormData({ ...formData, paymentMethod: selectedOption.value })}
+                            className="w-full"
+                            placeholder="Select payment method"
+                            styles={{
+                                control: (provided) => ({
+                                    ...provided,
+                                    color: 'black',
+                                }),
+                                option: (provided) => ({
+                                    ...provided,
+                                    color: 'black',
+                                }),
+                                singleValue: (provided) => ({
+                                    ...provided,
+                                    color: 'black',
+                                }),
+                            }}
                         />
                     </div>
                     <button
