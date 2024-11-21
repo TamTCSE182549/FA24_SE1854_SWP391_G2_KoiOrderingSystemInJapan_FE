@@ -458,7 +458,7 @@ const BookingDetail = () => {
                         <div key={koiDetail.bookingKoiDetailId} className="grid grid-cols-1 md:grid-cols-5 gap-4 p-4 bg-gray-50 rounded-lg">
                             <div className="md:col-span-3">
                                 <h4 className="text-lg font-semibold text-gray-900">{koiDetail.koiName}</h4>
-                                <p className="text-sm text-gray-500">Origin: {koiDetail.farmName}</p>
+                                <p className="text-sm text-gray-500">Farm: {koiDetail.farmName}</p>
                                 <p className="text-sm text-gray-500">Origin: {koiDetail.origin}</p>
                             </div>
                             <div>

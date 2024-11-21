@@ -224,6 +224,7 @@ const BookingKoi = () => {
     } else {
       // Thêm cá mới
       const newBookingDetail = {
+        farmId: selectedFarmId,
         koiId: selectedKoiId,
         koiName: selectedKoi.koiName,
         quantity: quantityNum,
@@ -322,7 +323,7 @@ const BookingKoi = () => {
         chekinId: parseInt(selectedCheckinId),
         paymentMethod: paymentMethod,
         details: bookingDetails.map((detail) => ({
-          farmId: selectedFarmId,
+          farmId: detail.farmId,
           koiId: parseInt(detail.koiId),
           quantity: detail.quantity,
           unitPrice: detail.unitPrice,
