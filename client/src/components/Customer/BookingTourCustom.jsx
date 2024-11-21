@@ -25,7 +25,7 @@ const airportOptions = [
 ];
 
 const paymentOptions = [
-    { value: "CASH", label: "💵 Cash" },
+    // { value: "CASH", label: "💵 Cash" },
     { value: "VISA", label: "💳 Visa" },
     { value: "TRANSFER", label: "🏦 Transfer" },
 ];

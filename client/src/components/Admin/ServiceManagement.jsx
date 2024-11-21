@@ -127,7 +127,6 @@ const ServiceManagement = () => {
 
     try {
       const payload = {
-        amount: values.amount,
         description:
           values.status === "FINISH"
             ? "Quotation has been accept"
@@ -399,41 +398,6 @@ const ServiceManagement = () => {
               <Option value="FINISH">Accept</Option>
               <Option value="REJECTED">Rejected</Option>
             </Select>
-          </Form.Item>
-
-          <Form.Item
-            name="amount"
-            label="Amount (VND)"
-            rules={[
-              {
-                validator(_, value) {
-                  if (!value) {
-                    return Promise.reject("Amount is required");
-                  }
-                  if (isNaN(value)) {
-                    return Promise.reject("Amount must be a number");
-                  }
-                  const numValue = parseFloat(value);
-                  if (numValue <= 0) {
-                    return Promise.reject("Amount must be greater than 0");
-                  }
-                  if (numValue > 10000000000) {
-                    return Promise.reject(
-                      "Amount cannot exceed 10,000,000,000 VND"
-                    );
-                  }
-                  return Promise.resolve();
-                },
-              },
-            ]}
-          >
-            <Input
-              type="number"
-              min="0"
-              max="10000000000"
-              step="1000"
-              placeholder="Enter amount in VND"
-            />
           </Form.Item>
 
           <Form.Item

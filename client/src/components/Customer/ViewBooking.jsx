@@ -378,8 +378,8 @@ const BookingInformation = () => {
                       </div>
                     </div>
 
-                    {/* Action Buttons - giữ nguyên */}
-                    <div className="grid grid-cols-3 gap-1">
+                    {/* Action Buttons - Giảm gap xuống */}
+                    <div className="grid grid-cols-3 gap-0.5"> {/* Thay đổi từ gap-1 thành gap-0.5 */}
                       <Tooltip title={"View booking details"}>
                         <Button
                           type="primary"
@@ -487,47 +487,76 @@ const BookingInformation = () => {
         footer={null}
         width={700}
       >
-        <div className="space-y-4">
-          {currentParticipants.length === 0 ? (
-            <div className="text-center py-4 text-gray-500">
-              No participants found for this booking
-            </div>
-          ) : (
-            currentParticipants.map((participant, index) => (
-              <div key={index} className="bg-white p-4 rounded-lg border border-gray-200">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-xs text-gray-500">First Name</label>
-                    <p className="font-medium">{participant.firstName}</p>
-                  </div>
-                  <div>
-                    <label className="text-xs text-gray-500">Last Name</label>
-                    <p className="font-medium">{participant.lastName}</p>
-                  </div>
-                  <div>
-                    <label className="text-xs text-gray-500">Email</label>
-                    <p className="font-medium">{participant.email || 'N/A'}</p>
-                  </div>
-                  <div>
-                    <label className="text-xs text-gray-500">Phone</label>
-                    <p className="font-medium">{participant.phoneNumber}</p>
-                  </div>
-                  <div>
-                    <label className="text-xs text-gray-500">Passport</label>
-                    <p className="font-medium">{participant.passport}</p>
-                  </div>
-                  <div>
-                    <label className="text-xs text-gray-500">Created By</label>
-                    <p className="font-medium">{participant.createBy}</p>
-                  </div>
-                  <div>
-                    <label className="text-xs text-gray-500">Status</label>
-                    <p className="font-medium">{participant.status}</p>
-                  </div>
-                </div>
+        <div className="space-y-6">
+          {/* Common Information Section */}
+          <div className="bg-blue-50 p-4 rounded-lg">
+            <h3 className="text-lg font-semibold text-blue-800 mb-3">Common Information</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-xs text-gray-500">Created By</label>
+                <p className="font-medium">{currentParticipants[0]?.createBy || 'N/A'}</p>
               </div>
-            ))
-          )}
+              <div>
+                <label className="text-xs text-gray-500">Airport</label>
+                <p className="font-medium">{currentParticipants[0]?.airport || 'N/A'}</p>
+              </div>
+              <div>
+                <label className="text-xs text-gray-500">Airline</label>
+                <p className="font-medium">{currentParticipants[0]?.airline || 'N/A'}</p>
+              </div>
+              <div>
+                <label className="text-xs text-gray-500">Check-in Date</label>
+                <p className="font-medium">
+                  {currentParticipants[0]?.checkinDate 
+                    ? new Date(currentParticipants[0].checkinDate).toLocaleString() 
+                    : 'N/A'}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Participants Section */}
+          <div>
+            <h3 className="text-lg font-semibold text-gray-800 mb-3">Participants Information</h3>
+            {currentParticipants.length === 0 ? (
+              <div className="text-center py-4 text-gray-500">
+                No participants found for this booking
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {currentParticipants.map((participant, index) => (
+                  <div key={index} className="bg-white p-4 rounded-lg border border-gray-200">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-xs text-gray-500">First Name</label>
+                        <p className="font-medium">{participant.firstName}</p>
+                      </div>
+                      <div>
+                        <label className="text-xs text-gray-500">Last Name</label>
+                        <p className="font-medium">{participant.lastName}</p>
+                      </div>
+                      <div>
+                        <label className="text-xs text-gray-500">Email</label>
+                        <p className="font-medium">{participant.email || 'N/A'}</p>
+                      </div>
+                      <div>
+                        <label className="text-xs text-gray-500">Phone</label>
+                        <p className="font-medium">{participant.phoneNumber}</p>
+                      </div>
+                      <div>
+                        <label className="text-xs text-gray-500">Passport</label>
+                        <p className="font-medium">{participant.passport}</p>
+                      </div>
+                      <div>
+                        <label className="text-xs text-gray-500">Status</label>
+                        <p className="font-medium">{participant.status}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </Modal>
       <ToastContainer />
