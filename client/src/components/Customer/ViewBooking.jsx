@@ -111,12 +111,8 @@ const BookingInformation = () => {
       return;
     }
     
-    if (booking.paymentStatus === "pending") {
-      toast.warn("Booking details are only available after pending status");
-      return;
-    }
-    
     navigate("/bookingTourDetail", { state: { booking } });
+    return;
   };
 
   const handleDeleteBooking = async (booking) => {
@@ -384,21 +380,12 @@ const BookingInformation = () => {
 
                     {/* Action Buttons - giữ nguyên */}
                     <div className="grid grid-cols-3 gap-1">
-                      <Tooltip title={
-                        booking.paymentStatus === "pending" 
-                          ? "Details available after pending status" 
-                          : "View booking details"
-                      }>
+                      <Tooltip title={"View booking details"}>
                         <Button
                           type="primary"
                           onClick={() => handleViewDetailBooking(booking)}
-                          className={`flex items-center justify-center ${
-                            booking.paymentStatus === "pending"
-                              ? "!bg-gray-400 cursor-not-allowed"
-                              : "!bg-blue-500 hover:!bg-blue-600"
-                          }`}
+                          className={`flex items-center justify-center !bg-blue-500 hover:!bg-blue-600`}
                           icon={<EyeOutlined />}
-                          disabled={booking.paymentStatus === "pending"}
                         />
                       </Tooltip>
 
