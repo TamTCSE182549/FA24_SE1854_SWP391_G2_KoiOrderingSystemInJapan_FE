@@ -420,11 +420,11 @@ const Tour = () => {
       {/* Custom Tour Message */}
       <div className="w-full max-w-6xl text-center mt-8 mb-4">
         <div 
-          onClick={() => navigate('/aboutus')}
+          onClick={() => navigate('/bookingtourcustom')}
           className="inline-block px-6 py-3 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer"
         >
           <p className="text-lg font-medium bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-            ✨ Contact us for customized tour bookings ✨
+            Booking Tour Customize 
           </p>
         </div>
       </div>
