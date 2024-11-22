@@ -163,8 +163,8 @@ const Quotation = () => {
       
       const payload = {
         bookingID: selectedQuotation.bookingId,
-        amount: parseFloat(values.amount), // Đảm bảo amount là số
-        vat: Number(values.vat) / 100,
+        amount: parseFloat(values.amount),
+        vat: 0,
         paymentMethod: values.paymentMethod,
         paymentStatus: "processing",
         discountAmount: parseFloat(values.discountAmount),
@@ -379,30 +379,18 @@ const Quotation = () => {
                 <p className="mb-2"><strong>Customer Name:</strong> {bookingDetails.nameCus}</p>
                 <p className="mb-2"><strong>Email:</strong> {bookingDetails.email}</p>
                 <p className="mb-2"><strong>Phone:</strong> {bookingDetails.phone}</p>
-                <p className="mb-2"><strong>Booking Type:</strong> {bookingDetails.bookingType}</p>
               </div>
               <div>
-                <p className="mb-2"><strong>Base Amount:</strong> VND {bookingDetails.totalAmount}</p>
-                <p className="mb-2"><strong>VAT (%):</strong> {bookingDetails.vat * 100}%</p>
-                <p className="mb-2"><strong>VAT Amount:</strong> +VND {bookingDetails.vatAmount}</p>
-                <p className="mb-2">
-                  <strong>Discount Rate:</strong> {(bookingDetails.discountAmount / (bookingDetails.totalAmount + bookingDetails.vatAmount) * 100).toFixed(1)}%
-                </p>
-                <p className="mb-2">
-                  <strong>Discount Amount:</strong> -{bookingDetails.discountAmount} VND
-                  <span className="text-gray-500 text-sm ml-2">
-                    ({(bookingDetails.discountAmount / (bookingDetails.totalAmount + bookingDetails.vatAmount) * 100).toFixed(1)}% )
-                  </span>
-                </p>
+                <p className="mb-2"><strong>Base Amount:</strong> VND {formatNumber(bookingDetails.totalAmount)}</p>
+                <p className="mb-2"><strong>VAT Amount:</strong> VND {formatNumber(bookingDetails.vatAmount)}</p>
+                <p className="mb-2"><strong>Discount Amount:</strong> VND {formatNumber(bookingDetails.discountAmount)}</p>
                 <p className="mb-2 text-lg font-bold border-t pt-2">
-                  <strong>Final Total:</strong> {bookingDetails.totalAmountWithVAT} VND
+                  <strong>Final Total:</strong> VND {formatNumber(bookingDetails.totalAmountWithVAT)}
                 </p>
               </div>
               <div className="col-span-2">
-                <p className="mb-2"><strong>Payment Method:</strong> {bookingDetails.paymentMethod}</p>
+                <p className="mb-2"><strong>Current Payment Method:</strong> {bookingDetails.paymentMethod}</p>
                 <p className="mb-2"><strong>Payment Status:</strong> {bookingDetails.paymentStatus}</p>
-                <p className="mb-2"><strong>Created Date:</strong> {bookingDetails.createdDate && new Date(bookingDetails.createdDate).toLocaleString()}</p>
-                <p className="mb-2"><strong>Updated Date:</strong> {bookingDetails.updatedDate && new Date(bookingDetails.updatedDate).toLocaleString()}</p>
               </div>
             </div>
           </div>
@@ -411,11 +399,22 @@ const Quotation = () => {
         <Form
           form={paymentForm}
           onFinish={(values) => {
+            // Chỉ gửi payment method nếu có thay đổi
             if (allowPaymentMethodChange && values.paymentMethod === originalPaymentMethod) {
               message.error('Please select a different payment method or uncheck the change option');
               return;
             }
-            handlePaymentSubmit(values);
+            // Gửi các giá trị từ booking details
+            const payload = {
+              bookingID: selectedQuotation.bookingId,
+              amount: bookingDetails.totalAmountWithVAT,
+              vat: bookingDetails.vat,
+              paymentMethod: values.paymentMethod,
+              paymentStatus: "processing",
+              discountAmount: bookingDetails.discountAmount,
+              quoId: selectedQuotation.id,
+            };
+            handlePaymentSubmit(payload);
           }}
           layout="vertical"
         >
@@ -426,7 +425,7 @@ const Quotation = () => {
             <Checkbox 
               onChange={(e) => setAllowPaymentMethodChange(e.target.checked)}
             >
-              Allow payment method change
+              Change payment method
             </Checkbox>
           </Form.Item>
 
@@ -436,93 +435,12 @@ const Quotation = () => {
             rules={[{ required: true, message: 'Please select payment method' }]}
           >
             <Select disabled={!allowPaymentMethodChange}>
-              <Option value="CASH">Cash</Option>
-              <Option value="VISA">Credit Card</Option>
-              <Option value="TRANSFER">Bank Transfer</Option>
+              {/* <Option value="CASH">Cash</Option> */}
+              <Option value="VISA">Visa</Option>
+              <Option value="TRANSFER">Transfer</Option>
             </Select>
           </Form.Item>
-          <Form.Item 
-            name="vat" 
-            label="VAT" 
-            rules={[
-              { required: true, message: 'Please select VAT rate' }
-            ]}
-          >
-            <Select placeholder="Select VAT rate">
-              <Option value="0">NO VAT (0%)</Option>
-              {/* <Option value="5">5%</Option> */}
-              <Option value="10">10%</Option>
-            </Select>
-          </Form.Item>
-          <Form.Item
-            name="discountAmount"
-            label="Discount Amount"
-            tooltip="Enter discount amount (0 to 50,000,000 VND, not exceeding 70% of the original amount)"
-            rules={[
-              { required: true, message: 'Please input discount amount' },
-              {
-                validator: (_, value) => {
-                  const amount = parseFloat(value);
-                  const originalAmount = selectedQuotation?.amount || 0;
-                  if (isNaN(amount) || amount < 0) {
-                    return Promise.reject('Discount amount cannot be negative');
-                  }
-                  if (amount > 50000000) {
-                    return Promise.reject('Discount amount cannot exceed 50,000,000 VND');
-                  }
-                  if (amount > originalAmount * 0.7) {
-                    return Promise.reject('Discount amount cannot exceed 70% of the original amount');
-                  }
-                  return Promise.resolve();
-                }
-              }
-            ]}
-          >
-            <Input 
-              type="number" 
-              min="0"
-              max={selectedQuotation ? Math.min(50000000, selectedQuotation.amount * 0.7) : 50000000}
-              step="100000"
-              placeholder="Enter discount amount (e.g., 1000000)" 
-              onKeyDown={(e) => {
-                if (e.key === 'e' || e.key === '.' || e.key === '-' || e.key === '+') {
-                  e.preventDefault();
-                }
-              }}
-            />
-          </Form.Item>
-          <Form.Item
-            name="amount"
-            label="Amount"
-            initialValue={selectedQuotation?.amount}
-            rules={[
-              { required: true, message: 'Please input amount' },
-              {
-                validator: (_, value) => {
-                  const amount = parseFloat(value);
-                  if (isNaN(amount) || amount <= 0) {
-                    return Promise.reject('Amount must be greater than 0');
-                  }
-                  return Promise.resolve();
-                }
-              }
-            ]}
-          >
-            <Input
-              type="number"
-              min="0"
-              step="100000"
-              placeholder="Enter amount (VND)"
-              onChange={(e) => {
-                console.log('New amount value:', e.target.value);
-              }}
-              onKeyDown={(e) => {
-                if (e.key === 'e' || e.key === '.' || e.key === '-' || e.key === '+') {
-                  e.preventDefault();
-                }
-              }}
-            />
-          </Form.Item>
+
           <Form.Item className="flex justify-end">
             <Space>
               <Button onClick={() => {

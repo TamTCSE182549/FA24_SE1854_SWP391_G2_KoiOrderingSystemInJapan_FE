@@ -31,12 +31,9 @@ const formatVND = (price) => {
   return price?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + " VND";
 };
 
-const AcceptedTourList = () => {
-  const vatOptions = [
-    { value: "0", label: "0%" },
-    { value: "10", label: "10%" },
-  ];
+const VAT_RATE = "10"; // Define constant for VAT rate
 
+const AcceptedTourList = () => {
   const [acceptedTours, setAcceptedTours] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState(null);
@@ -52,15 +49,8 @@ const AcceptedTourList = () => {
   // Thêm state để lưu trữ các bookingId đã tạo quotation
   const [createdQuotations, setCreatedQuotations] = useState(new Set());
 
-  // Add these new state variables
-  const [isViewParticipantsModalVisible, setIsViewParticipantsModalVisible] =
-    useState(false);
-  const [currentParticipants, setCurrentParticipants] = useState([]);
-  const [selectedBookingForParticipants, setSelectedBookingForParticipants] =
-    useState(null);
-
-  // Thêm state để lưu role
-  const [userRole, setUserRole] = useState("");
+  // Thêm state userRole
+  const [userRole, setUserRole] = useState(null);
 
   // Thêm useEffect để decode token và lấy role khi component mount
   useEffect(() => {
@@ -103,47 +93,19 @@ const AcceptedTourList = () => {
       return;
     }
 
-    try {
-      // Create quotation with default values
-      const quotationResponse = await axios.post(
-        "http://localhost:8080/quotations/create",
-        {
-          bookingId: booking.id,
-          amount: booking.totalAmount,
-          description: 'Quotation being in Process...',
-          vat: 0.1,
-          paymentMethod: 'CASH'
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      if (quotationResponse.status === 201) {
-        setCreatedQuotations((prev) => new Set([...prev, booking.id]));
-        toast.success("Quotation created successfully!");
-        
-        // Set selected booking for payment form
-        setSelectedBookingForQuotation(booking);
-        
-        // Initialize payment form with default values
-        paymentForm.setFieldsValue({
-          amount: booking.totalAmount,
-          vat: '10',
-          paymentMethod: 'CASH',
-          discountAmount: 0
-        });
-        
-        // Show payment form immediately
-        setIsPaymentFormVisible(true);
-      }
-    } catch (error) {
-      console.error("Error creating quotation:", error);
-      toast.error("Failed to create quotation: " + (error.response?.data?.message || error.message));
-    }
+    // Set selected booking for quotation form
+    setSelectedBookingForQuotation(booking);
+    
+    // Initialize payment form with values from booking
+    paymentForm.setFieldsValue({
+      amount: booking.totalAmount,
+      vat: '10',
+      paymentMethod: booking.paymentMethod || 'CASH', // Lấy paymentMethod từ booking
+      discountAmount: 0
+    });
+    
+    // Show payment form
+    setIsPaymentFormVisible(true);
   };
 
   const handleCreateBookingKoi = (bookingId) => {
@@ -197,35 +159,69 @@ const AcceptedTourList = () => {
 
   const handlePaymentSubmit = async (values) => {
     try {
-      const payload = {
-        bookingID: selectedBookingForQuotation.id,
-        amount: parseFloat(values.amount),
-        vat: Number(values.vat) / 100,
-        paymentMethod: values.paymentMethod,
-        paymentStatus: "processing",
-        discountAmount: parseFloat(values.discountAmount),
-        quoId: selectedBookingForQuotation.id, // This will be updated with the new quotation ID
+      // Validate the input values
+      const amount = parseFloat(values.amount);
+      const vat = Number(values.vat) / 100;
+      const discountAmount = parseFloat(values.discountAmount);
+
+      // Step 1: Create quotation first
+      const quotationPayload = {
+        bookingId: selectedBookingForQuotation.id,
+        amount: amount,
+        description: 'Quotation created',
+        vat: vat,
+        paymentMethod: values.paymentMethod
       };
 
-      const response = await axios.put(
-        "http://localhost:8080/bookings/admin/updateResponseCusFormStaff/Customize",
-        payload,
+      const quotationResponse = await axios.post(
+        "http://localhost:8080/quotations/create",
+        quotationPayload,
         {
           headers: {
             Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
           },
         }
       );
 
-      if (response.status === 200) {
-        toast.success("Payment processed successfully!");
-        setIsPaymentFormVisible(false);
-        paymentForm.resetFields();
-        fetchAcceptedTours();
+      if (quotationResponse.status === 201) {
+        // Step 2: After successful quotation creation, update the booking
+        const bookingPayload = {
+          bookingID: selectedBookingForQuotation.id,
+          amount: amount,
+          vat: vat,
+          paymentMethod: values.paymentMethod,
+          paymentStatus: "pending",
+          discountAmount: discountAmount,
+          quoId: quotationResponse.data.id // Use the quotation ID from the response
+        };
+
+        const bookingResponse = await axios.put(
+          "http://localhost:8080/bookings/admin/updateResponseCusFormStaff/Customize",
+          bookingPayload,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (bookingResponse.status === 200) {
+          // Update UI and show success message
+          setCreatedQuotations((prev) => new Set([...prev, selectedBookingForQuotation.id]));
+          toast.success("Quotation created and booking updated successfully!");
+          setIsPaymentFormVisible(false);
+          paymentForm.resetFields();
+          fetchAcceptedTours(); // Refresh the booking list
+        }
       }
     } catch (error) {
-      console.error("Error processing payment:", error);
-      toast.error("Failed to process payment. Please try again.");
+      console.error("Error in payment process:", error);
+      if (error.response?.data?.message) {
+        toast.error(`Error: ${error.response.data.message}`);
+      } else {
+        toast.error("Failed to process payment. Please try again.");
+      }
     }
   };
 
@@ -260,57 +256,6 @@ const AcceptedTourList = () => {
     fetchAcceptedTours();
   }, []);
 
-  const handleViewParticipants = async (booking) => {
-    try {
-      const response = await axios.get(
-        `http://localhost:8080/checkins/${booking.id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      setCurrentParticipants(response.data);
-      setSelectedBookingForParticipants(booking);
-      setIsViewParticipantsModalVisible(true);
-    } catch (error) {
-      console.error("Error fetching participants:", error);
-      toast.error(error.response?.data || "Failed to fetch participants");
-    }
-  };
-
-  const handleUpdateCheckinStatus = async (checkinId) => {
-    if (userRole !== 'CONSULTING_STAFF') {
-      toast.error('Only Consulting Staff can perform check-ins');
-      return;
-    }
-
-    try {
-      const response = await axios.put(
-        `http://localhost:8080/checkins/status/${checkinId}`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      setCurrentParticipants((prevParticipants) =>
-        prevParticipants.map((participant) =>
-          participant.id === checkinId
-            ? { ...participant, status: 'CHECKED' }
-            : participant
-        )
-      );
-
-      toast.success('Check-in status updated successfully');
-    } catch (error) {
-      console.error('Error updating check-in status:', error);
-      toast.error('Failed to update check-in status');
-    }
-  };
-
   const columns = [
     {
       title: "Booking ID",
@@ -334,7 +279,7 @@ const AcceptedTourList = () => {
               : status === "complete"
               ? "green"
               : status === "processing"
-              ? "blue" // Changed to blue for processing
+              ? "blue"
               : "red"
           }
         >
@@ -343,7 +288,7 @@ const AcceptedTourList = () => {
       ),
     },
     {
-      title: "Total Amount - not contain VAT",
+      title: "Amount Original",
       dataIndex: "totalAmount",
       key: "totalAmount",
       align: "right",
@@ -366,7 +311,6 @@ const AcceptedTourList = () => {
             View Details
           </Button>
 
-          {/* Chỉ hiển thị button Create Booking Koi khi role là CONSULT_STAFF */}
           {userRole === "CONSULT_STAFF" && (
             <Button
               type="primary"
@@ -377,14 +321,6 @@ const AcceptedTourList = () => {
             </Button>
           )}
 
-          <Button
-            type="default"
-            onClick={() => handleViewParticipants(record)}
-            icon={<UserOutlined />}
-          >
-            View Participants
-          </Button>
-
           {record.paymentStatus.toLowerCase() === "pending" && (
             <Button
               onClick={() => handleCreateQuotation(record)}
@@ -392,8 +328,8 @@ const AcceptedTourList = () => {
               disabled={createdQuotations.has(record.id)}
               style={{
                 opacity: createdQuotations.has(record.id) ? 0.5 : 1,
-                cursor: createdQuotations.has(record.id)
-                  ? "not-allowed"
+                cursor: createdQuotations.has(record.id) 
+                  ? "not-allowed" 
                   : "pointer",
               }}
             >
@@ -452,6 +388,137 @@ const AcceptedTourList = () => {
     { value: 'VISA', label: 'Visa' }
   ];
 
+  // Payment form modal
+  const PaymentFormModal = () => (
+    <Modal
+      title="Create Quotation"
+      visible={isPaymentFormVisible}
+      onCancel={() => {
+        setIsPaymentFormVisible(false);
+        paymentForm.resetFields();
+      }}
+      footer={null}
+      width={700}
+    >
+      <Form
+        form={paymentForm}
+        onFinish={handlePaymentSubmit}
+        layout="vertical"
+      >
+        <Form.Item
+          name="paymentMethod"
+          label="Payment Method"
+          rules={[{ required: true, message: 'Please select payment method' }]}
+        >
+          <Select disabled>
+            {paymentMethodOptions.map(option => (
+              <Option key={option.value} value={option.value}>{option.label}</Option>
+            ))}
+          </Select>
+        </Form.Item>
+        
+        <Form.Item 
+          name="vat" 
+          label="VAT"
+          initialValue={VAT_RATE}
+        >
+          <Input 
+            disabled
+            value={`${VAT_RATE}%`}
+            style={{ backgroundColor: '#f5f5f5' }}
+          />
+        </Form.Item>
+        
+        <Form.Item
+          name="discountAmount"
+          label="Discount Amount"
+          tooltip="Enter 0 or minimum 100,000 VND (not exceeding 70% of the amount)"
+          rules={[
+            { required: true, message: 'Please input discount amount' },
+            {
+              validator: async (_, value) => {
+                const amount = parseFloat(paymentForm.getFieldValue('amount'));
+                const discountAmount = parseFloat(value);
+
+                // Kiểm tra nếu giá trị không phải số hoặc âm
+                if (isNaN(discountAmount) || discountAmount < 0) {
+                  throw new Error('Discount amount cannot be negative');
+                }
+
+                // Cho phép giá trị 0
+                if (discountAmount === 0) {
+                  return Promise.resolve();
+                }
+
+                // Nếu không phải 0, phải từ 100,000 VND trở lên
+                if (discountAmount < 100000) {
+                  throw new Error('Minimum discount amount must be 100,000 VND');
+                }
+
+                if (discountAmount > 50000000) {
+                  throw new Error('Discount amount cannot exceed 50,000,000 VND');
+                }
+
+                if (!amount || isNaN(amount)) {
+                  throw new Error('Please enter valid amount first');
+                }
+
+                if (discountAmount > amount * 0.7) {
+                  throw new Error('Discount amount cannot exceed 70% of the amount');
+                }
+              }
+            }
+          ]}
+        >
+          <Input 
+            type="number" 
+            min="0"
+            step="100000"
+            placeholder="Enter 0 or minimum 100,000 VND"
+          />
+        </Form.Item>
+        
+        <Form.Item
+          name="amount"
+          label="Amount"
+          rules={[
+            { required: true, message: 'Please input amount' },
+            {
+              validator: (_, value) => {
+                const amount = parseFloat(value);
+                if (isNaN(amount) || amount < 1000000) { // Minimum 1 million VND
+                  return Promise.reject('Amount must be at least 1,000,000 VND');
+                }
+                return Promise.resolve();
+              }
+            }
+          ]}
+        >
+          <Input
+            type="number"
+            min="1000000"
+            step="100000"
+            placeholder="Enter amount (VND)"
+          />
+        </Form.Item>
+        
+        <Form.Item className="flex justify-end">
+          <Space>
+            <Button onClick={() => {
+              setIsPaymentFormVisible(false);
+              paymentForm.resetFields();
+            }}>
+              Cancel
+            </Button>
+            <Button type="primary" htmlType="submit">
+              Create Quotation
+            </Button>
+          </Space>
+        </Form.Item>
+      </Form>
+    </Modal>
+  );
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -489,12 +556,6 @@ const AcceptedTourList = () => {
             </div>
             <Button type="primary" onClick={() => navigate("/staff/Quotation")}>
               View Quotations
-            </Button>
-            <Button
-              type="primary"
-              onClick={() => navigate("/staff/checkin-service")}
-            >
-              View Check-ins
             </Button>
           </Space>
         </div>
@@ -605,12 +666,11 @@ const AcceptedTourList = () => {
                     <span className="text-gray-600 w-32 font-medium">
                       VAT (%):
                     </span>
-                    <Select
-                      value={selectedBooking.vat * 100}
+                    <Input
+                      value={`${selectedBooking.vat * 100}%`}
                       className="w-24 ml-2"
                       disabled
                       style={{ backgroundColor: "#f5f5f5" }}
-                      options={vatOptions}
                     />
                   </div>
                   <div className="flex items-center">
@@ -697,114 +757,7 @@ const AcceptedTourList = () => {
         )}
       </Modal>
 
-      <Modal
-        title="Process Payment"
-        visible={isPaymentFormVisible}
-        onCancel={() => {
-          setIsPaymentFormVisible(false);
-          paymentForm.resetFields();
-        }}
-        footer={null}
-        width={700}
-      >
-        <Form
-          form={paymentForm}
-          onFinish={handlePaymentSubmit}
-          layout="vertical"
-        >
-          <Form.Item
-            name="paymentMethod"
-            label="Payment Method"
-            rules={[{ required: true, message: 'Please select payment method' }]}
-          >
-            <Select>
-              <Option value="CASH">Cash</Option>
-              <Option value="VISA">Credit Card</Option>
-              <Option value="TRANSFER">Bank Transfer</Option>
-            </Select>
-          </Form.Item>
-          
-          <Form.Item 
-            name="vat" 
-            label="VAT"
-            initialValue="10"
-          >
-            <Select disabled>
-              <Option value="10">10%</Option>
-            </Select>
-          </Form.Item>
-          
-          <Form.Item
-            name="discountAmount"
-            label="Discount Amount"
-            tooltip="Enter discount amount (0 to 50,000,000 VND, not exceeding 70% of the original amount)"
-            rules={[
-              { required: true, message: 'Please input discount amount' },
-              {
-                validator: (_, value) => {
-                  const amount = parseFloat(value);
-                  const originalAmount = selectedBookingForQuotation?.totalAmount || 0;
-                  if (isNaN(amount) || amount < 0) {
-                    return Promise.reject('Discount amount cannot be negative');
-                  }
-                  if (amount > 50000000) {
-                    return Promise.reject('Discount amount cannot exceed 50,000,000 VND');
-                  }
-                  if (amount > originalAmount * 0.7) {
-                    return Promise.reject('Discount amount cannot exceed 70% of the original amount');
-                  }
-                  return Promise.resolve();
-                }
-              }
-            ]}
-          >
-            <Input 
-              type="number" 
-              min="0"
-              step="100000"
-              placeholder="Enter discount amount (e.g., 1000000)"
-            />
-          </Form.Item>
-          
-          <Form.Item
-            name="amount"
-            label="Amount"
-            rules={[
-              { required: true, message: 'Please input amount' },
-              {
-                validator: (_, value) => {
-                  const amount = parseFloat(value);
-                  if (isNaN(amount) || amount <= 0) {
-                    return Promise.reject('Amount must be greater than 0');
-                  }
-                  return Promise.resolve();
-                }
-              }
-            ]}
-          >
-            <Input
-              type="number"
-              min="0"
-              step="100000"
-              placeholder="Enter amount (VND)"
-            />
-          </Form.Item>
-          
-          <Form.Item className="flex justify-end">
-            <Space>
-              <Button onClick={() => {
-                setIsPaymentFormVisible(false);
-                paymentForm.resetFields();
-              }}>
-                Cancel
-              </Button>
-              <Button type="primary" htmlType="submit">
-                Confirm Payment
-              </Button>
-            </Space>
-          </Form.Item>
-        </Form>
-      </Modal>
+      <PaymentFormModal />
       <ToastContainer />
     </div>
   );
