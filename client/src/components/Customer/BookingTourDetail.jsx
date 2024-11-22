@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useCookies } from "react-cookie";
-import { Table, Button } from "antd";
+import { Table, Button, Modal } from "antd";
+import { UserOutlined, EnvironmentOutlined, InfoCircleOutlined, PhoneOutlined, GlobalOutlined } from "@ant-design/icons";
 
 const BookingTourDetail = () => {
   const [bookingTourDetails, setBookingTourDetails] = useState([]);
@@ -14,6 +15,11 @@ const BookingTourDetail = () => {
   // Lấy token từ cookies
   const [cookies] = useCookies(["token"]);
   const token = cookies.token;
+  const [isViewParticipantsModalVisible, setIsViewParticipantsModalVisible] = useState(false);
+  const [currentParticipants, setCurrentParticipants] = useState([]);
+  const [farmDetails, setFarmDetails] = useState([]);
+  const [selectedFarm, setSelectedFarm] = useState(null);
+  const navigate = useNavigate();
 
   // Gọi API để lấy chi tiết booking tour
   const fetchBookingTourDetails = async () => {
@@ -61,18 +67,55 @@ const BookingTourDetail = () => {
     }
   };
 
+  // Add function to handle viewing participants
+  const handleViewParticipants = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:8080/checkins/${booking.id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setCurrentParticipants(response.data);
+      setIsViewParticipantsModalVisible(true);
+    } catch (error) {
+      console.error('Error fetching participants:', error);
+      toast.error('Failed to fetch participants');
+    }
+  };
+
   useEffect(() => {
     fetchBookingTourDetails();
   }, [booking]);
 
+  useEffect(() => {
+    const fetchFarmDetails = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:8080/TourDetail/tour/${tourDetails?.id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        setFarmDetails(response.data);
+      } catch (error) {
+        console.error("Error fetching farm details:", error);
+      }
+    };
+
+    if (tourDetails?.id) {
+      fetchFarmDetails();
+    }
+  }, [tourDetails?.id, token]);
+
   if (loading) {
     return <div>Loading...</div>;
   }
-
-  // Thêm hàm format VND ở đầu component
-  const formatVND = (price) => {
-    return price?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + " VND";
-  };
 
   const columns = [
     {
@@ -86,15 +129,12 @@ const BookingTourDetail = () => {
       dataIndex: "participant",
       key: "participant",
       align: "center",
-    },
-    {
-      title: "Total Amount",
-      dataIndex: "totalAmount",
-      key: "totalAmount",
-      render: (amount) => formatVND(amount),
-      align: "center",
-    },
+    }
   ];
+
+  const handleViewFarmDetail = (farmId) => {
+    navigate(`/farmdetail/${farmId}`);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 pt-24 pb-12 px-4 sm:px-6 lg:px-8">
@@ -109,6 +149,18 @@ const BookingTourDetail = () => {
             Review your booking information and explore the exciting details of your upcoming adventure
           </p>
         </div>
+      </div>
+
+      {/* Add View Participants Button */}
+      <div className="max-w-6xl mx-auto mb-8">
+        <Button
+          type="primary"
+          icon={<UserOutlined />}
+          onClick={handleViewParticipants}
+          className="bg-purple-500 hover:bg-purple-600"
+        >
+          View Participants
+        </Button>
       </div>
 
       {/* Booking Table Section */}
@@ -149,9 +201,6 @@ const BookingTourDetail = () => {
                       : 'bg-gradient-to-r from-red-400 to-red-500 text-white'
                   }`}>
                     {tourDetails.tourStatus}
-                  </span>
-                  <span className="text-white bg-white/20 backdrop-blur-sm px-4 py-1.5 rounded-full text-sm font-medium">
-                    {formatVND(tourDetails.unitPrice)}
                   </span>
                 </div>
                 <h3 className="text-4xl font-bold text-white mb-2 drop-shadow-lg">{tourDetails.tourName}</h3>
@@ -203,6 +252,132 @@ const BookingTourDetail = () => {
           </div>
         </div>
       )}
+
+      {/* Farm Destinations Section */}
+      <div className="max-w-6xl mx-auto mt-8">
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl overflow-hidden border border-indigo-100">
+          <div className="px-6 py-4 bg-gradient-to-r from-indigo-500 to-purple-500">
+            <h3 className="text-xl font-semibold text-white">Included Destinations</h3>
+          </div>
+          <div className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {farmDetails.map((farm, index) => (
+                <div 
+                  key={index} 
+                  className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer"
+                  onClick={() => handleViewFarmDetail(farm.farmId)}
+                >
+                  <div className="relative h-48">
+                    <img
+                      src={farm.farmImage}
+                      alt={farm.farmName}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                    <div className="absolute bottom-0 left-0 right-0 p-4">
+                      <h4 className="text-white font-semibold text-lg">{farm.farmName}</h4>
+                    </div>
+                  </div>
+                  <div className="p-4">
+                    <p className="text-gray-600 text-sm line-clamp-3">
+                      {farm.description}
+                    </p>
+                    <div className="mt-4 flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <EnvironmentOutlined className="text-indigo-500" />
+                        <span className="text-sm text-gray-500">{farm.location}</span>
+                      </div>
+                      <InfoCircleOutlined className="text-indigo-500" />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Add Participants Modal */}
+      <Modal
+        title={`Participants for Booking #${booking?.id || ''}`}
+        visible={isViewParticipantsModalVisible}
+        onCancel={() => setIsViewParticipantsModalVisible(false)}
+        footer={null}
+        width={700}
+      >
+        <div className="space-y-6">
+          {/* Common Information Section */}
+          <div className="bg-blue-50 p-4 rounded-lg">
+            <h3 className="text-lg font-semibold text-blue-800 mb-3">Common Information</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-xs text-gray-500">Created By</label>
+                <p className="font-medium">{currentParticipants[0]?.createBy || 'N/A'}</p>
+              </div>
+              <div>
+                <label className="text-xs text-gray-500">Airport</label>
+                <p className="font-medium">{currentParticipants[0]?.airport || 'N/A'}</p>
+              </div>
+              <div>
+                <label className="text-xs text-gray-500">Airline</label>
+                <p className="font-medium">{currentParticipants[0]?.airline || 'N/A'}</p>
+              </div>
+              <div>
+                <label className="text-xs text-gray-500">Check-in Date</label>
+                <p className="font-medium">
+                  {currentParticipants[0]?.checkinDate 
+                    ? new Date(currentParticipants[0].checkinDate).toLocaleString() 
+                    : 'N/A'}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Participants Section */}
+          <div>
+            <h3 className="text-lg font-semibold text-gray-800 mb-3">Participants Information</h3>
+            {currentParticipants.length === 0 ? (
+              <div className="text-center py-4 text-gray-500">
+                No participants found for this booking
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {currentParticipants.map((participant, index) => (
+                  <div key={index} className="bg-white p-4 rounded-lg border border-gray-200">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-xs text-gray-500">First Name</label>
+                        <p className="font-medium">{participant.firstName}</p>
+                      </div>
+                      <div>
+                        <label className="text-xs text-gray-500">Last Name</label>
+                        <p className="font-medium">{participant.lastName}</p>
+                      </div>
+                      <div>
+                        <label className="text-xs text-gray-500">Email</label>
+                        <p className="font-medium">{participant.email || 'N/A'}</p>
+                      </div>
+                      <div>
+                        <label className="text-xs text-gray-500">Phone</label>
+                        <p className="font-medium">{participant.phoneNumber}</p>
+                      </div>
+                      <div>
+                        <label className="text-xs text-gray-500">Passport</label>
+                        <p className="font-medium">{participant.passport}</p>
+                      </div>
+                      <div>
+                        <label className="text-xs text-gray-500">Status</label>
+                        <p className="font-medium">{participant.status}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </Modal>
+
       <ToastContainer />
     </div>
   );

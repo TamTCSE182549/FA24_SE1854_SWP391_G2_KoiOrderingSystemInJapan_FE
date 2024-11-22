@@ -163,8 +163,8 @@ const Quotation = () => {
       
       const payload = {
         bookingID: selectedQuotation.bookingId,
-        amount: parseFloat(values.amount), // Đảm bảo amount là số
-        vat: Number(values.vat) / 100,
+        amount: parseFloat(values.amount),
+        vat: 0,
         paymentMethod: values.paymentMethod,
         paymentStatus: "processing",
         discountAmount: parseFloat(values.discountAmount),

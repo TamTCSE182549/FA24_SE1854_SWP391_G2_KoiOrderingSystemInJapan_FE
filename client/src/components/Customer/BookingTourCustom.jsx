@@ -36,7 +36,7 @@ function BookingTourCustom() {
         endDate: '',
         farmId: [],
         participant: 0,
-        paymentMethod: 'CASH',
+        paymentMethod: 'Select Payment Method',
         description: '',
         airline: '',
         airport: ''
@@ -117,6 +117,20 @@ function BookingTourCustom() {
         return passportRegex.test(passport);
     };
 
+    const containsSpecialChars = (str) => {
+        const regex = /^[a-zA-Z\s-]+$/;
+        return !regex.test(str);
+    };
+
+    const isDuplicatePassport = (passport, index) => {
+        return newParticipants.some(
+            (participant, idx) => 
+                idx !== index && 
+                participant.passport && 
+                participant.passport.toLowerCase() === passport.toLowerCase()
+        );
+    };
+
     const validateParticipant = (participant) => {
         const errors = {};
         if (!validateName(participant.firstName)) {
@@ -170,6 +184,87 @@ function BookingTourCustom() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        // Validate Select Airline
+        if (!formData.airline) {
+            toast.error("Please select an airline");
+            return;
+        }
+
+        // Validate Select Airport
+        if (!formData.airport) {
+            toast.error("Please select an airport");
+            return;
+        }
+
+        // Validate Select Farms
+        if (formData.farmId.length === 0) {
+            toast.error("Please select at least one farm");
+            return;
+        }
+
+        // Validate Payment Method
+        if (formData.paymentMethod === 'Select Payment Method' || !formData.paymentMethod) {
+            toast.error("Please select a payment method");
+            return;
+        }
+
+        // Validate participants
+        if (newParticipants.length === 0) {
+            toast.error("Please add at least one participant");
+            return;
+        }
+
+        // Existing participant validations
+        for (const participant of newParticipants) {
+            if (!validateName(participant.firstName) || !validateName(participant.lastName)) {
+                toast.error("First name and last name are required for all participants");
+                return;
+            }
+
+            if (!participant.phoneNumber || !validatePhone(participant.phoneNumber)) {
+                toast.error("Phone number is required and must be in format 09xxxxxxxx");
+                return;
+            }
+
+            if (!participant.passport || !validatePassport(participant.passport)) {
+                toast.error("Passport is required and must be in format B2700000 (B followed by 7 digits)");
+                return;
+            }
+
+            if (participant.email && !validateEmail(participant.email)) {
+                toast.error("Email must be in format xxx@gmail.com");
+                return;
+            }
+
+            if (containsSpecialChars(participant.firstName) || containsSpecialChars(participant.lastName)) {
+                toast.warning("Names can only contain letters and spaces");
+                return;
+            }
+        }
+
+        // Check for duplicate passports
+        const hasDuplicates = newParticipants.some((participant, index) => 
+            isDuplicatePassport(participant.passport, index)
+        );
+
+        if (hasDuplicates) {
+            toast.error("Please fix duplicate passport numbers before continuing");
+            return;
+        }
+
+        // Validate dates
+        if (!formData.startDate || !formData.endDate) {
+            toast.error("Start date and end date are required");
+            return;
+        }
+
+        // Validate end date is after start date
+        if (new Date(formData.endDate) <= new Date(formData.startDate)) {
+            toast.error("End date must be after start date");
+            return;
+        }
+
         try {
             const startDateTime = `${formData.startDate}T00:00:00`;
             const endDateTime = `${formData.endDate}T23:59:59`;
