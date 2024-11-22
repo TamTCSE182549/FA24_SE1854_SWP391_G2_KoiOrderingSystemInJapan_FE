@@ -22,7 +22,7 @@ const BookingKoi = () => {
   const [selectedKoiId, setSelectedKoiId] = useState("");
   const [quantity, setQuantity] = useState("");
   const [unitPrice, setUnitPrice] = useState("");
-  const [vat, setVat] = useState("");
+  const [vat, setVat] = useState(10);
   const [discountAmount, setDiscountAmount] = useState("");
   const [selectedKoiOption, setSelectedKoiOption] = useState(null);
   const navigate = useNavigate();
@@ -350,11 +350,7 @@ const BookingKoi = () => {
       resetForm();
       navigate("/staff/booking-for-koi-list");
     } catch (error) {
-      console.error("Booking error:", {
-        message: error.message,
-        data: error.response?.data,
-        status: error.response?.status,
-      });
+      console.error("Booking error:", error.message);
       toast.error(error.response?.data?.message || "Booking Failed");
     }
   };
@@ -722,7 +718,7 @@ const BookingKoi = () => {
                       onChange={(e) => {
                         const value = e.target.value;
                         if (value === "") {
-                          setVat("");
+                          setVat(10);
                           return;
                         }
 

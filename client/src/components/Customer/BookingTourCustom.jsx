@@ -25,7 +25,6 @@ const airportOptions = [
 ];
 
 const paymentOptions = [
-    { value: "CASH", label: "💵 Cash" },
     { value: "VISA", label: "💳 Visa" },
     { value: "TRANSFER", label: "🏦 Transfer" },
 ];
@@ -36,7 +35,7 @@ function BookingTourCustom() {
         endDate: '',
         farmId: [],
         participant: 0,
-        paymentMethod: 'CASH',
+        paymentMethod: 'Transfer',
         description: '',
         airline: '',
         airport: ''
