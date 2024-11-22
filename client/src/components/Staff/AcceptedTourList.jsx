@@ -325,15 +325,15 @@ const AcceptedTourList = () => {
             <Button
               onClick={() => handleCreateQuotation(record)}
               className="italic"
-              disabled={createdQuotations.has(record.id) || record.quotation?.send !== null}
+              disabled={createdQuotations.has(record.id)}
               style={{
-                opacity: (createdQuotations.has(record.id) || record.quotation?.send !== null) ? 0.5 : 1,
-                cursor: (createdQuotations.has(record.id) || record.quotation?.send !== null) 
+                opacity: createdQuotations.has(record.id) ? 0.5 : 1,
+                cursor: createdQuotations.has(record.id) 
                   ? "not-allowed" 
                   : "pointer",
               }}
             >
-              {createdQuotations.has(record.id) || record.quotation?.send !== null
+              {createdQuotations.has(record.id)
                 ? "Quotation Created"
                 : "Create Quotation"}
             </Button>
